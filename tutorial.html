@@ -68,14 +68,15 @@
         input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; }
         input:focus { border-color: var(--color-disponibles); }
 
-       /* BOTONERA INFERIOR FIJA */
+      /* BOTONERA INFERIOR FIJA */
         .bottom-bar {
-            position: fixed; bottom: 0; width: 100%; max-width: 500px; background-color: var(--card-bg);
-            padding: 15px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px; background-color: var(--card-bg);
+            padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 100;
         }
         button { padding: 15px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
-        .btn-back { background-color: transparent; border: none; font-size: 24px; padding: 0 15px; cursor: pointer; color: var(--text-main); flex: none; display: flex; align-items: center; justify-content: center; }
+        .btn-back { background-color: var(--bg-color); border: 2px solid #D5D8DC; border-radius: 8px; font-size: 20px; padding: 0 20px; cursor: pointer; color: var(--text-main); flex: none; display: flex; align-items: center; justify-content: center; }
         .btn-primary { background-color: var(--text-main); color: white; }
         .btn-primary:disabled { background-color: #BDC3C7; cursor: not-allowed; }
         .btn-secondary { background-color: var(--color-disponibles); color: white; margin-top: 15px; width: 100%; }
