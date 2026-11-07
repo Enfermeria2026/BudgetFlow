@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Registro</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9;
+            --text-main: #2C3E50;
+            --color-disponibles: #27AE60;
+            --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-main); padding: 20px; box-sizing: border-box;
+        }
+        .logo-container { 
+            display: flex; align-items: center; justify-content: center; gap: 0px; 
+            font-size: 32px; font-weight: bold; margin-bottom: 20px; 
+        }
+        .logo-img { width: 70px; height: auto; margin-right: -5px; }
+        
+        .card {
+            background-color: var(--card-bg); width: 100%; max-width: 400px; padding: 30px 20px;
+            border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        input, select { 
+            width: 100%; padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; 
+            box-sizing: border-box; font-size: 16px; outline: none; font-family: inherit; 
+        }
+        input:focus, select:focus { border-color: var(--color-disponibles); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .checkbox-group input[type="checkbox"], .radio-group input[type="radio"] { width: auto; padding: 0; transform: scale(1.2); }
+        
+        #doble-verificacion-opciones { 
+            display: none; flex-direction: column; gap: 15px; padding: 15px; 
+            background-color: #F9F9F9; border-radius: 8px; border: 1px dashed #D5D8DC; 
+        }
+        .radio-group { display: flex; gap: 20px; }
+        .radio-item { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .aviso-rojo { color: var(--color-retenidos); font-size: 12px; font-weight: bold; }
+        
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-principal { background-color: var(--text-main); color: white; margin-top: 5px; }
+        
+        .enlaces-footer { text-align: center; margin-top: 5px; }
+        .enlaces-footer a { color: var(--text-main); text-decoration: underline; font-size: 14px; cursor: pointer; }
+        #mensaje-error { color: var(--color-retenidos); font-size: 14px; font-weight: bold; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+        <div><span style="color: #000000;">Budget</span><span style="color: var(--color-disponibles);">Flow</span></div>
+    </div>
+
+    <div class="card">
+        <form id="form-registro" class="form-group">
+            <input type="text" id="reg-nombre" placeholder="Nombre" required>
+            <input type="text" id="reg-apellidos" placeholder="Apellidos" required>
+            <input type="date" id="reg-fecha" required title="Fecha de nacimiento">
+            <input type="email" id="reg-correo" placeholder="Correo electrónico" required>
+            <input type="text" id="reg-usuario" placeholder="Nombre de usuario (Único)" required>
+            <input type="password" id="reg-password" placeholder="Contraseña" required>
+            <input type="password" id="reg-password-rep" placeholder="Repetir contraseña" required>
+            
+            <p id="mensaje-error"></p>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="check-doble-verificacion">
+                Activar doble verificación al iniciar sesión
+            </label>
+            
+            <div id="doble-verificacion-opciones">
+                <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="tipo_2fa" value="pin" id="radio-pin"> PIN</label>
+                    <label class="radio-item"><input type="radio" name="tipo_2fa" value="pregunta" id="radio-pregunta"> Pregunta</label>
+                </div>
+
+                <input type="text" id="input-pin" placeholder="PIN de 6 dígitos" maxlength="6" style="display:none;" pattern="\d{6}">
+                
+                <div id="bloque-pregunta" style="display:none; flex-direction:column; gap:10px;">
+                    <select id="select-pregunta">
+                        <option value="">Selecciona una pregunta...</option>
+                        <option value="ciudad">¿En qué ciudad nací?</option>
+                        <option value="mascota">¿Cómo se llama mi primera mascota?</option>
+                        <option value="animal">¿Cuál es mi animal favorito?</option>
+                        <option value="pais">¿Cuál es mi país favorito?</option>
+                        <option value="otra">Otra...</option>
+                    </select>
+                    <input type="text" id="input-pregunta-otra" placeholder="Escribe tu pregunta" style="display:none;">
+                    <input type="text" id="input-respuesta" placeholder="Respuesta">
+                    <span class="aviso-rojo">Escribe la respuesta en minúsculas y sin tildes.</span>
+                </div>
+            </div>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="check-terminos" required checked disabled>
+                Acepto los términos y condiciones de uso
+            </label>
+
+            <button type="submit" class="btn-principal" id="btn-registrar">REGISTRAR</button>
+        </form>
+        <div class="enlaces-footer">
+            <a onclick="window.location.href='index.html'">Volver al inicio de sesión</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
+            authDomain: "budgetflow-a1f80.firebaseapp.com",
+            projectId: "budgetflow-a1f80",
+            storageBucket: "budgetflow-a1f80.firebasestorage.app",
+            messagingSenderId: "29395070663",
+            appId: "1:29395070663:web:16e9db163af21b44e718e2",
+            measurementId: "G-L7TQ65BLBH"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const checkDobleVerif = document.getElementById('check-doble-verificacion');
+        const divOpciones = document.getElementById('doble-verificacion-opciones');
+        const radioPin = document.getElementById('radio-pin');
+        const radioPregunta = document.getElementById('radio-pregunta');
+        const inputPin = document.getElementById('input-pin');
+        const bloquePregunta = document.getElementById('bloque-pregunta');
+        const selectPregunta = document.getElementById('select-pregunta');
+        const inputPreguntaOtra = document.getElementById('input-pregunta-otra');
+        const inputRespuesta = document.getElementById('input-respuesta');
+
+        checkDobleVerif.addEventListener('change', (e) => {
+            divOpciones.style.display = e.target.checked ? 'flex' : 'none';
+            if(!e.target.checked) {
+                radioPin.checked = false;
+                radioPregunta.checked = false;
+                inputPin.style.display = 'none';
+                bloquePregunta.style.display = 'none';
+            }
+        });
+
+        radioPin.addEventListener('change', () => { inputPin.style.display = 'block'; bloquePregunta.style.display = 'none'; });
+        radioPregunta.addEventListener('change', () => { inputPin.style.display = 'none'; bloquePregunta.style.display = 'flex'; });
+        selectPregunta.addEventListener('change', (e) => { inputPreguntaOtra.style.display = e.target.value === 'otra' ? 'block' : 'none'; });
+
+        inputRespuesta.addEventListener('input', function() {
+            this.value = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "");
+        });
+    </script>
+</body>
+</html>
