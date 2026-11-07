@@ -32,19 +32,15 @@
         }
         .form-group { display: flex; flex-direction: column; gap: 15px; width: 100%; }
         
-        /* Contenedor para juntar etiqueta e input */
-        .field-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .input-label {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--text-main);
-        }
-        .asterisco {
-            color: var(--color-retenidos);
+        .field-wrapper { display: flex; flex-direction: column; gap: 5px; }
+        .input-label { font-size: 14px; font-weight: bold; color: var(--text-main); }
+        .asterisco { color: var(--color-retenidos); }
+
+        /* Contenedor relativo para el ojo de la contraseña */
+        .password-container { position: relative; display: flex; align-items: center; }
+        .password-container input { padding-right: 45px; } /* Espacio para el icono */
+        .toggle-password {
+            position: absolute; right: 15px; cursor: pointer; font-size: 18px; user-select: none;
         }
 
         input, select { 
@@ -72,7 +68,12 @@
         
         .enlaces-footer { text-align: center; margin-top: 5px; }
         .enlaces-footer a { color: var(--text-main); text-decoration: underline; font-size: 14px; cursor: pointer; }
-        #mensaje-error { color: var(--color-retenidos); font-size: 14px; font-weight: bold; text-align: center; display: none; margin: 0; }
+        
+        #mensaje-error { 
+            color: var(--color-retenidos); background-color: #FDEDEC; padding: 10px; 
+            border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; 
+            display: none; margin: 0; border: 1px solid #F5B7B1;
+        }
     </style>
 </head>
 <body>
@@ -112,12 +113,18 @@
             
             <div class="field-wrapper">
                 <label class="input-label" for="reg-password">Contraseña <span class="asterisco">*</span></label>
-                <input type="password" id="reg-password" placeholder="Crea una contraseña" required>
+                <div class="password-container">
+                    <input type="password" id="reg-password" placeholder="Crea una contraseña" required>
+                    <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁️</span>
+                </div>
             </div>
             
             <div class="field-wrapper">
                 <label class="input-label" for="reg-password-rep">Repetir contraseña <span class="asterisco">*</span></label>
-                <input type="password" id="reg-password-rep" placeholder="Repite la contraseña" required>
+                <div class="password-container">
+                    <input type="password" id="reg-password-rep" placeholder="Repite la contraseña" required>
+                    <span class="toggle-password" onclick="togglePassword('reg-password-rep', this)">👁️</span>
+                </div>
             </div>
             
             <p id="mensaje-error"></p>
@@ -155,11 +162,8 @@
                 <input type="checkbox" id="check-terminos">
                 Acepto los términos y condiciones de uso <span class="asterisco">*</span>
             </label>
-
-            <!-- Mensaje de aviso de términos -->
             <p id="msg-terminos" class="aviso-rojo">* Acepta los términos y condiciones para poder finalizar el registro</p>
 
-            <!-- Botón deshabilitado por defecto -->
             <button type="submit" class="btn-principal" id="btn-registrar" disabled>REGISTRAR</button>
         </form>
         
@@ -168,11 +172,13 @@
         </div>
     </div>
 
+    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
+        // Conexión a Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
             authDomain: "budgetflow-a1f80.firebaseapp.com",
@@ -185,6 +191,18 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // Funcionalidad Ojo Contraseña (disponible globalmente)
+        window.togglePassword = function(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconElement.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                iconElement.textContent = '👁️';
+            }
+        };
 
         // Lógica de Términos y Condiciones
         const checkTerminos = document.getElementById('check-terminos');
@@ -201,7 +219,7 @@
             }
         });
 
-        // Lógica de Doble Verificación
+        // Lógica de Doble Verificación UI
         const checkDobleVerif = document.getElementById('check-doble-verificacion');
         const divOpciones = document.getElementById('doble-verificacion-opciones');
         const radioPin = document.getElementById('radio-pin');
@@ -219,6 +237,8 @@
                 radioPregunta.checked = false;
                 inputPin.style.display = 'none';
                 bloquePregunta.style.display = 'none';
+                inputPin.value = '';
+                inputRespuesta.value = '';
             }
         });
 
@@ -226,8 +246,120 @@
         radioPregunta.addEventListener('change', () => { inputPin.style.display = 'none'; bloquePregunta.style.display = 'flex'; });
         selectPregunta.addEventListener('change', (e) => { inputPreguntaOtra.style.display = e.target.value === 'otra' ? 'block' : 'none'; });
 
+        // Minúsculas y sin tildes automáticas para la respuesta
         inputRespuesta.addEventListener('input', function() {
             this.value = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "");
+        });
+
+        // --- LÓGICA PRINCIPAL DE REGISTRO EN FIREBASE ---
+        const formRegistro = document.getElementById('form-registro');
+        const msgError = document.getElementById('mensaje-error');
+
+        formRegistro.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página se recargue
+            msgError.style.display = 'none';
+
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const apellidos = document.getElementById('reg-apellidos').value.trim();
+            const fecha = document.getElementById('reg-fecha').value;
+            const correo = document.getElementById('reg-correo').value.trim();
+            const usuario = document.getElementById('reg-usuario').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            const passRep = document.getElementById('reg-password-rep').value;
+
+            // 1. Comprobar que las contraseñas coinciden
+            if (pass !== passRep) {
+                msgError.textContent = 'Las contraseñas no coinciden. Por favor, revísalas.';
+                msgError.style.display = 'block';
+                return;
+            }
+
+            // 2. Comprobar campos de doble verificación si está activada
+            let tipo2FA = null;
+            let valor2FA = null;
+            let preguntaSeleccionada = null;
+
+            if (checkDobleVerif.checked) {
+                if (!radioPin.checked && !radioPregunta.checked) {
+                    msgError.textContent = 'Has activado la doble verificación pero no has seleccionado PIN ni Pregunta.';
+                    msgError.style.display = 'block';
+                    return;
+                }
+                if (radioPin.checked) {
+                    valor2FA = inputPin.value;
+                    if (valor2FA.length !== 6) {
+                        msgError.textContent = 'El PIN debe tener exactamente 6 dígitos numéricos.';
+                        msgError.style.display = 'block';
+                        return;
+                    }
+                    tipo2FA = 'pin';
+                }
+                if (radioPregunta.checked) {
+                    preguntaSeleccionada = selectPregunta.value === 'otra' ? inputPreguntaOtra.value : selectPregunta.options[selectPregunta.selectedIndex].text;
+                    valor2FA = inputRespuesta.value;
+                    if (selectPregunta.value === '' || valor2FA === '') {
+                        msgError.textContent = 'Debes seleccionar una pregunta y escribir una respuesta para la doble verificación.';
+                        msgError.style.display = 'block';
+                        return;
+                    }
+                    tipo2FA = 'pregunta';
+                }
+            }
+
+            // Bloquear botón mientras procesa
+            btnRegistrar.disabled = true;
+            btnRegistrar.textContent = 'CREANDO CUENTA...';
+
+            try {
+                // 3. Comprobar si el nombre de usuario ya existe en Firestore
+                const usernameRef = doc(db, 'nombres_usuario', usuario.toLowerCase());
+                const usernameDoc = await getDoc(usernameRef);
+                
+                if (usernameDoc.exists()) {
+                    throw new Error("El nombre de usuario ya está en uso. Por favor, elige otro.");
+                }
+
+                // 4. Crear el usuario en Firebase Authentication con su correo
+                const userCredential = await createUserWithEmailAndPassword(auth, correo, pass);
+                const uid = userCredential.user.uid;
+
+                // 5. Guardar el nombre de usuario para que nadie más lo coja
+                await setDoc(usernameRef, { uid: uid });
+
+                // 6. Guardar todos los datos en la ficha del usuario
+                await setDoc(doc(db, 'usuarios', uid), {
+                    nombre: nombre,
+                    apellidos: apellidos,
+                    fechaNacimiento: fecha || null,
+                    correo: correo,
+                    usuario: usuario,
+                    tutorialCompletado: 0, // Listo para el tutorial inicial
+                    dobleVerificacion: {
+                        activa: checkDobleVerif.checked,
+                        tipo: tipo2FA,
+                        pregunta: preguntaSeleccionada,
+                        respuesta: valor2FA // El PIN o la respuesta a la pregunta
+                    }
+                });
+
+                // Éxito: Mostrar mensaje y redirigir al login
+                alert('¡Cuenta creada correctamente! Ahora puedes iniciar sesión.');
+                window.location.href = 'index.html';
+
+            } catch (error) {
+                console.error(error);
+                // Manejar errores comunes de Firebase
+                if (error.code === 'auth/email-already-in-use') {
+                    msgError.textContent = 'Este correo electrónico ya está registrado.';
+                } else if (error.code === 'auth/weak-password') {
+                    msgError.textContent = 'La contraseña es demasiado débil. Debe tener al menos 6 caracteres.';
+                } else {
+                    msgError.textContent = error.message || 'Ha ocurrido un error durante el registro.';
+                }
+                msgError.style.display = 'block';
+                btnRegistrar.disabled = false;
+                btnRegistrar.textContent = 'REGISTRAR';
+            }
         });
     </script>
 </body>
