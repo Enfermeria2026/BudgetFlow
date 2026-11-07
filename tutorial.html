@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Tutorial Inicial</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9;
+            --text-main: #2C3E50;
+            --color-totales: #D4AC0D;
+            --color-disponibles: #27AE60;
+            --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0; color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        
+        /* BARRA DE PROGRESO VISUAL */
+        .progress-bar-container {
+            width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between; align-items: center; position: relative;
+        }
+        .progress-line {
+            position: absolute; top: 50%; left: 10%; right: 10%; height: 3px;
+            background-color: #D5D8DC; z-index: 1; transform: translateY(-50%);
+        }
+        .progress-step {
+            width: 30px; height: 30px; border-radius: 50%; background-color: #D5D8DC;
+            color: white; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            z-index: 2; transition: all 0.3s;
+        }
+        .progress-step.active { background-color: var(--color-disponibles); box-shadow: 0 0 10px rgba(39, 174, 96, 0.5); }
+        .progress-step.completed { background-color: var(--text-main); }
+
+        /* PANEL FINANCIERO SUPERIOR (Oculto en paso 1) */
+        #top-financial-panel {
+            display: none; width: 100%; max-width: 500px; background-color: var(--card-bg);
+            padding: 15px; box-sizing: border-box; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px; text-align: center; justify-content: space-around;
+        }
+        .fin-item { display: flex; flex-direction: column; gap: 5px; }
+        .fin-item span { font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .fin-item strong { font-size: 16px; }
+
+        /* CONTENEDORES DE PANTALLAS */
+        .tutorial-screen {
+            display: none; width: 100%; max-width: 500px; padding: 0 20px 80px; box-sizing: border-box;
+            flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease;
+        }
+        .tutorial-screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .info-card {
+            background-color: var(--card-bg); padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        h2 { margin-top: 0; font-size: 20px; color: var(--text-main); }
+        p { font-size: 15px; line-height: 1.5; color: #555; }
+        
+        .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        label { font-size: 14px; font-weight: bold; }
+        input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--color-disponibles); }
+
+        /* BOTONES */
+        .bottom-bar {
+            position: fixed; bottom: 0; width: 100%; max-width: 500px; background-color: var(--card-bg);
+            padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        button { padding: 15px 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-primary { background-color: var(--text-main); color: white; }
+        .btn-primary:disabled { background-color: #BDC3C7; cursor: not-allowed; }
+        .btn-secondary { background-color: var(--color-disponibles); color: white; }
+        .btn-skip { background-color: transparent; border: 2px solid var(--text-main); color: var(--text-main); }
+
+        /* VENTANAS EMERGENTES (MODALES) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
+            max-height: 90vh; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px;
+        }
+        .modal-content h3 { margin: 0; }
+        .aviso-retenido { background-color: #FDEDEC; color: var(--color-retenidos); padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; }
+        
+        /* Selectores de Icono y Color */
+        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 10px; }
+        .opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D5D8DC; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        .opt-btn.selected { border-color: var(--color-disponibles); background-color: #E8F5E9; }
+        
+        .error-msg { color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; }
+        .item-preview { background-color: #F9F9F9; border: 1px solid #D5D8DC; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE PROGRESO -->
+    <div class="progress-bar-container">
+        <div class="progress-line"></div>
+        <div class="progress-step active" id="step-dot-1">1</div>
+        <div class="progress-step" id="step-dot-2">2</div>
+        <div class="progress-step" id="step-dot-3">3</div>
+        <div class="progress-step" id="step-dot-4">4</div>
+        <div class="progress-step" id="step-dot-5">5</div>
+    </div>
+
+    <!-- PANEL FINANCIERO (Visible desde paso 2) -->
+    <div id="top-financial-panel">
+        <div class="fin-item" style="color: var(--color-totales);"><span>Totales</span><strong id="ui-totales">0,00 €</strong></div>
+        <div class="fin-item" style="color: var(--color-disponibles);"><span>Disponibles</span><strong id="ui-disponibles">0,00 €</strong></div>
+        <div class="fin-item" style="color: var(--color-retenidos);"><span>Retenidos</span><strong id="ui-retenidos">0,00 €</strong></div>
+    </div>
+
+    <!-- PANTALLA 1: INICIO FINANZAS -->
+    <div class="tutorial-screen active" id="screen-1">
+        <div class="info-card">
+            <h2>Paso 1: Tu situación actual</h2>
+            <p>Bienvenido a BudgetFlow. Para que el sistema funcione correctamente, necesitamos establecer la base de tus finanzas.</p>
+            
+            <div class="field-wrapper">
+                <label>Inicio del mes financiero</label>
+                <p style="font-size: 13px; margin:0;">El día en el que sueles cobrar tu nómina o ingreso principal (1 al 31). Será tu aviso de nuevo ciclo.</p>
+                <input type="number" id="t-inicio-mes" placeholder="Ej: 1 o 28" min="1" max="31">
+            </div>
+
+            <div class="field-wrapper">
+                <label>Fondos Totales (Obligatorio)</label>
+                <p style="font-size: 13px; margin:0;">¿De cuánto dinero dispones actualmente sumando tu cuenta del banco y efectivo?</p>
+                <input type="number" id="t-fondos-totales" placeholder="0.00" min="0.01" step="0.01">
+            </div>
+            <p id="err-step-1" class="error-msg">Por favor, rellena los fondos totales con un importe mayor a 0 y un día válido.</p>
+        </div>
+        <div class="bottom-bar"><button class="btn-primary" onclick="siguientePaso(2)">SIGUIENTE</button></div>
+    </div>
+
+    <!-- PANTALLA 2: CATEGORÍAS -->
+    <div class="tutorial-screen" id="screen-2">
+        <div class="info-card">
+            <h2>Paso 2: Gastos Fijos (Categorías)</h2>
+            <p>El presupuesto base cero exige que le des un trabajo a cada euro. Las <b>Categorías</b> representan tus gastos fijos (alquiler, luz, compra...).</p>
+            <p>Es <b>obligatorio</b> crear al menos una categoría ahora para aprender cómo funciona. El dinero que le asignes como "Presupuesto Máximo" pasará a estar <span style="color: var(--color-retenidos); font-weight:bold;">RETENIDO</span> para asegurar que no te lo gastes en otra cosa.</p>
+            <div id="preview-categoria"></div>
+            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-categoria')">Crear ahora una categoría</button>
+        </div>
+        <div class="bottom-bar">
+            <button class="btn-primary" id="btn-next-2" disabled onclick="siguientePaso(3)">SIGUIENTE</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: HUCHAS -->
+    <div class="tutorial-screen" id="screen-3">
+        <div class="info-card">
+            <h2>Paso 3: Huchas de Ahorro</h2>
+            <p>Las huchas sirven para meter dinero que <b>NO PODRÁS GASTAR</b>. Ideal para ahorrar para una casa, un coche o un viaje.</p>
+            <p>Cualquier aporte inicial que introduzcas se marcará como <span style="color: var(--color-retenidos); font-weight:bold;">RETENIDO</span> para protegerlo. Debes tener fondos disponibles suficientes para el aporte inicial.</p>
+            <div id="preview-hucha"></div>
+            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-hucha')">Crear una hucha ahora</button>
+        </div>
+        <div class="bottom-bar">
+            <button class="btn-skip" onclick="siguientePaso(4)">SALTAR</button>
+            <button class="btn-primary" onclick="siguientePaso(4)">SIGUIENTE</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: FONDOS RESERVADOS -->
+    <div class="tutorial-screen" id="screen-4">
+        <div class="info-card">
+            <h2>Paso 4: Fondos Reservados</h2>
+            <p>Útiles para pagos puntuales que sabes que llegarán (seguro del coche, averías, impuestos). El dinero que introduces queda <span style="color: var(--color-retenidos); font-weight:bold;">RESERVADO</span> para ese fin.</p>
+            <div id="preview-fondo"></div>
+            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-fondo')">Crear fondo reservado</button>
+        </div>
+        <div class="bottom-bar">
+            <button class="btn-skip" onclick="siguientePaso(5)">SALTAR</button>
+            <button class="btn-primary" onclick="siguientePaso(5)">SIGUIENTE</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 5: RESUMEN Y FINAL -->
+    <div class="tutorial-screen" id="screen-5">
+        <div class="info-card">
+            <h2>Paso 5: Todo listo</h2>
+            <p>Así funciona tu panel de control:</p>
+            <ul style="font-size: 14px; color: #555; padding-left: 20px;">
+                <li><b>Fondos Totales:</b> Todo el dinero que tienes en realidad.</li>
+                <li><b style="color: var(--color-retenidos);">Fondos Retenidos:</b> El dinero protegido dentro de tus presupuestos, huchas y reservas.</li>
+                <li><b style="color: var(--color-disponibles);">Fondos Disponibles:</b> El dinero "libre" que te queda para gastar en imprevistos o crear nuevas huchas.</li>
+            </ul>
+            <div style="margin-top: 20px; font-weight:bold; border-top: 1px solid #eee; padding-top: 15px;">
+                Resumen de lo creado:
+                <div id="resumen-final-lista"></div>
+            </div>
+            
+            <div style="margin-top: 25px; display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="check-eliminar-tutorial" style="width:20px; height:20px;">
+                <label for="check-eliminar-tutorial" style="font-size: 13px;">Eliminar lo creado en el tutorial y empezar de cero en el Dashboard. (Mantendrá tus fondos iniciales).</label>
+            </div>
+        </div>
+        <div class="bottom-bar">
+            <button class="btn-primary" id="btn-finalizar" onclick="finalizarTutorial()">FINALIZAR TUTORIAL</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR CATEGORÍA -->
+    <div class="modal-overlay" id="modal-categoria">
+        <div class="modal-content">
+            <h3>Crear Categoría</h3>
+            <div class="aviso-retenido">Recuerda: El Presupuesto Máximo se retendrá de tus fondos disponibles.</div>
+            
+            <div class="field-wrapper">
+                <label>Nombre de la categoría</label>
+                <input type="text" id="cat-nombre" placeholder="Ej: Supermercado">
+            </div>
+            
+            <div class="field-wrapper">
+                <label>Icono (Básicos)</label>
+                <div class="icon-selector" id="cat-iconos">
+                    <div class="opt-btn selected" onclick="seleccionarOpcion(this, 'cat-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">💡</div>
+                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">⛽</div>
+                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">🍿</div>
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label>Color (Básicos)</label>
+                <div class="color-selector" id="cat-colores">
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#EB984E"></div>
+                    <div class="opt-btn" style="background:#AF7AC5;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#AF7AC5"></div>
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label>Presupuesto Máximo mensual</label>
+                <input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01">
+            </div>
+            <p id="err-cat" class="error-msg"></p>
+
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-skip" onclick="cerrarModal('modal-categoria')">Cancelar</button>
+                <button class="btn-secondary" onclick="guardarCategoria()">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR HUCHA -->
+    <div class="modal-overlay" id="modal-hucha">
+        <div class="modal-content">
+            <h3>Crear Hucha</h3>
+            <div class="aviso-retenido">El aporte inicial se retendrá de tus fondos disponibles al instante.</div>
+            <div class="field-wrapper"><label>Nombre del objetivo</label><input type="text" id="huc-nombre" placeholder="Ej: Coche nuevo"></div>
+            <div class="field-wrapper"><label>Objetivo total a ahorrar</label><input type="number" id="huc-objetivo" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="huc-aporte" placeholder="0.00"></div>
+            <p id="err-huc" class="error-msg"></p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-skip" onclick="cerrarModal('modal-hucha')">Cancelar</button>
+                <button class="btn-secondary" onclick="guardarHucha()">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR FONDO -->
+    <div class="modal-overlay" id="modal-fondo">
+        <div class="modal-content">
+            <h3>Crear Fondo Reservado</h3>
+            <div class="aviso-retenido">El aporte inicial se retendrá para que no lo gastes accidentalmente.</div>
+            <div class="field-wrapper"><label>Nombre de la reserva</label><input type="text" id="fon-nombre" placeholder="Ej: Seguro coche"></div>
+            <div class="field-wrapper"><label>Objetivo total de la reserva</label><input type="number" id="fon-objetivo" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="fon-aporte" placeholder="0.00"></div>
+            <p id="err-fon" class="error-msg"></p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-skip" onclick="cerrarModal('modal-fondo')">Cancelar</button>
+                <button class="btn-secondary" onclick="guardarFondo()">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS CORE Y FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
+            authDomain: "budgetflow-a1f80.firebaseapp.com",
+            projectId: "budgetflow-a1f80",
+            storageBucket: "budgetflow-a1f80.firebasestorage.app",
+            messagingSenderId: "29395070663",
+            appId: "1:29395070663:web:16e9db163af21b44e718e2",
+            measurementId: "G-L7TQ65BLBH"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let uidActual = null;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                uidActual = user.uid;
+            } else {
+                window.location.href = 'index.html'; // Si no está logueado, fuera
+            }
+        });
+
+        // --- VARIABLES DE ESTADO DEL TUTORIAL ---
+        let varTotales = 0;
+        let varDisponibles = 0;
+        let varRetenidos = 0;
+        let varInicioMes = 1;
+
+        // Arrays temporales para guardar lo creado
+        let tempCategorias = [];
+        let tempHuchas = [];
+        let tempFondos = [];
+
+        // UI de Variables
+        const uiTotales = document.getElementById('ui-totales');
+        const uiDisponibles = document.getElementById('ui-disponibles');
+        const uiRetenidos = document.getElementById('ui-retenidos');
+        const panelFinanciero = document.getElementById('top-financial-panel');
+
+        function actualizarUI() {
+            uiTotales.textContent = varTotales.toFixed(2) + " €";
+            uiDisponibles.textContent = varDisponibles.toFixed(2) + " €";
+            uiRetenidos.textContent = varRetenidos.toFixed(2) + " €";
+        }
+
+        // --- NAVEGACIÓN ENTRE PASOS ---
+        window.siguientePaso = function(paso) {
+            // Validaciones Paso 1
+            if (paso === 2) {
+                const inputTotales = parseFloat(document.getElementById('t-fondos-totales').value);
+                const inputMes = parseInt(document.getElementById('t-inicio-mes').value) || 1;
+                if (isNaN(inputTotales) || inputTotales <= 0 || inputMes < 1 || inputMes > 31) {
+                    document.getElementById('err-step-1').style.display = 'block';
+                    return;
+                }
+                document.getElementById('err-step-1').style.display = 'none';
+                
+                varTotales = inputTotales;
+                varDisponibles = inputTotales;
+                varRetenidos = 0;
+                varInicioMes = inputMes;
+                
+                actualizarUI();
+                panelFinanciero.style.display = 'flex'; // Mostramos panel
+            }
+
+            if (paso === 5) renderizarResumen();
+
+            // Cambiar pantallas
+            document.querySelectorAll('.tutorial-screen').forEach(scr => scr.classList.remove('active'));
+            document.getElementById('screen-' + paso).classList.add('active');
+
+            // Actualizar bolitas
+            document.querySelectorAll('.progress-step').forEach(dot => {
+                const num = parseInt(dot.textContent);
+                dot.classList.remove('active', 'completed');
+                if (num < paso) dot.classList.add('completed');
+                if (num === paso) dot.classList.add('active');
+            });
+        };
+
+        // --- MANEJO DE MODALES ---
+        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; };
+        window.cerrarModal = function(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+        };
+
+        // UI Selectores
+        window.seleccionarOpcion = function(elemento, contenedorId) {
+            document.getElementById(contenedorId).querySelectorAll('.opt-btn').forEach(btn => btn.classList.remove('selected'));
+            elemento.classList.add('selected');
+        };
+
+        // --- LÓGICA CATEGORÍAS ---
+        window.guardarCategoria = function() {
+            const nombre = document.getElementById('cat-nombre').value.trim();
+            const presu = parseFloat(document.getElementById('cat-presupuesto').value);
+            const icono = document.querySelector('#cat-iconos .selected').textContent;
+            const color = document.querySelector('#cat-colores .selected').getAttribute('data-color');
+            const errDiv = document.getElementById('err-cat');
+
+            if (!nombre || isNaN(presu) || presu <= 0) { errDiv.textContent = "Rellena todos los campos correctamente."; errDiv.style.display = 'block'; return; }
+            if (presu > varDisponibles) { errDiv.textContent = "El presupuesto no puede superar tus Fondos Disponibles (" + varDisponibles.toFixed(2) + "€)."; errDiv.style.display = 'block'; return; }
+
+            // Guardar en memoria
+            tempCategorias.push({ nombre, presupuestoMaximo: presu, icono, color, gastado: 0 });
+            
+            // Actualizar finanzas
+            varDisponibles -= presu;
+            varRetenidos += presu;
+            actualizarUI();
+            
+            // UI
+            cerrarModal('modal-categoria');
+            document.getElementById('btn-next-2').disabled = false; // Habilitar siguiente
+            const preview = document.getElementById('preview-categoria');
+            preview.innerHTML += `<div class="item-preview"><span style="background:${color}; padding:5px; border-radius:50%;">${icono}</span> ${nombre} - <b>${presu.toFixed(2)}€ retenidos</b></div>`;
+        };
+
+        // --- LÓGICA HUCHAS Y FONDOS ---
+        window.guardarHucha = function() { procesarItemAhorro('huc', tempHuchas, 'preview-hucha', 'modal-hucha'); };
+        window.guardarFondo = function() { procesarItemAhorro('fon', tempFondos, 'preview-fondo', 'modal-fondo'); };
+
+        function procesarItemAhorro(prefijo, arrayTemp, previewId, modalId) {
+            const nombre = document.getElementById(`${prefijo}-nombre`).value.trim();
+            const obj = parseFloat(document.getElementById(`${prefijo}-objetivo`).value) || 0;
+            const aporte = parseFloat(document.getElementById(`${prefijo}-aporte`).value) || 0;
+            const errDiv = document.getElementById(`err-${prefijo}`);
+
+            if (!nombre) { errDiv.textContent = "El nombre es obligatorio."; errDiv.style.display = 'block'; return; }
+            if (aporte > varDisponibles) { errDiv.textContent = "El aporte no puede superar tus Fondos Disponibles."; errDiv.style.display = 'block'; return; }
+
+            arrayTemp.push({ nombre, objetivo: obj, guardado: aporte });
+            
+            if (aporte > 0) {
+                varDisponibles -= aporte;
+                varRetenidos += aporte;
+                actualizarUI();
+            }
+
+            cerrarModal(modalId);
+            document.getElementById(previewId).innerHTML += `<div class="item-preview">💰 ${nombre} - <b>${aporte.toFixed(2)}€ retenidos iniciales</b></div>`;
+        }
+
+        // --- RESUMEN FINAL Y ENVÍO A FIREBASE ---
+        function renderizarResumen() {
+            const div = document.getElementById('resumen-final-lista');
+            let html = "";
+            tempCategorias.forEach(c => html += `<div style="font-size:13px;">- 👛 Categoría: ${c.nombre} (${c.presupuestoMaximo}€)</div>`);
+            tempHuchas.forEach(h => html += `<div style="font-size:13px;">- 🐷 Hucha: ${h.nombre} (${h.guardado}€)</div>`);
+            tempFondos.forEach(f => html += `<div style="font-size:13px;">- 🏛️ Reserva: ${f.nombre} (${f.guardado}€)</div>`);
+            div.innerHTML = html;
+        }
+
+        window.finalizarTutorial = async function() {
+            const btn = document.getElementById('btn-finalizar');
+            btn.disabled = true;
+            btn.textContent = 'CONFIGURANDO TU CUENTA...';
+            
+            const eliminarTodo = document.getElementById('check-eliminar-tutorial').checked;
+
+            try {
+                // 1. Si decide eliminar, reiniciamos las variables retenidas
+                let finalesDisponibles = varDisponibles;
+                let finalesRetenidos = varRetenidos;
+                
+                if (eliminarTodo) {
+                    finalesDisponibles = varTotales;
+                    finalesRetenidos = 0;
+                }
+
+                // 2. Actualizar documento de usuario
+                const userRef = doc(db, "usuarios", uidActual);
+                await updateDoc(userRef, {
+                    tutorialCompletado: 1,
+                    diaInicioMes: varInicioMes,
+                    fondosTotales: varTotales,
+                    fondosDisponibles: finalesDisponibles,
+                    fondosRetenidos: finalesRetenidos
+                });
+
+                // 3. Registrar el movimiento inicial
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
+                    tipo: "ingreso",
+                    concepto: "Fondos iniciales",
+                    importe: varTotales,
+                    fecha: new Date().toISOString()
+                });
+
+                // 4. Guardar colecciones si NO marcó eliminar
+                if (!eliminarTodo) {
+                    // Guardar Categorías
+                    for (const cat of tempCategorias) {
+                        await addDoc(collection(db, "usuarios", uidActual, "categorias"), cat);
+                    }
+                    // Guardar Huchas
+                    for (const huc of tempHuchas) {
+                        await addDoc(collection(db, "usuarios", uidActual, "huchas"), huc);
+                    }
+                    // Guardar Fondos
+                    for (const fon of tempFondos) {
+                        await addDoc(collection(db, "usuarios", uidActual, "fondos_reservados"), fon);
+                    }
+                }
+
+                // Redirigir al dashboard oficial
+                window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                console.error("Error guardando datos:", error);
+                alert("Hubo un error al guardar tu configuración. Inténtalo de nuevo.");
+                btn.disabled = false;
+                btn.textContent = 'FINALIZAR TUTORIAL';
+            }
+        };
+    </script>
+</body>
+</html>
