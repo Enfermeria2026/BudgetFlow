@@ -47,7 +47,7 @@
         .fin-item span { font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .fin-item strong { font-size: 16px; }
 
-        /* PANTALLAS (CON PADDING INFERIOR PARA NO PISAR BOTONES) */
+        /* PANTALLAS */
         .tutorial-screen {
             display: none; width: 100%; max-width: 500px; padding: 10px 20px 100px; box-sizing: border-box;
             flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease;
@@ -64,6 +64,7 @@
 
         .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
         label { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        .info-text { font-size: 12px; font-style: italic; color: #7F8C8D; margin: -5px 0 0 0; }
         input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; }
         input:focus { border-color: var(--color-disponibles); }
 
@@ -91,14 +92,15 @@
         .modal-content h3 { margin: 0 0 5px 0; }
         .aviso-retenido { background-color: #FDEDEC; color: var(--color-retenidos); padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; }
         
-        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; }
+        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 5px; }
         .opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D5D8DC; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
         .opt-btn.selected { border-color: var(--color-disponibles); box-shadow: 0 0 0 2px var(--color-disponibles); }
         .nota-tienda { font-size: 12px; color: #7F8C8D; font-style: italic; margin-top: 2px; }
         
         .error-msg { color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; margin-top: 5px; }
         
-        /* DISEÑO DE TARJETA (INSPIRADO EN TU IMAGEN) */
+        /* DISEÑO DE TARJETA */
+        .resumen-label { font-size: 12px; font-weight: bold; color: #7F8C8D; text-transform: uppercase; margin-top: 15px; margin-bottom: -5px; }
         .item-card {
             background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
             display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
@@ -149,13 +151,13 @@
             
             <div class="field-wrapper">
                 <label>Inicio del mes financiero <span class="ast">*</span></label>
-                <p style="font-size: 12px; margin:0;">El día indicado será el usado como preaviso para iniciar un nuevo mes financiero (suele coincidir con el día en que cobra la nómina).</p>
+                <p class="info-text">El día indicado será el usado como preaviso para iniciar un nuevo mes financiero (suele coincidir con el día en que cobra la nómina).</p>
                 <input type="number" id="t-inicio-mes" placeholder="Ej: 1 o 28" min="1" max="31">
             </div>
 
             <div class="field-wrapper">
                 <label>Fondos Totales iniciales <span class="ast">*</span></label>
-                <p style="font-size: 12px; margin:0;">Indique de cuántos fondos dispone actualmente en su cuenta de banco y en efectivo. Este importe se contará como 'Fondos iniciales'.</p>
+                <p class="info-text">Indique de cuántos fondos dispone actualmente en su cuenta de banco y en efectivo. Este importe se contará como 'Fondos iniciales'.</p>
                 <input type="number" id="t-fondos-totales" placeholder="0.00" min="0.01" step="0.01">
             </div>
             <p id="err-step-1" class="error-msg">Por favor, rellena los fondos con un importe mayor a 0 y un día válido.</p>
@@ -168,7 +170,7 @@
         <div class="info-card">
             <h2>Paso 2: Gastos Fijos (Categorías)</h2>
             <p>Las categorías permiten organizar los gastos que realiza cada mes (ej: alquiler, luz, compra). </p>
-            <p>El "Presupuesto máximo" es lo <b>MÁXIMO</b> que gastará al mes en esa categoría. Este dinero pasará a estar <span class="ast">RETENIDO</span> porque debe ir destinado únicamente a este gasto (lo que no gaste volverá a sus fondos a final de mes).</p>
+            <p>El "Presupuesto máximo" es lo <b>MÁXIMO</b> que gastará al mes en esa categoría. Este dinero pasará a estar <span class="ast">RETENIDO</span> porque debe ir destinado únicamente a este gasto.</p>
             
             <div id="wrapper-btn-cat">
                 <button class="btn-secondary" onclick="abrirModal('modal-categoria')">Crear ahora una categoría</button>
@@ -184,8 +186,8 @@
     <div class="tutorial-screen" id="screen-3">
         <div class="info-card">
             <h2>Paso 3: Huchas de Ahorro</h2>
-            <p>Sirven para meter dinero que <b>NO PODRÁ GASTAR</b> en ningún momento mientras esté en la hucha.</p>
-            <p>El dinero que meta se considerará <span class="ast">RETENIDO</span> porque pertenece al individuo pero no se debe gastar. <br><br><b>Si tiene algún dinero apartado, es el momento de reflejarlo en la app mediante el Aporte Inicial.</b> Debe tener suficientes fondos disponibles para dicho aporte.</p>
+            <p>Sirven para meter dinero que <b>NO PODRÁS GASTAR</b> en ningún momento mientras esté en la hucha.</p>
+            <p>El dinero que meta se considerará <span class="ast">RETENIDO</span> porque pertenece al individuo pero no se debe gastar. <br><br><b>Si tiene algún dinero apartado, es el momento de reflejarlo en la app mediante el Aporte Inicial.</b></p>
             
             <div id="wrapper-btn-huc">
                 <button class="btn-secondary" onclick="abrirModal('modal-hucha')">Crear una hucha ahora</button>
@@ -251,11 +253,11 @@
             <div class="field-wrapper">
                 <label>Icono <span class="ast">*</span></label>
                 <div class="icon-selector" id="cat-iconos">
-                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🛒</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🏠</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💡</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">⛽</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🍿</div>
+                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💼</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🧳</div>
                 </div>
                 <div class="nota-tienda">Podrás adquirir más iconos en la tienda.</div>
             </div>
@@ -266,13 +268,18 @@
                     <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'cat-colores')" data-color="#58D68D"></div>
                     <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'cat-colores')" data-color="#5DADE2"></div>
                     <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'cat-colores')" data-color="#E74C3C"></div>
                     <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'cat-colores')" data-color="#EB984E"></div>
-                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'cat-colores')" data-color="#AF7AC5"></div>
                 </div>
                 <div class="nota-tienda">Podrás adquirir más colores en la tienda.</div>
             </div>
 
-            <div class="field-wrapper"><label>Presupuesto Máximo <span class="ast">*</span></label><input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01"></div>
+            <div class="field-wrapper">
+                <label>Presupuesto Máximo <span class="ast">*</span></label>
+                <p class="info-text">Cantidad que tienes prevista gastar cada mes en esta categoría.</p>
+                <input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01">
+            </div>
+            
             <p id="err-cat" class="error-msg"></p>
             <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-categoria')">Cancelar</button><button class="btn-primary" onclick="guardarCategoria()">CONFIRMAR</button></div>
         </div>
@@ -287,11 +294,11 @@
             <div class="field-wrapper">
                 <label>Icono <span class="ast">*</span></label>
                 <div class="icon-selector" id="huc-iconos">
-                    <div class="opt-btn selected" onclick="selOpc(this, 'huc-iconos')">✈️</div>
+                    <div class="opt-btn selected" onclick="selOpc(this, 'huc-iconos')">🏠</div>
                     <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🚗</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">💍</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">📱</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🎓</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">💼</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🧳</div>
                 </div>
                 <div class="nota-tienda">Más iconos disponibles en la tienda.</div>
             </div>
@@ -302,14 +309,26 @@
                     <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'huc-colores')" data-color="#58D68D"></div>
                     <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'huc-colores')" data-color="#5DADE2"></div>
                     <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'huc-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'huc-colores')" data-color="#E74C3C"></div>
                     <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'huc-colores')" data-color="#EB984E"></div>
-                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'huc-colores')" data-color="#AF7AC5"></div>
                 </div>
             </div>
 
-            <div class="field-wrapper"><label>Importe Objetivo <span class="ast">*</span></label><input type="number" id="huc-objetivo" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="huc-aporte" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Fecha Objetivo (Opcional)</label><input type="date" id="huc-fecha"></div>
+            <div class="field-wrapper">
+                <label>Importe Objetivo</label>
+                <p class="info-text">Selecciona un objetivo de dinero a ahorrar para esta hucha.</p>
+                <input type="number" id="huc-objetivo" placeholder="0.00">
+            </div>
+            <div class="field-wrapper">
+                <label>Aporte Inicial</label>
+                <p class="info-text">Selecciona si deseas aportar dinero a esta hucha ahora.</p>
+                <input type="number" id="huc-aporte" placeholder="0.00">
+            </div>
+            <div class="field-wrapper">
+                <label>Fecha Objetivo</label>
+                <p class="info-text">Selecciona, si lo deseas, una fecha tope para completar la hucha.</p>
+                <input type="date" id="huc-fecha">
+            </div>
             
             <p id="err-huc" class="error-msg"></p>
             <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-hucha')">Cancelar</button><button class="btn-primary" onclick="guardarHucha()">CONFIRMAR</button></div>
@@ -325,11 +344,11 @@
             <div class="field-wrapper">
                 <label>Icono <span class="ast">*</span></label>
                 <div class="icon-selector" id="fon-iconos">
-                    <div class="opt-btn selected" onclick="selOpc(this, 'fon-iconos')">🏛️</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🔧</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🏥</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">📄</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🐾</div>
+                    <div class="opt-btn selected" onclick="selOpc(this, 'fon-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">💼</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🧳</div>
                 </div>
                 <div class="nota-tienda">Más iconos disponibles en la tienda.</div>
             </div>
@@ -340,14 +359,26 @@
                     <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'fon-colores')" data-color="#58D68D"></div>
                     <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'fon-colores')" data-color="#5DADE2"></div>
                     <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'fon-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'fon-colores')" data-color="#E74C3C"></div>
                     <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'fon-colores')" data-color="#EB984E"></div>
-                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'fon-colores')" data-color="#AF7AC5"></div>
                 </div>
             </div>
 
-            <div class="field-wrapper"><label>Importe Objetivo <span class="ast">*</span></label><input type="number" id="fon-objetivo" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="fon-aporte" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Fecha Prevista (Opcional)</label><input type="date" id="fon-fecha"></div>
+            <div class="field-wrapper">
+                <label>Importe Objetivo</label>
+                <p class="info-text">Selecciona un objetivo de dinero a ahorrar para este fondo.</p>
+                <input type="number" id="fon-objetivo" placeholder="0.00">
+            </div>
+            <div class="field-wrapper">
+                <label>Aporte Inicial</label>
+                <p class="info-text">Selecciona si deseas aportar dinero a este fondo ahora.</p>
+                <input type="number" id="fon-aporte" placeholder="0.00">
+            </div>
+            <div class="field-wrapper">
+                <label>Fecha Prevista</label>
+                <p class="info-text">Selecciona, si lo deseas, una fecha tope para completar el fondo.</p>
+                <input type="date" id="fon-fecha">
+            </div>
             
             <p id="err-fon" class="error-msg"></p>
             <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-fondo')">Cancelar</button><button class="btn-primary" onclick="guardarFondo()">CONFIRMAR</button></div>
@@ -424,23 +455,50 @@
             elemento.classList.add('selected');
         };
 
-        // RENDERIZAR TARJETA (Reutilizable para Cat, Huchas y Fondos)
+        // RENDERIZAR TARJETA CON LÓGICA DE COLORES
         function crearHTMLTarjeta(item, tipo) {
             let progresoHTML = "";
-            if (tipo === 'cat' || item.objetivo > 0) {
-                let porcentaje = tipo === 'cat' ? 0 : Math.min(100, Math.round((item.guardado / item.objetivo) * 100));
-                let gastadoOGuardado = tipo === 'cat' ? 0 : item.guardado;
-                let max = tipo === 'cat' ? item.presupuestoMaximo : item.objetivo;
+            let colorBarra = item.color; // Fallback
+
+            if (tipo === 'cat') {
+                let max = item.presupuestoMaximo;
+                let gastado = item.gastado || 0;
+                let porcentaje = Math.min(100, Math.round((gastado / max) * 100));
+                
+                // Lógica Categorías (0-49 Verde, 50-79 Amarillo, 80-100 Rojo)
+                if (porcentaje < 50) colorBarra = '#27AE60'; 
+                else if (porcentaje < 80) colorBarra = '#F4D03F'; 
+                else colorBarra = '#E74C3C'; 
                 
                 progresoHTML = `
                     <div class="card-progress-row">
-                        <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${porcentaje}%; background-color: ${item.color};"></div></div>
-                        <div class="card-percent" style="color: ${item.color};">${porcentaje}%</div>
+                        <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${porcentaje}%; background-color: ${colorBarra};"></div></div>
+                        <div class="card-percent" style="color: ${colorBarra};">${porcentaje}%</div>
                     </div>
-                    <div class="card-amounts">${gastadoOGuardado.toFixed(2)}€ / ${max.toFixed(2)}€</div>
+                    <div class="card-amounts">${gastado.toFixed(2)}€ / ${max.toFixed(2)}€</div>
                 `;
             } else {
-                progresoHTML = `<div class="card-amounts">${item.guardado.toFixed(2)}€ (Sin objetivo)</div>`;
+                let max = item.objetivo || 0;
+                let guardado = item.guardado || 0;
+                
+                if (max > 0) {
+                    let porcentaje = Math.min(100, Math.round((guardado / max) * 100));
+                    
+                    // Lógica Huchas/Fondos (0-39 Rojo, 40-79 Amarillo, 80-100 Verde)
+                    if (porcentaje < 40) colorBarra = '#E74C3C'; 
+                    else if (porcentaje < 80) colorBarra = '#F4D03F'; 
+                    else colorBarra = '#27AE60'; 
+
+                    progresoHTML = `
+                        <div class="card-progress-row">
+                            <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${porcentaje}%; background-color: ${colorBarra};"></div></div>
+                            <div class="card-percent" style="color: ${colorBarra};">${porcentaje}%</div>
+                        </div>
+                        <div class="card-amounts">${guardado.toFixed(2)}€ / ${max.toFixed(2)}€</div>
+                    `;
+                } else {
+                    progresoHTML = `<div class="card-amounts">${guardado.toFixed(2)}€ (Sin objetivo)</div>`;
+                }
             }
 
             let fechaHTML = item.fecha ? `<div class="card-date">F. prevista: ${formatearFecha(item.fecha)}</div>` : "";
@@ -467,16 +525,15 @@
             return `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
 
-        // CATEGORÍA
+        // GUARDAR CATEGORÍA
         window.guardarCategoria = function() {
             const nombre = document.getElementById('cat-nombre').value.trim();
             const presu = parseFloat(document.getElementById('cat-presupuesto').value);
             const errDiv = document.getElementById('err-cat');
+            
             if (!nombre || isNaN(presu) || presu <= 0) { errDiv.textContent = "Rellena título y presupuesto válidos."; errDiv.style.display='block'; return; }
             
-            // Si editamos, revertimos el saldo anterior
             if (tutCategoria) { varDisponibles += tutCategoria.presupuestoMaximo; varRetenidos -= tutCategoria.presupuestoMaximo; }
-            
             if (presu > varDisponibles) { errDiv.textContent = "Supera tus Fondos Disponibles."; errDiv.style.display='block'; 
                 if (tutCategoria) { varDisponibles -= tutCategoria.presupuestoMaximo; varRetenidos += tutCategoria.presupuestoMaximo; } return; 
             }
@@ -494,20 +551,19 @@
             document.getElementById('preview-categoria').innerHTML = crearHTMLTarjeta(tutCategoria, 'cat');
         };
 
-        // HUCHA Y FONDO
+        // GUARDAR HUCHA Y FONDO
         window.guardarHucha = function() { procesarItem('huc'); };
         window.guardarFondo = function() { procesarItem('fon'); };
 
         function procesarItem(tipo) {
             const nombre = document.getElementById(`${tipo}-nombre`).value.trim();
-            const obj = parseFloat(document.getElementById(`${tipo}-objetivo`).value);
+            const obj = parseFloat(document.getElementById(`${tipo}-objetivo`).value) || 0;
             const aporte = parseFloat(document.getElementById(`${tipo}-aporte`).value) || 0;
             const fecha = document.getElementById(`${tipo}-fecha`).value;
             const errDiv = document.getElementById(`err-${tipo}`);
 
-            if (!nombre || isNaN(obj) || obj <= 0) { errDiv.textContent = "Título e Importe Objetivo son obligatorios."; errDiv.style.display='block'; return; }
+            if (!nombre) { errDiv.textContent = "El título es obligatorio."; errDiv.style.display='block'; return; }
             
-            // Revertir si edita
             let itemAntiguo = tipo === 'huc' ? tutHucha : tutFondo;
             if (itemAntiguo) { varDisponibles += itemAntiguo.guardado; varRetenidos -= itemAntiguo.guardado; }
 
@@ -566,8 +622,8 @@
             document.getElementById(`${tipo}-nombre`).value = it.nombre;
             if (tipo==='cat') document.getElementById('cat-presupuesto').value = it.presupuestoMaximo;
             else {
-                document.getElementById(`${tipo}-objetivo`).value = it.objetivo;
-                document.getElementById(`${tipo}-aporte`).value = it.guardado;
+                document.getElementById(`${tipo}-objetivo`).value = it.objetivo > 0 ? it.objetivo : "";
+                document.getElementById(`${tipo}-aporte`).value = it.guardado > 0 ? it.guardado : "";
                 if(it.fecha) document.getElementById(`${tipo}-fecha`).value = it.fecha;
             }
             abrirModal(modalId);
@@ -577,9 +633,9 @@
         function renderizarResumen() {
             const div = document.getElementById('resumen-final-lista');
             div.innerHTML = "";
-            if(tutCategoria) div.innerHTML += crearHTMLTarjeta(tutCategoria, 'cat').split('<div class="action-buttons">')[0];
-            if(tutHucha) div.innerHTML += crearHTMLTarjeta(tutHucha, 'huc').split('<div class="action-buttons">')[0];
-            if(tutFondo) div.innerHTML += crearHTMLTarjeta(tutFondo, 'fon').split('<div class="action-buttons">')[0];
+            if(tutCategoria) div.innerHTML += '<div class="resumen-label">Categoría</div>' + crearHTMLTarjeta(tutCategoria, 'cat').split('<div class="action-buttons">')[0];
+            if(tutHucha) div.innerHTML += '<div class="resumen-label">Hucha de Ahorro</div>' + crearHTMLTarjeta(tutHucha, 'huc').split('<div class="action-buttons">')[0];
+            if(tutFondo) div.innerHTML += '<div class="resumen-label">Fondo Reservado</div>' + crearHTMLTarjeta(tutFondo, 'fon').split('<div class="action-buttons">')[0];
         }
 
         window.finalizarTutorial = async function() {
