@@ -36,7 +36,6 @@
         .input-label { font-size: 14px; font-weight: bold; color: var(--text-main); }
         .asterisco { color: var(--color-retenidos); }
 
-        /* Contenedor relativo para el ojo de la contraseña */
         .password-container { position: relative; display: flex; align-items: center; }
         .password-container input { padding-right: 45px; } 
         .toggle-password {
@@ -75,6 +74,38 @@
             border-radius: 8px; font-size: 14px; font-weight: bold; text-align: center; 
             display: none; margin: 0; border: 1px solid #F5B7B1;
         }
+
+        /* ESTILOS DE LA VENTANA EMERGENTE (MODAL) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* Oculto por defecto */
+            align-items: center; justify-content: center;
+            z-index: 10000;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .modal-icon {
+            width: 50px; height: 50px;
+            background-color: #E8F5E9;
+            color: var(--color-disponibles);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; color: var(--text-main); margin: 0; }
+        .modal-text { font-size: 14px; color: #7F8C8D; margin: 0; }
     </style>
 </head>
 <body>
@@ -117,9 +148,7 @@
                 <div class="password-container">
                     <input type="password" id="reg-password" placeholder="Crea una contraseña" required>
                     <span class="toggle-password" onclick="togglePassword('reg-password', this)">
-                        <!-- Ojo abierto -->
                         <svg class="eye-icon eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        <!-- Ojo tachado (oculto por defecto) -->
                         <svg class="eye-icon eye-closed" viewBox="0 0 24 24" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </span>
                 </div>
@@ -130,9 +159,7 @@
                 <div class="password-container">
                     <input type="password" id="reg-password-rep" placeholder="Repite la contraseña" required>
                     <span class="toggle-password" onclick="togglePassword('reg-password-rep', this)">
-                        <!-- Ojo abierto -->
                         <svg class="eye-icon eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        <!-- Ojo tachado (oculto por defecto) -->
                         <svg class="eye-icon eye-closed" viewBox="0 0 24 24" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </span>
                 </div>
@@ -183,6 +210,16 @@
         </div>
     </div>
 
+    <!-- VENTANA EMERGENTE DE ÉXITO (MODAL) -->
+    <div id="modal-exito" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">✓</div>
+            <h3 class="modal-title">Cuenta creada</h3>
+            <p class="modal-text">Tu cuenta se ha creado correctamente. Ya puedes iniciar sesión en BudgetFlow.</p>
+            <button class="btn-principal" id="btn-aceptar-exito">Aceptar</button>
+        </div>
+    </div>
+
     <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
@@ -202,7 +239,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Funcionalidad Ojo Contraseña con SVG
+        // Funcionalidad Ojo Contraseña
         window.togglePassword = function(inputId, spanElement) {
             const input = document.getElementById(inputId);
             const eyeOpen = spanElement.querySelector('.eye-open');
@@ -219,7 +256,7 @@
             }
         };
 
-        // Lógica de Términos y Condiciones
+        // Lógica de Términos
         const checkTerminos = document.getElementById('check-terminos');
         const btnRegistrar = document.getElementById('btn-registrar');
         const msgTerminos = document.getElementById('msg-terminos');
@@ -261,14 +298,19 @@
         radioPregunta.addEventListener('change', () => { inputPin.style.display = 'none'; bloquePregunta.style.display = 'flex'; });
         selectPregunta.addEventListener('change', (e) => { inputPreguntaOtra.style.display = e.target.value === 'otra' ? 'block' : 'none'; });
 
-        // Minúsculas y sin tildes automáticas para la respuesta
         inputRespuesta.addEventListener('input', function() {
             this.value = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "");
         });
 
-        // --- LÓGICA PRINCIPAL DE REGISTRO EN FIREBASE ---
+        // Lógica de Registro
         const formRegistro = document.getElementById('form-registro');
         const msgError = document.getElementById('mensaje-error');
+        const modalExito = document.getElementById('modal-exito');
+        const btnAceptarExito = document.getElementById('btn-aceptar-exito');
+
+        btnAceptarExito.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
 
         formRegistro.addEventListener('submit', async (e) => {
             e.preventDefault(); 
@@ -350,8 +392,8 @@
                     }
                 });
 
-                alert('¡Cuenta creada correctamente! Ahora puedes iniciar sesión.');
-                window.location.href = 'index.html';
+                // Mostrar Modal en lugar del alert
+                modalExito.style.display = 'flex';
 
             } catch (error) {
                 console.error(error);
