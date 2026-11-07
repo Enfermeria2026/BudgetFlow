@@ -20,7 +20,7 @@
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
         
-        /* BARRA DE PROGRESO VISUAL */
+        /* BARRA DE PROGRESO */
         .progress-bar-container {
             width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box;
             display: flex; justify-content: space-between; align-items: center; position: relative;
@@ -37,72 +37,94 @@
         .progress-step.active { background-color: var(--color-disponibles); box-shadow: 0 0 10px rgba(39, 174, 96, 0.5); }
         .progress-step.completed { background-color: var(--text-main); }
 
-        /* PANEL FINANCIERO SUPERIOR (Oculto en paso 1) */
+        /* PANEL FINANCIERO SUPERIOR */
         #top-financial-panel {
             display: none; width: 100%; max-width: 500px; background-color: var(--card-bg);
             padding: 15px; box-sizing: border-box; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 20px; text-align: center; justify-content: space-around;
+            margin-bottom: 10px; text-align: center; justify-content: space-around;
         }
         .fin-item { display: flex; flex-direction: column; gap: 5px; }
         .fin-item span { font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .fin-item strong { font-size: 16px; }
 
-        /* CONTENEDORES DE PANTALLAS */
+        /* PANTALLAS (CON PADDING INFERIOR PARA NO PISAR BOTONES) */
         .tutorial-screen {
-            display: none; width: 100%; max-width: 500px; padding: 0 20px 80px; box-sizing: border-box;
+            display: none; width: 100%; max-width: 500px; padding: 10px 20px 100px; box-sizing: border-box;
             flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease;
         }
         .tutorial-screen.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .info-card {
-            background-color: var(--card-bg); padding: 20px; border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         h2 { margin-top: 0; font-size: 20px; color: var(--text-main); }
-        p { font-size: 15px; line-height: 1.5; color: #555; }
-        
+        p { font-size: 14px; line-height: 1.5; color: #555; margin-bottom: 10px; }
+        .ast { color: var(--color-retenidos); }
+
         .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
-        label { font-size: 14px; font-weight: bold; }
-        input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 16px; outline: none; }
+        label { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; }
         input:focus { border-color: var(--color-disponibles); }
 
-        /* BOTONES */
+        /* BOTONERA INFERIOR FIJA */
         .bottom-bar {
             position: fixed; bottom: 0; width: 100%; max-width: 500px; background-color: var(--card-bg);
             padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 100;
         }
-        button { padding: 15px 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; }
+        button { padding: 15px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
         .btn-primary { background-color: var(--text-main); color: white; }
         .btn-primary:disabled { background-color: #BDC3C7; cursor: not-allowed; }
-        .btn-secondary { background-color: var(--color-disponibles); color: white; }
+        .btn-secondary { background-color: var(--color-disponibles); color: white; margin-top: 15px; width: 100%; }
         .btn-skip { background-color: transparent; border: 2px solid var(--text-main); color: var(--text-main); }
 
-        /* VENTANAS EMERGENTES (MODALES) */
+        /* MODALES */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 10000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6);
+            display: none; align-items: center; justify-content: center; z-index: 10000;
         }
         .modal-content {
             background-color: var(--card-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px;
-            max-height: 90vh; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px;
+            max-height: 90vh; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;
         }
-        .modal-content h3 { margin: 0; }
+        .modal-content h3 { margin: 0 0 5px 0; }
         .aviso-retenido { background-color: #FDEDEC; color: var(--color-retenidos); padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; }
         
-        /* Selectores de Icono y Color */
-        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 10px; }
+        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; }
         .opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D5D8DC; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
-        .opt-btn.selected { border-color: var(--color-disponibles); background-color: #E8F5E9; }
+        .opt-btn.selected { border-color: var(--color-disponibles); box-shadow: 0 0 0 2px var(--color-disponibles); }
+        .nota-tienda { font-size: 12px; color: #7F8C8D; font-style: italic; margin-top: 2px; }
         
-        .error-msg { color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; }
-        .item-preview { background-color: #F9F9F9; border: 1px solid #D5D8DC; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; margin-top: 10px; font-weight: bold; }
+        .error-msg { color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; margin-top: 5px; }
+        
+        /* DISEÑO DE TARJETA (INSPIRADO EN TU IMAGEN) */
+        .item-card {
+            background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
+            display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+            position: relative; margin-top: 15px;
+        }
+        .card-icon {
+            width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px;
+        }
+        .card-details { flex: 1; }
+        .card-title { font-size: 16px; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
+        .card-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .card-progress-bg { flex: 1; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; }
+        .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        .card-percent { font-size: 13px; font-weight: bold; }
+        .card-amounts { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        .card-date { position: absolute; bottom: 10px; right: 15px; font-size: 11px; font-weight: bold; color: var(--color-retenidos); }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end; }
+        .btn-small { padding: 5px 10px; font-size: 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-edit { background: #E5E7E9; color: var(--text-main); }
+        .btn-delete { background: #FDEDEC; color: var(--color-retenidos); }
     </style>
 </head>
 <body>
 
-    <!-- BARRA DE PROGRESO -->
+    <!-- BARRA PROGRESO -->
     <div class="progress-bar-container">
         <div class="progress-line"></div>
         <div class="progress-step active" id="step-dot-1">1</div>
@@ -112,7 +134,7 @@
         <div class="progress-step" id="step-dot-5">5</div>
     </div>
 
-    <!-- PANEL FINANCIERO (Visible desde paso 2) -->
+    <!-- PANEL FINANCIERO -->
     <div id="top-financial-panel">
         <div class="fin-item" style="color: var(--color-totales);"><span>Totales</span><strong id="ui-totales">0,00 €</strong></div>
         <div class="fin-item" style="color: var(--color-disponibles);"><span>Disponibles</span><strong id="ui-disponibles">0,00 €</strong></div>
@@ -123,20 +145,20 @@
     <div class="tutorial-screen active" id="screen-1">
         <div class="info-card">
             <h2>Paso 1: Tu situación actual</h2>
-            <p>Bienvenido a BudgetFlow. Para que el sistema funcione correctamente, necesitamos establecer la base de tus finanzas.</p>
+            <p>Debe configurar todo lo relacionado con sus finanzas para comenzar.</p>
             
             <div class="field-wrapper">
-                <label>Inicio del mes financiero</label>
-                <p style="font-size: 13px; margin:0;">El día en el que sueles cobrar tu nómina o ingreso principal (1 al 31). Será tu aviso de nuevo ciclo.</p>
+                <label>Inicio del mes financiero <span class="ast">*</span></label>
+                <p style="font-size: 12px; margin:0;">El día indicado será el usado como preaviso para iniciar un nuevo mes financiero (suele coincidir con el día en que cobra la nómina).</p>
                 <input type="number" id="t-inicio-mes" placeholder="Ej: 1 o 28" min="1" max="31">
             </div>
 
             <div class="field-wrapper">
-                <label>Fondos Totales (Obligatorio)</label>
-                <p style="font-size: 13px; margin:0;">¿De cuánto dinero dispones actualmente sumando tu cuenta del banco y efectivo?</p>
+                <label>Fondos Totales iniciales <span class="ast">*</span></label>
+                <p style="font-size: 12px; margin:0;">Indique de cuántos fondos dispone actualmente en su cuenta de banco y en efectivo. Este importe se contará como 'Fondos iniciales'.</p>
                 <input type="number" id="t-fondos-totales" placeholder="0.00" min="0.01" step="0.01">
             </div>
-            <p id="err-step-1" class="error-msg">Por favor, rellena los fondos totales con un importe mayor a 0 y un día válido.</p>
+            <p id="err-step-1" class="error-msg">Por favor, rellena los fondos con un importe mayor a 0 y un día válido.</p>
         </div>
         <div class="bottom-bar"><button class="btn-primary" onclick="siguientePaso(2)">SIGUIENTE</button></div>
     </div>
@@ -145,10 +167,13 @@
     <div class="tutorial-screen" id="screen-2">
         <div class="info-card">
             <h2>Paso 2: Gastos Fijos (Categorías)</h2>
-            <p>El presupuesto base cero exige que le des un trabajo a cada euro. Las <b>Categorías</b> representan tus gastos fijos (alquiler, luz, compra...).</p>
-            <p>Es <b>obligatorio</b> crear al menos una categoría ahora para aprender cómo funciona. El dinero que le asignes como "Presupuesto Máximo" pasará a estar <span style="color: var(--color-retenidos); font-weight:bold;">RETENIDO</span> para asegurar que no te lo gastes en otra cosa.</p>
+            <p>Las categorías permiten organizar los gastos que realiza cada mes (ej: alquiler, luz, compra). </p>
+            <p>El "Presupuesto máximo" es lo <b>MÁXIMO</b> que gastará al mes en esa categoría. Este dinero pasará a estar <span class="ast">RETENIDO</span> porque debe ir destinado únicamente a este gasto (lo que no gaste volverá a sus fondos a final de mes).</p>
+            
+            <div id="wrapper-btn-cat">
+                <button class="btn-secondary" onclick="abrirModal('modal-categoria')">Crear ahora una categoría</button>
+            </div>
             <div id="preview-categoria"></div>
-            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-categoria')">Crear ahora una categoría</button>
         </div>
         <div class="bottom-bar">
             <button class="btn-primary" id="btn-next-2" disabled onclick="siguientePaso(3)">SIGUIENTE</button>
@@ -159,14 +184,17 @@
     <div class="tutorial-screen" id="screen-3">
         <div class="info-card">
             <h2>Paso 3: Huchas de Ahorro</h2>
-            <p>Las huchas sirven para meter dinero que <b>NO PODRÁS GASTAR</b>. Ideal para ahorrar para una casa, un coche o un viaje.</p>
-            <p>Cualquier aporte inicial que introduzcas se marcará como <span style="color: var(--color-retenidos); font-weight:bold;">RETENIDO</span> para protegerlo. Debes tener fondos disponibles suficientes para el aporte inicial.</p>
+            <p>Sirven para meter dinero que <b>NO PODRÁ GASTAR</b> en ningún momento mientras esté en la hucha.</p>
+            <p>El dinero que meta se considerará <span class="ast">RETENIDO</span> porque pertenece al individuo pero no se debe gastar. <br><br><b>Si tiene algún dinero apartado, es el momento de reflejarlo en la app mediante el Aporte Inicial.</b> Debe tener suficientes fondos disponibles para dicho aporte.</p>
+            
+            <div id="wrapper-btn-huc">
+                <button class="btn-secondary" onclick="abrirModal('modal-hucha')">Crear una hucha ahora</button>
+            </div>
             <div id="preview-hucha"></div>
-            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-hucha')">Crear una hucha ahora</button>
         </div>
         <div class="bottom-bar">
-            <button class="btn-skip" onclick="siguientePaso(4)">SALTAR</button>
-            <button class="btn-primary" onclick="siguientePaso(4)">SIGUIENTE</button>
+            <button class="btn-skip" id="btn-skip-3" onclick="siguientePaso(4)">Saltar y continuar</button>
+            <button class="btn-primary" id="btn-next-3" style="display:none;" onclick="siguientePaso(4)">SIGUIENTE</button>
         </div>
     </div>
 
@@ -174,34 +202,38 @@
     <div class="tutorial-screen" id="screen-4">
         <div class="info-card">
             <h2>Paso 4: Fondos Reservados</h2>
-            <p>Útiles para pagos puntuales que sabes que llegarán (seguro del coche, averías, impuestos). El dinero que introduces queda <span style="color: var(--color-retenidos); font-weight:bold;">RESERVADO</span> para ese fin.</p>
+            <p>Para aquellos pagos puntuales o que pueden tener lugar en otro momento (ej: seguro del coche, averías). </p>
+            <p>Reserve su dinero para tenerlo disponible sin agobios. Este dinero también queda <span class="ast">RETENIDO</span> pero reservado para un fin.<br><br><b>Si ya tiene dinero guardado para este fin, indíquelo en el Aporte Inicial.</b></p>
+            
+            <div id="wrapper-btn-fon">
+                <button class="btn-secondary" onclick="abrirModal('modal-fondo')">Crear fondo reservado</button>
+            </div>
             <div id="preview-fondo"></div>
-            <button class="btn-secondary" style="margin-top: 15px;" onclick="abrirModal('modal-fondo')">Crear fondo reservado</button>
         </div>
         <div class="bottom-bar">
-            <button class="btn-skip" onclick="siguientePaso(5)">SALTAR</button>
-            <button class="btn-primary" onclick="siguientePaso(5)">SIGUIENTE</button>
+            <button class="btn-skip" id="btn-skip-4" onclick="siguientePaso(5)">Saltar y continuar</button>
+            <button class="btn-primary" id="btn-next-4" style="display:none;" onclick="siguientePaso(5)">SIGUIENTE</button>
         </div>
     </div>
 
     <!-- PANTALLA 5: RESUMEN Y FINAL -->
     <div class="tutorial-screen" id="screen-5">
         <div class="info-card">
-            <h2>Paso 5: Todo listo</h2>
-            <p>Así funciona tu panel de control:</p>
-            <ul style="font-size: 14px; color: #555; padding-left: 20px;">
-                <li><b>Fondos Totales:</b> Todo el dinero que tienes en realidad.</li>
-                <li><b style="color: var(--color-retenidos);">Fondos Retenidos:</b> El dinero protegido dentro de tus presupuestos, huchas y reservas.</li>
-                <li><b style="color: var(--color-disponibles);">Fondos Disponibles:</b> El dinero "libre" que te queda para gastar en imprevistos o crear nuevas huchas.</li>
+            <h2>Paso 5: Resumen de su cuenta</h2>
+            <p>Así queda la configuración inicial de su aplicación:</p>
+            <ul style="font-size: 13px; color: #555; padding-left: 20px;">
+                <li><b>Fondos Totales:</b> Todo el dinero que posee.</li>
+                <li><b class="ast">Fondos Retenidos:</b> Dinero protegido en presupuestos, huchas y reservas.</li>
+                <li><b style="color: var(--color-disponibles);">Fondos Disponibles:</b> El dinero libre restante.</li>
             </ul>
-            <div style="margin-top: 20px; font-weight:bold; border-top: 1px solid #eee; padding-top: 15px;">
-                Resumen de lo creado:
+            <div style="margin-top: 15px; font-weight:bold; border-top: 1px solid #eee; padding-top: 15px;">
+                Ítems configurados:
                 <div id="resumen-final-lista"></div>
             </div>
             
-            <div style="margin-top: 25px; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="check-eliminar-tutorial" style="width:20px; height:20px;">
-                <label for="check-eliminar-tutorial" style="font-size: 13px;">Eliminar lo creado en el tutorial y empezar de cero en el Dashboard. (Mantendrá tus fondos iniciales).</label>
+            <div style="margin-top: 25px; display:flex; align-items:flex-start; gap:10px; background:#f9f9f9; padding:15px; border-radius:8px;">
+                <input type="checkbox" id="check-eliminar-tutorial" style="width:25px; height:25px; margin-top:2px;">
+                <label for="check-eliminar-tutorial" style="font-size: 13px; line-height:1.4;">Deseo eliminar los ítems creados en este tutorial (categoría, hucha y fondo) y empezar de cero en la app. (Mis fondos iniciales se mantendrán intactos).</label>
             </div>
         </div>
         <div class="bottom-bar">
@@ -209,89 +241,124 @@
         </div>
     </div>
 
-    <!-- MODAL: CREAR CATEGORÍA -->
+    <!-- MODAL CATEGORÍA -->
     <div class="modal-overlay" id="modal-categoria">
         <div class="modal-content">
-            <h3>Crear Categoría</h3>
-            <div class="aviso-retenido">Recuerda: El Presupuesto Máximo se retendrá de tus fondos disponibles.</div>
+            <h3>Nueva Categoría</h3>
+            
+            <div class="field-wrapper"><label>Título <span class="ast">*</span></label><input type="text" id="cat-nombre"></div>
             
             <div class="field-wrapper">
-                <label>Nombre de la categoría</label>
-                <input type="text" id="cat-nombre" placeholder="Ej: Supermercado">
-            </div>
-            
-            <div class="field-wrapper">
-                <label>Icono (Básicos)</label>
+                <label>Icono <span class="ast">*</span></label>
                 <div class="icon-selector" id="cat-iconos">
-                    <div class="opt-btn selected" onclick="seleccionarOpcion(this, 'cat-iconos')">🛒</div>
-                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">🏠</div>
-                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">💡</div>
-                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">⛽</div>
-                    <div class="opt-btn" onclick="seleccionarOpcion(this, 'cat-iconos')">🍿</div>
+                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💡</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">⛽</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🍿</div>
                 </div>
+                <div class="nota-tienda">Podrás adquirir más iconos en la tienda.</div>
             </div>
 
             <div class="field-wrapper">
-                <label>Color (Básicos)</label>
+                <label>Color <span class="ast">*</span></label>
                 <div class="color-selector" id="cat-colores">
-                    <div class="opt-btn selected" style="background:#58D68D;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#58D68D"></div>
-                    <div class="opt-btn" style="background:#5DADE2;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#5DADE2"></div>
-                    <div class="opt-btn" style="background:#F4D03F;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#F4D03F"></div>
-                    <div class="opt-btn" style="background:#EB984E;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#EB984E"></div>
-                    <div class="opt-btn" style="background:#AF7AC5;" onclick="seleccionarOpcion(this, 'cat-colores')" data-color="#AF7AC5"></div>
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'cat-colores')" data-color="#EB984E"></div>
+                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'cat-colores')" data-color="#AF7AC5"></div>
                 </div>
+                <div class="nota-tienda">Podrás adquirir más colores en la tienda.</div>
             </div>
 
-            <div class="field-wrapper">
-                <label>Presupuesto Máximo mensual</label>
-                <input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01">
-            </div>
+            <div class="field-wrapper"><label>Presupuesto Máximo <span class="ast">*</span></label><input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01"></div>
             <p id="err-cat" class="error-msg"></p>
-
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-skip" onclick="cerrarModal('modal-categoria')">Cancelar</button>
-                <button class="btn-secondary" onclick="guardarCategoria()">CONFIRMAR</button>
-            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-categoria')">Cancelar</button><button class="btn-primary" onclick="guardarCategoria()">CONFIRMAR</button></div>
         </div>
     </div>
 
-    <!-- MODAL: CREAR HUCHA -->
+    <!-- MODAL HUCHA -->
     <div class="modal-overlay" id="modal-hucha">
         <div class="modal-content">
-            <h3>Crear Hucha</h3>
-            <div class="aviso-retenido">El aporte inicial se retendrá de tus fondos disponibles al instante.</div>
-            <div class="field-wrapper"><label>Nombre del objetivo</label><input type="text" id="huc-nombre" placeholder="Ej: Coche nuevo"></div>
-            <div class="field-wrapper"><label>Objetivo total a ahorrar</label><input type="number" id="huc-objetivo" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="huc-aporte" placeholder="0.00"></div>
-            <p id="err-huc" class="error-msg"></p>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-skip" onclick="cerrarModal('modal-hucha')">Cancelar</button>
-                <button class="btn-secondary" onclick="guardarHucha()">CONFIRMAR</button>
+            <h3>Nueva Hucha</h3>
+            <div class="field-wrapper"><label>Título <span class="ast">*</span></label><input type="text" id="huc-nombre"></div>
+            
+            <div class="field-wrapper">
+                <label>Icono <span class="ast">*</span></label>
+                <div class="icon-selector" id="huc-iconos">
+                    <div class="opt-btn selected" onclick="selOpc(this, 'huc-iconos')">✈️</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">💍</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">📱</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'huc-iconos')">🎓</div>
+                </div>
+                <div class="nota-tienda">Más iconos disponibles en la tienda.</div>
             </div>
+
+            <div class="field-wrapper">
+                <label>Color <span class="ast">*</span></label>
+                <div class="color-selector" id="huc-colores">
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'huc-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'huc-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'huc-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'huc-colores')" data-color="#EB984E"></div>
+                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'huc-colores')" data-color="#AF7AC5"></div>
+                </div>
+            </div>
+
+            <div class="field-wrapper"><label>Importe Objetivo <span class="ast">*</span></label><input type="number" id="huc-objetivo" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="huc-aporte" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Fecha Objetivo (Opcional)</label><input type="date" id="huc-fecha"></div>
+            
+            <p id="err-huc" class="error-msg"></p>
+            <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-hucha')">Cancelar</button><button class="btn-primary" onclick="guardarHucha()">CONFIRMAR</button></div>
         </div>
     </div>
 
-    <!-- MODAL: CREAR FONDO -->
+    <!-- MODAL FONDO -->
     <div class="modal-overlay" id="modal-fondo">
         <div class="modal-content">
-            <h3>Crear Fondo Reservado</h3>
-            <div class="aviso-retenido">El aporte inicial se retendrá para que no lo gastes accidentalmente.</div>
-            <div class="field-wrapper"><label>Nombre de la reserva</label><input type="text" id="fon-nombre" placeholder="Ej: Seguro coche"></div>
-            <div class="field-wrapper"><label>Objetivo total de la reserva</label><input type="number" id="fon-objetivo" placeholder="0.00"></div>
-            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="fon-aporte" placeholder="0.00"></div>
-            <p id="err-fon" class="error-msg"></p>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-skip" onclick="cerrarModal('modal-fondo')">Cancelar</button>
-                <button class="btn-secondary" onclick="guardarFondo()">CONFIRMAR</button>
+            <h3>Nuevo Fondo Reservado</h3>
+            <div class="field-wrapper"><label>Título <span class="ast">*</span></label><input type="text" id="fon-nombre"></div>
+            
+            <div class="field-wrapper">
+                <label>Icono <span class="ast">*</span></label>
+                <div class="icon-selector" id="fon-iconos">
+                    <div class="opt-btn selected" onclick="selOpc(this, 'fon-iconos')">🏛️</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🔧</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🏥</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">📄</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'fon-iconos')">🐾</div>
+                </div>
+                <div class="nota-tienda">Más iconos disponibles en la tienda.</div>
             </div>
+
+            <div class="field-wrapper">
+                <label>Color <span class="ast">*</span></label>
+                <div class="color-selector" id="fon-colores">
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'fon-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'fon-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'fon-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'fon-colores')" data-color="#EB984E"></div>
+                    <div class="opt-btn" style="background:#AF7AC5;" onclick="selOpc(this, 'fon-colores')" data-color="#AF7AC5"></div>
+                </div>
+            </div>
+
+            <div class="field-wrapper"><label>Importe Objetivo <span class="ast">*</span></label><input type="number" id="fon-objetivo" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="fon-aporte" placeholder="0.00"></div>
+            <div class="field-wrapper"><label>Fecha Prevista (Opcional)</label><input type="date" id="fon-fecha"></div>
+            
+            <p id="err-fon" class="error-msg"></p>
+            <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn-skip" onclick="cerrarModal('modal-fondo')">Cancelar</button><button class="btn-primary" onclick="guardarFondo()">CONFIRMAR</button></div>
         </div>
     </div>
 
-    <!-- SCRIPTS CORE Y FIREBASE -->
+    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
@@ -307,65 +374,38 @@
         const db = getFirestore(app);
 
         let uidActual = null;
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                uidActual = user.uid;
-            } else {
-                window.location.href = 'index.html'; // Si no está logueado, fuera
-            }
-        });
+        onAuthStateChanged(auth, (user) => { if (user) uidActual = user.uid; else window.location.href = 'index.html'; });
 
-        // --- VARIABLES DE ESTADO DEL TUTORIAL ---
-        let varTotales = 0;
-        let varDisponibles = 0;
-        let varRetenidos = 0;
-        let varInicioMes = 1;
+        // ESTADO GLOBAL
+        let varTotales = 0, varDisponibles = 0, varRetenidos = 0, varInicioMes = 1;
+        let tutCategoria = null, tutHucha = null, tutFondo = null;
 
-        // Arrays temporales para guardar lo creado
-        let tempCategorias = [];
-        let tempHuchas = [];
-        let tempFondos = [];
-
-        // UI de Variables
+        // UI Helpers
         const uiTotales = document.getElementById('ui-totales');
         const uiDisponibles = document.getElementById('ui-disponibles');
         const uiRetenidos = document.getElementById('ui-retenidos');
-        const panelFinanciero = document.getElementById('top-financial-panel');
-
+        
         function actualizarUI() {
             uiTotales.textContent = varTotales.toFixed(2) + " €";
             uiDisponibles.textContent = varDisponibles.toFixed(2) + " €";
             uiRetenidos.textContent = varRetenidos.toFixed(2) + " €";
         }
 
-        // --- NAVEGACIÓN ENTRE PASOS ---
         window.siguientePaso = function(paso) {
-            // Validaciones Paso 1
             if (paso === 2) {
                 const inputTotales = parseFloat(document.getElementById('t-fondos-totales').value);
-                const inputMes = parseInt(document.getElementById('t-inicio-mes').value) || 1;
-                if (isNaN(inputTotales) || inputTotales <= 0 || inputMes < 1 || inputMes > 31) {
-                    document.getElementById('err-step-1').style.display = 'block';
-                    return;
+                const inputMes = parseInt(document.getElementById('t-inicio-mes').value);
+                if (isNaN(inputTotales) || inputTotales <= 0 || isNaN(inputMes) || inputMes < 1 || inputMes > 31) {
+                    document.getElementById('err-step-1').style.display = 'block'; return;
                 }
                 document.getElementById('err-step-1').style.display = 'none';
-                
-                varTotales = inputTotales;
-                varDisponibles = inputTotales;
-                varRetenidos = 0;
-                varInicioMes = inputMes;
-                
-                actualizarUI();
-                panelFinanciero.style.display = 'flex'; // Mostramos panel
+                varTotales = inputTotales; varDisponibles = inputTotales; varRetenidos = 0; varInicioMes = inputMes;
+                actualizarUI(); document.getElementById('top-financial-panel').style.display = 'flex';
             }
-
             if (paso === 5) renderizarResumen();
 
-            // Cambiar pantallas
             document.querySelectorAll('.tutorial-screen').forEach(scr => scr.classList.remove('active'));
             document.getElementById('screen-' + paso).classList.add('active');
-
-            // Actualizar bolitas
             document.querySelectorAll('.progress-step').forEach(dot => {
                 const num = parseInt(dot.textContent);
                 dot.classList.remove('active', 'completed');
@@ -374,139 +414,202 @@
             });
         };
 
-        // --- MANEJO DE MODALES ---
         window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; };
         window.cerrarModal = function(id) { 
             document.getElementById(id).style.display = 'none'; 
             document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
         };
-
-        // UI Selectores
-        window.seleccionarOpcion = function(elemento, contenedorId) {
-            document.getElementById(contenedorId).querySelectorAll('.opt-btn').forEach(btn => btn.classList.remove('selected'));
+        window.selOpc = function(elemento, contId) {
+            document.getElementById(contId).querySelectorAll('.opt-btn').forEach(btn => btn.classList.remove('selected'));
             elemento.classList.add('selected');
         };
 
-        // --- LÓGICA CATEGORÍAS ---
+        // RENDERIZAR TARJETA (Reutilizable para Cat, Huchas y Fondos)
+        function crearHTMLTarjeta(item, tipo) {
+            let progresoHTML = "";
+            if (tipo === 'cat' || item.objetivo > 0) {
+                let porcentaje = tipo === 'cat' ? 0 : Math.min(100, Math.round((item.guardado / item.objetivo) * 100));
+                let gastadoOGuardado = tipo === 'cat' ? 0 : item.guardado;
+                let max = tipo === 'cat' ? item.presupuestoMaximo : item.objetivo;
+                
+                progresoHTML = `
+                    <div class="card-progress-row">
+                        <div class="card-progress-bg"><div class="card-progress-fill" style="width: ${porcentaje}%; background-color: ${item.color};"></div></div>
+                        <div class="card-percent" style="color: ${item.color};">${porcentaje}%</div>
+                    </div>
+                    <div class="card-amounts">${gastadoOGuardado.toFixed(2)}€ / ${max.toFixed(2)}€</div>
+                `;
+            } else {
+                progresoHTML = `<div class="card-amounts">${item.guardado.toFixed(2)}€ (Sin objetivo)</div>`;
+            }
+
+            let fechaHTML = item.fecha ? `<div class="card-date">F. prevista: ${formatearFecha(item.fecha)}</div>` : "";
+
+            return `
+                <div class="item-card">
+                    <div class="card-icon" style="background-color: ${item.color}20; color: ${item.color};">${item.icono}</div>
+                    <div class="card-details">
+                        <div class="card-title">${item.nombre}</div>
+                        ${progresoHTML}
+                    </div>
+                    ${fechaHTML}
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-small btn-edit" onclick="editarItem('${tipo}')">Editar</button>
+                    <button class="btn-small btn-delete" onclick="eliminarItem('${tipo}')">Eliminar</button>
+                </div>
+            `;
+        }
+
+        function formatearFecha(fechaStr) {
+            if (!fechaStr) return "";
+            const partes = fechaStr.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        // CATEGORÍA
         window.guardarCategoria = function() {
             const nombre = document.getElementById('cat-nombre').value.trim();
             const presu = parseFloat(document.getElementById('cat-presupuesto').value);
-            const icono = document.querySelector('#cat-iconos .selected').textContent;
-            const color = document.querySelector('#cat-colores .selected').getAttribute('data-color');
             const errDiv = document.getElementById('err-cat');
-
-            if (!nombre || isNaN(presu) || presu <= 0) { errDiv.textContent = "Rellena todos los campos correctamente."; errDiv.style.display = 'block'; return; }
-            if (presu > varDisponibles) { errDiv.textContent = "El presupuesto no puede superar tus Fondos Disponibles (" + varDisponibles.toFixed(2) + "€)."; errDiv.style.display = 'block'; return; }
-
-            // Guardar en memoria
-            tempCategorias.push({ nombre, presupuestoMaximo: presu, icono, color, gastado: 0 });
+            if (!nombre || isNaN(presu) || presu <= 0) { errDiv.textContent = "Rellena título y presupuesto válidos."; errDiv.style.display='block'; return; }
             
-            // Actualizar finanzas
-            varDisponibles -= presu;
-            varRetenidos += presu;
-            actualizarUI();
+            // Si editamos, revertimos el saldo anterior
+            if (tutCategoria) { varDisponibles += tutCategoria.presupuestoMaximo; varRetenidos -= tutCategoria.presupuestoMaximo; }
             
-            // UI
-            cerrarModal('modal-categoria');
-            document.getElementById('btn-next-2').disabled = false; // Habilitar siguiente
-            const preview = document.getElementById('preview-categoria');
-            preview.innerHTML += `<div class="item-preview"><span style="background:${color}; padding:5px; border-radius:50%;">${icono}</span> ${nombre} - <b>${presu.toFixed(2)}€ retenidos</b></div>`;
-        };
-
-        // --- LÓGICA HUCHAS Y FONDOS ---
-        window.guardarHucha = function() { procesarItemAhorro('huc', tempHuchas, 'preview-hucha', 'modal-hucha'); };
-        window.guardarFondo = function() { procesarItemAhorro('fon', tempFondos, 'preview-fondo', 'modal-fondo'); };
-
-        function procesarItemAhorro(prefijo, arrayTemp, previewId, modalId) {
-            const nombre = document.getElementById(`${prefijo}-nombre`).value.trim();
-            const obj = parseFloat(document.getElementById(`${prefijo}-objetivo`).value) || 0;
-            const aporte = parseFloat(document.getElementById(`${prefijo}-aporte`).value) || 0;
-            const errDiv = document.getElementById(`err-${prefijo}`);
-
-            if (!nombre) { errDiv.textContent = "El nombre es obligatorio."; errDiv.style.display = 'block'; return; }
-            if (aporte > varDisponibles) { errDiv.textContent = "El aporte no puede superar tus Fondos Disponibles."; errDiv.style.display = 'block'; return; }
-
-            arrayTemp.push({ nombre, objetivo: obj, guardado: aporte });
-            
-            if (aporte > 0) {
-                varDisponibles -= aporte;
-                varRetenidos += aporte;
-                actualizarUI();
+            if (presu > varDisponibles) { errDiv.textContent = "Supera tus Fondos Disponibles."; errDiv.style.display='block'; 
+                if (tutCategoria) { varDisponibles -= tutCategoria.presupuestoMaximo; varRetenidos += tutCategoria.presupuestoMaximo; } return; 
             }
 
-            cerrarModal(modalId);
-            document.getElementById(previewId).innerHTML += `<div class="item-preview">💰 ${nombre} - <b>${aporte.toFixed(2)}€ retenidos iniciales</b></div>`;
+            tutCategoria = {
+                nombre, presupuestoMaximo: presu, gastado: 0,
+                icono: document.querySelector('#cat-iconos .selected').textContent,
+                color: document.querySelector('#cat-colores .selected').getAttribute('data-color')
+            };
+            
+            varDisponibles -= presu; varRetenidos += presu; actualizarUI(); cerrarModal('modal-categoria');
+            
+            document.getElementById('wrapper-btn-cat').style.display = 'none';
+            document.getElementById('btn-next-2').disabled = false;
+            document.getElementById('preview-categoria').innerHTML = crearHTMLTarjeta(tutCategoria, 'cat');
+        };
+
+        // HUCHA Y FONDO
+        window.guardarHucha = function() { procesarItem('huc'); };
+        window.guardarFondo = function() { procesarItem('fon'); };
+
+        function procesarItem(tipo) {
+            const nombre = document.getElementById(`${tipo}-nombre`).value.trim();
+            const obj = parseFloat(document.getElementById(`${tipo}-objetivo`).value);
+            const aporte = parseFloat(document.getElementById(`${tipo}-aporte`).value) || 0;
+            const fecha = document.getElementById(`${tipo}-fecha`).value;
+            const errDiv = document.getElementById(`err-${tipo}`);
+
+            if (!nombre || isNaN(obj) || obj <= 0) { errDiv.textContent = "Título e Importe Objetivo son obligatorios."; errDiv.style.display='block'; return; }
+            
+            // Revertir si edita
+            let itemAntiguo = tipo === 'huc' ? tutHucha : tutFondo;
+            if (itemAntiguo) { varDisponibles += itemAntiguo.guardado; varRetenidos -= itemAntiguo.guardado; }
+
+            if (aporte > varDisponibles) { errDiv.textContent = "El aporte supera tus Fondos Disponibles."; errDiv.style.display='block'; 
+                if (itemAntiguo) { varDisponibles -= itemAntiguo.guardado; varRetenidos += itemAntiguo.guardado; } return; 
+            }
+
+            const nuevoItem = {
+                nombre, objetivo: obj, guardado: aporte, fecha,
+                icono: document.querySelector(`#${tipo}-iconos .selected`).textContent,
+                color: document.querySelector(`#${tipo}-colores .selected`).getAttribute('data-color')
+            };
+
+            varDisponibles -= aporte; varRetenidos += aporte; actualizarUI(); cerrarModal(`modal-${tipo === 'huc'?'hucha':'fondo'}`);
+
+            if (tipo === 'huc') {
+                tutHucha = nuevoItem;
+                document.getElementById('wrapper-btn-huc').style.display = 'none';
+                document.getElementById('btn-skip-3').style.display = 'none';
+                document.getElementById('btn-next-3').style.display = 'block';
+                document.getElementById('preview-hucha').innerHTML = crearHTMLTarjeta(tutHucha, 'huc');
+            } else {
+                tutFondo = nuevoItem;
+                document.getElementById('wrapper-btn-fon').style.display = 'none';
+                document.getElementById('btn-skip-4').style.display = 'none';
+                document.getElementById('btn-next-4').style.display = 'block';
+                document.getElementById('preview-fondo').innerHTML = crearHTMLTarjeta(tutFondo, 'fon');
+            }
         }
 
-        // --- RESUMEN FINAL Y ENVÍO A FIREBASE ---
+        // EDITAR / ELIMINAR
+        window.eliminarItem = function(tipo) {
+            if (tipo === 'cat') {
+                varDisponibles += tutCategoria.presupuestoMaximo; varRetenidos -= tutCategoria.presupuestoMaximo; tutCategoria = null;
+                document.getElementById('preview-categoria').innerHTML = '';
+                document.getElementById('wrapper-btn-cat').style.display = 'block';
+                document.getElementById('btn-next-2').disabled = true;
+            } else if (tipo === 'huc') {
+                varDisponibles += tutHucha.guardado; varRetenidos -= tutHucha.guardado; tutHucha = null;
+                document.getElementById('preview-hucha').innerHTML = '';
+                document.getElementById('wrapper-btn-huc').style.display = 'block';
+                document.getElementById('btn-skip-3').style.display = 'block'; document.getElementById('btn-next-3').style.display = 'none';
+            } else {
+                varDisponibles += tutFondo.guardado; varRetenidos -= tutFondo.guardado; tutFondo = null;
+                document.getElementById('preview-fondo').innerHTML = '';
+                document.getElementById('wrapper-btn-fon').style.display = 'block';
+                document.getElementById('btn-skip-4').style.display = 'block'; document.getElementById('btn-next-4').style.display = 'none';
+            }
+            actualizarUI();
+        };
+
+        window.editarItem = function(tipo) {
+            let it = tipo==='cat' ? tutCategoria : (tipo==='huc' ? tutHucha : tutFondo);
+            let modalId = tipo==='cat' ? 'modal-categoria' : (tipo==='huc' ? 'modal-hucha' : 'modal-fondo');
+            
+            document.getElementById(`${tipo}-nombre`).value = it.nombre;
+            if (tipo==='cat') document.getElementById('cat-presupuesto').value = it.presupuestoMaximo;
+            else {
+                document.getElementById(`${tipo}-objetivo`).value = it.objetivo;
+                document.getElementById(`${tipo}-aporte`).value = it.guardado;
+                if(it.fecha) document.getElementById(`${tipo}-fecha`).value = it.fecha;
+            }
+            abrirModal(modalId);
+        };
+
+        // RESUMEN Y FINALIZAR
         function renderizarResumen() {
             const div = document.getElementById('resumen-final-lista');
-            let html = "";
-            tempCategorias.forEach(c => html += `<div style="font-size:13px;">- 👛 Categoría: ${c.nombre} (${c.presupuestoMaximo}€)</div>`);
-            tempHuchas.forEach(h => html += `<div style="font-size:13px;">- 🐷 Hucha: ${h.nombre} (${h.guardado}€)</div>`);
-            tempFondos.forEach(f => html += `<div style="font-size:13px;">- 🏛️ Reserva: ${f.nombre} (${f.guardado}€)</div>`);
-            div.innerHTML = html;
+            div.innerHTML = "";
+            if(tutCategoria) div.innerHTML += crearHTMLTarjeta(tutCategoria, 'cat').split('<div class="action-buttons">')[0];
+            if(tutHucha) div.innerHTML += crearHTMLTarjeta(tutHucha, 'huc').split('<div class="action-buttons">')[0];
+            if(tutFondo) div.innerHTML += crearHTMLTarjeta(tutFondo, 'fon').split('<div class="action-buttons">')[0];
         }
 
         window.finalizarTutorial = async function() {
             const btn = document.getElementById('btn-finalizar');
-            btn.disabled = true;
-            btn.textContent = 'CONFIGURANDO TU CUENTA...';
+            btn.disabled = true; btn.textContent = 'CONFIGURANDO...';
             
             const eliminarTodo = document.getElementById('check-eliminar-tutorial').checked;
 
             try {
-                // 1. Si decide eliminar, reiniciamos las variables retenidas
-                let finalesDisponibles = varDisponibles;
-                let finalesRetenidos = varRetenidos;
+                let finDisponibles = eliminarTodo ? varTotales : varDisponibles;
+                let finRetenidos = eliminarTodo ? 0 : varRetenidos;
                 
-                if (eliminarTodo) {
-                    finalesDisponibles = varTotales;
-                    finalesRetenidos = 0;
-                }
-
-                // 2. Actualizar documento de usuario
-                const userRef = doc(db, "usuarios", uidActual);
-                await updateDoc(userRef, {
-                    tutorialCompletado: 1,
-                    diaInicioMes: varInicioMes,
-                    fondosTotales: varTotales,
-                    fondosDisponibles: finalesDisponibles,
-                    fondosRetenidos: finalesRetenidos
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    tutorialCompletado: 1, diaInicioMes: varInicioMes,
+                    fondosTotales: varTotales, fondosDisponibles: finDisponibles, fondosRetenidos: finRetenidos
                 });
 
-                // 3. Registrar el movimiento inicial
                 await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
-                    tipo: "ingreso",
-                    concepto: "Fondos iniciales",
-                    importe: varTotales,
-                    fecha: new Date().toISOString()
+                    tipo: "ingreso", concepto: "Fondos iniciales", importe: varTotales, fecha: new Date().toISOString()
                 });
 
-                // 4. Guardar colecciones si NO marcó eliminar
                 if (!eliminarTodo) {
-                    // Guardar Categorías
-                    for (const cat of tempCategorias) {
-                        await addDoc(collection(db, "usuarios", uidActual, "categorias"), cat);
-                    }
-                    // Guardar Huchas
-                    for (const huc of tempHuchas) {
-                        await addDoc(collection(db, "usuarios", uidActual, "huchas"), huc);
-                    }
-                    // Guardar Fondos
-                    for (const fon of tempFondos) {
-                        await addDoc(collection(db, "usuarios", uidActual, "fondos_reservados"), fon);
-                    }
+                    if (tutCategoria) await addDoc(collection(db, "usuarios", uidActual, "categorias"), tutCategoria);
+                    if (tutHucha) await addDoc(collection(db, "usuarios", uidActual, "huchas"), tutHucha);
+                    if (tutFondo) await addDoc(collection(db, "usuarios", uidActual, "fondos_reservados"), tutFondo);
                 }
-
-                // Redirigir al dashboard oficial
                 window.location.href = 'dashboard.html';
-
             } catch (error) {
-                console.error("Error guardando datos:", error);
-                alert("Hubo un error al guardar tu configuración. Inténtalo de nuevo.");
-                btn.disabled = false;
-                btn.textContent = 'FINALIZAR TUTORIAL';
+                console.error(error); alert("Error guardando datos.");
+                btn.disabled = false; btn.textContent = 'FINALIZAR TUTORIAL';
             }
         };
     </script>
