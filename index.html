@@ -136,8 +136,10 @@
 
     <!-- PANTALLA DE CARGA (Splash Screen) -->
     <div id="splash-screen">
-        <div class="logo-container">
-            <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+        <!-- Añadimos id="splash-logo" y opacity: 0 por defecto -->
+        <div class="logo-container" id="splash-logo" style="opacity: 0; transition: opacity 0.2s ease;">
+            <!-- Añadimos el evento onload para que muestre todo a la vez -->
+            <img src="logo.png" alt="Logo" class="logo-img" onload="document.getElementById('splash-logo').style.opacity = '1'" onerror="this.style.display='none'">
             <div>
                 <span style="color: #000000;">Budget</span><span style="color: var(--color-disponibles);">Flow</span>
             </div>
