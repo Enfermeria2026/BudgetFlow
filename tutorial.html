@@ -68,13 +68,14 @@
         input { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; }
         input:focus { border-color: var(--color-disponibles); }
 
-        /* BOTONERA INFERIOR FIJA */
+       /* BOTONERA INFERIOR FIJA */
         .bottom-bar {
             position: fixed; bottom: 0; width: 100%; max-width: 500px; background-color: var(--card-bg);
-            padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
+            padding: 15px; box-sizing: border-box; display: flex; justify-content: space-between; gap: 10px;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 100;
         }
-        button { padding: 15px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
+        button { padding: 15px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
+        .btn-back { background-color: transparent; border: none; font-size: 24px; padding: 0 15px; cursor: pointer; color: var(--text-main); flex: none; display: flex; align-items: center; justify-content: center; }
         .btn-primary { background-color: var(--text-main); color: white; }
         .btn-primary:disabled { background-color: #BDC3C7; cursor: not-allowed; }
         .btn-secondary { background-color: var(--color-disponibles); color: white; margin-top: 15px; width: 100%; }
@@ -178,7 +179,7 @@
             <div id="preview-categoria"></div>
         </div>
        <div class="bottom-bar">
-            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(1)">←</button>
+            <button class="btn-back" onclick="irAtras(X)">←</button>
             <button class="btn-primary" id="btn-next-2" disabled onclick="siguientePaso(3)">SIGUIENTE</button>
         </div>
     </div>
@@ -196,7 +197,7 @@
             <div id="preview-hucha"></div>
         </div>
         <div class="bottom-bar">
-            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(2)">←</button>
+           <button class="btn-back" onclick="irAtras(X)">←</button>
             <button class="btn-skip" id="btn-skip-3" onclick="siguientePaso(4)">Saltar y continuar</button>
             <button class="btn-primary" id="btn-next-3" style="display:none;" onclick="siguientePaso(4)">SIGUIENTE</button>
         </div>
@@ -215,7 +216,7 @@
             <div id="preview-fondo"></div>
         </div>
         <div class="bottom-bar">
-            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(3)">←</button>
+            <button class="btn-back" onclick="irAtras(X)">←</button>
             <button class="btn-skip" id="btn-skip-4" onclick="siguientePaso(5)">Saltar y continuar</button>
             <button class="btn-primary" id="btn-next-4" style="display:none;" onclick="siguientePaso(5)">SIGUIENTE</button>
         </div>
@@ -242,7 +243,7 @@
             </div>
         </div>
         <div class="bottom-bar">
-            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(4)">←</button>
+           <button class="btn-back" onclick="irAtras(X)">←</button>
             <button class="btn-primary" id="btn-finalizar" onclick="finalizarTutorial()">FINALIZAR TUTORIAL</button>
         </div>
     </div>
@@ -574,10 +575,24 @@
             const nombre = document.getElementById(`${tipo}-nombre`).value.trim();
             const obj = parseFloat(document.getElementById(`${tipo}-objetivo`).value) || 0;
             const aporte = parseFloat(document.getElementById(`${tipo}-aporte`).value) || 0;
-            const fecha = document.getElementById(`${tipo}-fecha`).value;
+            const fechaInput = document.getElementById(`${tipo}-fecha`).value;
             const errDiv = document.getElementById(`err-${tipo}`);
 
             if (!nombre) { errDiv.textContent = "El título es obligatorio."; errDiv.style.display='block'; return; }
+            
+            if (fechaInput) {
+                const hoy = new Date();
+                hoy.setHours(0,0,0,0);
+                const partes = fechaInput.split('-');
+                const fechaElegida = new Date(partes[0], partes[1] - 1, partes[2]);
+                
+                if (fechaElegida <= hoy) {
+                    errDiv.textContent = "La fecha prevista debe ser estrictamente posterior al día de hoy."; 
+                    errDiv.style.display = 'block'; 
+                    return; 
+                }
+            }
+            const fecha = fechaInput;
             
             let itemAntiguo = tipo === 'huc' ? tutHucha : tutFondo;
             if (itemAntiguo) { varDisponibles += itemAntiguo.guardado; varRetenidos -= itemAntiguo.guardado; }
