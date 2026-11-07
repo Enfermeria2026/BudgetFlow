@@ -183,7 +183,7 @@
 
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons-row">
-            <button class="btn-action btn-ingreso">Añadir ingreso</button>
+           <button class="btn-action btn-ingreso" onclick="abrirModal('modal-ingreso')">Añadir ingreso</button>
             <button class="btn-action btn-finalizar">Finalizar mes</button>
         </div>
 
@@ -259,12 +259,45 @@
         </div>
     </div>
 
+    <!-- MODAL AÑADIR INGRESO -->
+    <div class="modal-overlay" id="modal-ingreso">
+        <div class="modal-content" style="text-align: left;">
+            <h3 class="modal-title" style="color: var(--color-disponibles); text-align: center;">Añadir Ingreso</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Importe <span style="color:var(--color-retenidos)">*</span></label>
+                <input type="number" id="ing-importe" placeholder="0.00" min="0.01" step="0.01" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Tipo de ingreso <span style="color:var(--color-retenidos)">*</span></label>
+                <select id="ing-tipo" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; background-color: #fff;">
+                    <option value="">Selecciona una opción...</option>
+                    <option value="Nómina de trabajo">Nómina de trabajo</option>
+                    <option value="Ingreso puntual">Ingreso puntual</option>
+                    <option value="Ingreso autónomo">Ingreso autónomo</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Concepto <span style="color:var(--color-retenidos)">*</span></label>
+                <input type="text" id="ing-concepto" placeholder="Ej: Sueldo Noviembre" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
+            </div>
+            
+            <p id="err-ingreso" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align: center; margin-top: 10px;"></p>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-finalizar" style="flex:1; border-radius:8px; padding:15px; cursor:pointer;" onclick="cerrarModal('modal-ingreso')">Cancelar</button>
+                <button class="btn-ingreso" style="flex:1; border-radius:8px; padding:15px; cursor:pointer; font-weight:bold;" id="btn-guardar-ingreso" onclick="guardarIngreso()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
-
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
         const firebaseConfig = {
             apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
             authDomain: "budgetflow-a1f80.firebaseapp.com",
@@ -300,9 +333,76 @@
             signOut(auth).then(() => { window.location.href = 'index.html'; });
         };
 
-        // MODALES INFO
+       // MODALES GENERALES E INFO
         window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; };
         window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; };
+        
+        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; };
+        window.cerrarModal = function(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            if(document.getElementById('err-ingreso')) document.getElementById('err-ingreso').style.display = 'none';
+        };
+
+        // LÓGICA AÑADIR INGRESO
+        window.guardarIngreso = async function() {
+            const btn = document.getElementById('btn-guardar-ingreso');
+            const importe = parseFloat(document.getElementById('ing-importe').value);
+            const tipo = document.getElementById('ing-tipo').value;
+            const concepto = document.getElementById('ing-concepto').value.trim();
+            const errDiv = document.getElementById('err-ingreso');
+
+            if (isNaN(importe) || importe <= 0 || !tipo || !concepto) {
+                errDiv.textContent = "Por favor, rellena todos los campos obligatorios.";
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "GUARDANDO...";
+            errDiv.style.display = 'none';
+
+            try {
+                // 1. Añadir a historial de movimientos en Firestore
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
+                    tipo: "ingreso",
+                    subtipo: tipo,
+                    concepto: concepto,
+                    importe: importe,
+                    fecha: new Date().toISOString()
+                });
+
+                // 2. Actualizar las cifras del usuario
+                const userRef = doc(db, "usuarios", uidActual);
+                const userDoc = await getDoc(userRef);
+                const data = userDoc.data();
+                
+                const nuevosTotales = (data.fondosTotales || 0) + importe;
+                const nuevosDisponibles = (data.fondosDisponibles || 0) + importe;
+
+                await updateDoc(userRef, {
+                    fondosTotales: nuevosTotales,
+                    fondosDisponibles: nuevosDisponibles
+                });
+
+                // 3. Actualizar los números de la pantalla visualmente sin recargar
+                document.getElementById('ui-totales').textContent = nuevosTotales.toFixed(2) + " €";
+                document.getElementById('ui-disponibles').textContent = nuevosDisponibles.toFixed(2) + " €";
+
+                // 4. Limpiar formulario y cerrar
+                document.getElementById('ing-importe').value = "";
+                document.getElementById('ing-tipo').value = "";
+                document.getElementById('ing-concepto').value = "";
+                cerrarModal('modal-ingreso');
+                
+            } catch (error) {
+                console.error("Error:", error);
+                errDiv.textContent = "Hubo un error al guardar el ingreso.";
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "GUARDAR";
+            }
+        };
 
         // LÓGICA PRINCIPAL DE DATOS
         let uidActual = null;
