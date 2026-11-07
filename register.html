@@ -38,10 +38,11 @@
 
         /* Contenedor relativo para el ojo de la contraseña */
         .password-container { position: relative; display: flex; align-items: center; }
-        .password-container input { padding-right: 45px; } /* Espacio para el icono */
+        .password-container input { padding-right: 45px; } 
         .toggle-password {
-            position: absolute; right: 15px; cursor: pointer; font-size: 18px; user-select: none;
+            position: absolute; right: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
+        .eye-icon { width: 20px; height: 20px; stroke: #000000; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
         input, select { 
             width: 100%; padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; 
@@ -115,7 +116,12 @@
                 <label class="input-label" for="reg-password">Contraseña <span class="asterisco">*</span></label>
                 <div class="password-container">
                     <input type="password" id="reg-password" placeholder="Crea una contraseña" required>
-                    <span class="toggle-password" onclick="togglePassword('reg-password', this)">👁️</span>
+                    <span class="toggle-password" onclick="togglePassword('reg-password', this)">
+                        <!-- Ojo abierto -->
+                        <svg class="eye-icon eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <!-- Ojo tachado (oculto por defecto) -->
+                        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    </span>
                 </div>
             </div>
             
@@ -123,7 +129,12 @@
                 <label class="input-label" for="reg-password-rep">Repetir contraseña <span class="asterisco">*</span></label>
                 <div class="password-container">
                     <input type="password" id="reg-password-rep" placeholder="Repite la contraseña" required>
-                    <span class="toggle-password" onclick="togglePassword('reg-password-rep', this)">👁️</span>
+                    <span class="toggle-password" onclick="togglePassword('reg-password-rep', this)">
+                        <!-- Ojo abierto -->
+                        <svg class="eye-icon eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <!-- Ojo tachado (oculto por defecto) -->
+                        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    </span>
                 </div>
             </div>
             
@@ -178,7 +189,6 @@
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
-        // Conexión a Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
             authDomain: "budgetflow-a1f80.firebaseapp.com",
@@ -192,15 +202,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Funcionalidad Ojo Contraseña (disponible globalmente)
-        window.togglePassword = function(inputId, iconElement) {
+        // Funcionalidad Ojo Contraseña con SVG
+        window.togglePassword = function(inputId, spanElement) {
             const input = document.getElementById(inputId);
+            const eyeOpen = spanElement.querySelector('.eye-open');
+            const eyeClosed = spanElement.querySelector('.eye-closed');
+            
             if (input.type === 'password') {
                 input.type = 'text';
-                iconElement.textContent = '🙈';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
             } else {
                 input.type = 'password';
-                iconElement.textContent = '👁️';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
             }
         };
 
@@ -256,7 +271,7 @@
         const msgError = document.getElementById('mensaje-error');
 
         formRegistro.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página se recargue
+            e.preventDefault(); 
             msgError.style.display = 'none';
 
             const nombre = document.getElementById('reg-nombre').value.trim();
@@ -267,14 +282,12 @@
             const pass = document.getElementById('reg-password').value;
             const passRep = document.getElementById('reg-password-rep').value;
 
-            // 1. Comprobar que las contraseñas coinciden
             if (pass !== passRep) {
                 msgError.textContent = 'Las contraseñas no coinciden. Por favor, revísalas.';
                 msgError.style.display = 'block';
                 return;
             }
 
-            // 2. Comprobar campos de doble verificación si está activada
             let tipo2FA = null;
             let valor2FA = null;
             let preguntaSeleccionada = null;
@@ -306,12 +319,10 @@
                 }
             }
 
-            // Bloquear botón mientras procesa
             btnRegistrar.disabled = true;
             btnRegistrar.textContent = 'CREANDO CUENTA...';
 
             try {
-                // 3. Comprobar si el nombre de usuario ya existe en Firestore
                 const usernameRef = doc(db, 'nombres_usuario', usuario.toLowerCase());
                 const usernameDoc = await getDoc(usernameRef);
                 
@@ -319,36 +330,31 @@
                     throw new Error("El nombre de usuario ya está en uso. Por favor, elige otro.");
                 }
 
-                // 4. Crear el usuario en Firebase Authentication con su correo
                 const userCredential = await createUserWithEmailAndPassword(auth, correo, pass);
                 const uid = userCredential.user.uid;
 
-                // 5. Guardar el nombre de usuario para que nadie más lo coja
                 await setDoc(usernameRef, { uid: uid });
 
-                // 6. Guardar todos los datos en la ficha del usuario
                 await setDoc(doc(db, 'usuarios', uid), {
                     nombre: nombre,
                     apellidos: apellidos,
                     fechaNacimiento: fecha || null,
                     correo: correo,
                     usuario: usuario,
-                    tutorialCompletado: 0, // Listo para el tutorial inicial
+                    tutorialCompletado: 0, 
                     dobleVerificacion: {
                         activa: checkDobleVerif.checked,
                         tipo: tipo2FA,
                         pregunta: preguntaSeleccionada,
-                        respuesta: valor2FA // El PIN o la respuesta a la pregunta
+                        respuesta: valor2FA 
                     }
                 });
 
-                // Éxito: Mostrar mensaje y redirigir al login
                 alert('¡Cuenta creada correctamente! Ahora puedes iniciar sesión.');
                 window.location.href = 'index.html';
 
             } catch (error) {
                 console.error(error);
-                // Manejar errores comunes de Firebase
                 if (error.code === 'auth/email-already-in-use') {
                     msgError.textContent = 'Este correo electrónico ya está registrado.';
                 } else if (error.code === 'auth/weak-password') {
