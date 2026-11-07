@@ -27,11 +27,10 @@
             gap: 10px;
             font-size: 32px;
             font-weight: bold;
-            color: var(--text-main);
         }
-        .logo-icon {
-            color: var(--color-disponibles);
-            font-size: 40px;
+        .logo-img {
+            width: 45px; /* Ajusta este tamaño según necesites */
+            height: auto;
         }
 
         /* Pantalla de Carga */
@@ -58,7 +57,7 @@
 
         /* Pantalla de Inicio de Sesión */
         #login-screen {
-            display: none; /* Oculto inicialmente */
+            display: none;
             flex-direction: column;
             align-items: center;
             width: 100%;
@@ -74,9 +73,18 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             margin-top: 30px;
         }
+        
+        /* Formulario con mayor separación */
+        #form-login {
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Mayor espacio entre campos */
+            width: 100%;
+        }
+
         input {
             width: 100%;
             padding: 15px;
@@ -98,7 +106,7 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         .btn-registro {
             width: 100%;
@@ -113,7 +121,7 @@
         }
         .enlaces-footer {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         .enlaces-footer a {
             color: var(--text-main);
@@ -128,7 +136,10 @@
     <!-- PANTALLA DE CARGA (Splash Screen) -->
     <div id="splash-screen">
         <div class="logo-container">
-            <span class="logo-icon">🔀</span> BudgetFlow
+            <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+            <div>
+                <span style="color: #000000;">Budget</span><span style="color: var(--color-disponibles);">Flow</span>
+            </div>
         </div>
         <div class="spinner"></div>
     </div>
@@ -136,7 +147,10 @@
     <!-- PANTALLA DE INICIO DE SESIÓN -->
     <div id="login-screen">
         <div class="logo-container">
-            <span class="logo-icon">🔀</span> BudgetFlow
+            <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+            <div>
+                <span style="color: #000000;">Budget</span><span style="color: var(--color-disponibles);">Flow</span>
+            </div>
         </div>
         
         <div class="login-card">
@@ -159,7 +173,6 @@
         import { getFirestore } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
         import { getDatabase } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
-        // Tus claves exactas de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0",
             authDomain: "budgetflow-a1f80.firebaseapp.com",
@@ -170,13 +183,11 @@
             measurementId: "G-L7TQ65BLBH"
         };
 
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const rtdb = getDatabase(app);
 
-        // Lógica de la Pantalla de Carga
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -186,8 +197,8 @@
                 setTimeout(() => {
                     splash.style.display = 'none';
                     login.style.display = 'flex';
-                }, 500); // Espera a que termine la transición de opacidad
-            }, 2000); // 2 segundos de pantalla de carga
+                }, 500); 
+            }, 2000); 
         });
     </script>
 </body>
