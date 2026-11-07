@@ -177,7 +177,8 @@
             </div>
             <div id="preview-categoria"></div>
         </div>
-        <div class="bottom-bar">
+       <div class="bottom-bar">
+            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(1)">←</button>
             <button class="btn-primary" id="btn-next-2" disabled onclick="siguientePaso(3)">SIGUIENTE</button>
         </div>
     </div>
@@ -195,6 +196,7 @@
             <div id="preview-hucha"></div>
         </div>
         <div class="bottom-bar">
+            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(2)">←</button>
             <button class="btn-skip" id="btn-skip-3" onclick="siguientePaso(4)">Saltar y continuar</button>
             <button class="btn-primary" id="btn-next-3" style="display:none;" onclick="siguientePaso(4)">SIGUIENTE</button>
         </div>
@@ -213,6 +215,7 @@
             <div id="preview-fondo"></div>
         </div>
         <div class="bottom-bar">
+            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(3)">←</button>
             <button class="btn-skip" id="btn-skip-4" onclick="siguientePaso(5)">Saltar y continuar</button>
             <button class="btn-primary" id="btn-next-4" style="display:none;" onclick="siguientePaso(5)">SIGUIENTE</button>
         </div>
@@ -239,6 +242,7 @@
             </div>
         </div>
         <div class="bottom-bar">
+            <button class="btn-skip" style="flex: none; width: 60px; padding: 15px 0; font-size: 20px;" onclick="irAtras(4)">←</button>
             <button class="btn-primary" id="btn-finalizar" onclick="finalizarTutorial()">FINALIZAR TUTORIAL</button>
         </div>
     </div>
@@ -422,6 +426,17 @@
             uiRetenidos.textContent = varRetenidos.toFixed(2) + " €";
         }
 
+        window.irAtras = function(paso) {
+            document.querySelectorAll('.tutorial-screen').forEach(scr => scr.classList.remove('active'));
+            document.getElementById('screen-' + paso).classList.add('active');
+            document.querySelectorAll('.progress-step').forEach(dot => {
+                const num = parseInt(dot.textContent);
+                dot.classList.remove('active', 'completed');
+                if (num < paso) dot.classList.add('completed');
+                if (num === paso) dot.classList.add('active');
+            });
+        };
+        
         window.siguientePaso = function(paso) {
             if (paso === 2) {
                 const inputTotales = parseFloat(document.getElementById('t-fondos-totales').value);
