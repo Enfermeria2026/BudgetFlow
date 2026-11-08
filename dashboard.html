@@ -509,8 +509,16 @@
         });
 
         async function cargarDatosDashboard() {
-            // 1. Cargar Variables Principales
-            const userDoc = await getDoc(doc(db, "usuarios", uidActual));
+            // 1. Cargar Variables Principales PRIMERO para dar respuesta visual instantánea
+            const userDocPromise = getDoc(doc(db, "usuarios", uidActual));
+            
+            // Lanzar las colecciones en paralelo sin esperar
+            const categoriasPromise = fetchColeccion("categorias");
+            const huchasPromise = fetchColeccion("huchas");
+            const fondosPromise = fetchColeccion("fondos_reservados");
+
+            // Renderizar saldos en cuanto el usuario llega
+            const userDoc = await userDocPromise;
             if (userDoc.exists()) {
                 const data = userDoc.data();
                 document.getElementById('ui-totales').textContent = (data.fondosTotales || 0).toFixed(2) + " €";
@@ -518,10 +526,8 @@
                 document.getElementById('ui-retenidos').textContent = (data.fondosRetenidos || 0).toFixed(2) + " €";
             }
 
-            // 2. Cargar Colecciones (Categorías, Huchas, Fondos)
-            const categorias = await fetchColeccion("categorias");
-            const huchas = await fetchColeccion("huchas");
-            const fondos = await fetchColeccion("fondos_reservados");
+            // 2. Esperar al resto de colecciones simultáneamente
+            const [categorias, huchas, fondos] = await Promise.all([categoriasPromise, huchasPromise, fondosPromise]);
 
             // 3. Renderizar Grids
             renderizarGrid("grid-categorias", categorias, "cat", "presupuestos.html", "Ver todas las<br>categorías");
