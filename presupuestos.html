@@ -223,14 +223,17 @@
             <div class="totals-mini-card" id="ui-resumen-gastos">Total: 0.00€ / 0.00€</div>
             <div style="position: relative; display: inline-block;">
     <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
-    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 240px; overflow: hidden;">
+    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
         <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
+        <div onclick="ordenarCategorias('excedidas')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4; color: var(--color-retenidos); font-weight: bold;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Categorías excedidas</div>
+        <div onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
+        <div onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
         <div onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
         <div onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
-        <div onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg> Mayor gasto real</div>
-        <div onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#'" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg> Menor gasto real</div>
-        <div onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor presupuesto</div>
-        <div onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor presupuesto</div>
+        <div onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
+        <div onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
+        <div onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
+        <div onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
     </div>
 </div>
 </div>
@@ -536,7 +539,7 @@
             renderizarCategorias();
         };
 
-        // RENDERIZAR TARJETAS (Con lógica de ordenación numérica y alfabética corregida)
+        // RENDERIZAR TARJETAS (Con filtros de porcentajes y excedidas)
         function renderizarCategorias() {
             const container = document.getElementById('contenedor-categorias');
             container.innerHTML = "";
@@ -548,28 +551,42 @@
                 return; 
             }
             
-            // APLICAR ORDENACIÓN ESTRICTA
+            // APLICAR ORDENACIÓN SEGÚN CRITERIO
             colCategorias.sort((a, b) => {
-                if (criterioOrdenActual === 'az') {
+                let gastA = Number(a.gastado) || 0;
+                let maxA = Number(a.presupuestoMaximo) || 0;
+                let gastB = Number(b.gastado) || 0;
+                let maxB = Number(b.presupuestoMaximo) || 0;
+
+                let pctA = maxA > 0 ? (gastA / maxA) : 0;
+                let pctB = maxB > 0 ? (gastB / maxB) : 0;
+
+                let excesoA = gastA - maxA; // Positivo si está excedido
+                let excesoB = gastB - maxB;
+
+                if (criterioOrdenActual === 'excedidas') {
+                    // Prioridad absoluta: las que tengan mayor exceso van arriba del todo
+                    if (excesoA > 0 && excesoB > 0) return excesoB - excesoA; // Mayor exceso primero
+                    if (excesoA > 0) return -1; // A excedida sube
+                    if (excesoB > 0) return 1;  // B excedida sube
+                    // Si ninguna está excedida, ordenamos por porcentaje normal de mayor a menor
+                    return pctB - pctA;
+                } else if (criterioOrdenActual === 'pct-mayor') {
+                    return pctB - pctA; // De mayor a menor porcentaje
+                } else if (criterioOrdenActual === 'pct-menor') {
+                    return pctA - pctB; // De menor a mayor porcentaje
+                } else if (criterioOrdenActual === 'az') {
                     return a.nombre.localeCompare(b.nombre);
                 } else if (criterioOrdenActual === 'za') {
                     return b.nombre.localeCompare(a.nombre);
                 } else if (criterioOrdenActual === 'mayor-gasto') {
-                    let gastA = Number(a.gastado) || 0;
-                    let gastB = Number(b.gastado) || 0;
-                    return gastB - gastA; // De mayor a menor gasto
+                    return gastB - gastA;
                 } else if (criterioOrdenActual === 'menor-gasto') {
-                    let gastA = Number(a.gastado) || 0;
-                    let gastB = Number(b.gastado) || 0;
-                    return gastA - gastB; // De menor a mayor gasto
+                    return gastA - gastB;
                 } else if (criterioOrdenActual === 'mayor-presupuesto') {
-                    let presA = Number(a.presupuestoMaximo) || 0;
-                    let presB = Number(b.presupuestoMaximo) || 0;
-                    return presB - presA; // De mayor a menor presupuesto
+                    return maxB - maxA;
                 } else if (criterioOrdenActual === 'menor-presupuesto') {
-                    let presA = Number(a.presupuestoMaximo) || 0;
-                    let presB = Number(b.presupuestoMaximo) || 0;
-                    return presA - presB; // De menor a mayor presupuesto
+                    return maxA - maxB;
                 }
                 return 0;
             });
