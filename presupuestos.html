@@ -1116,23 +1116,35 @@
             if (btn) { btn.disabled = true; btn.textContent = "ELIMINANDO..."; }
 
             try {
-                let sumaPresupuestosMaximosBorrados = 0;
+                // 1. Calcular el remanente real no gastado (Presupuesto Máximo - Gastado) de las categorías que se borran
+                let sumaRemanentesBorrados = 0;
+
                 idsCategoriasABorrar.forEach(id => {
                     const cat = colCategorias.find(c => c.id === id);
                     if (cat) {
-                        sumaPresupuestosMaximosBorrados += (cat.presupuestoMaximo || 0);
+                        let maxC = Number(cat.presupuestoMaximo) || 0;
+                        let gastC = Number(cat.gastado) || 0;
+                        sumaRemanentesBorrados += Math.max(0, maxC - gastC); // Lo que quedaba retenido (no gastado)
                     }
                 });
 
-                let nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) - sumaPresupuestosMaximosBorrados;
-                let nuevosDisponibles = (datosUsuario.fondosDisponibles || 0) + sumaPresupuestosMaximosBorrados;
+                // 2. Aplicar la contabilidad exacta acordada:
+                // - Los retenidos bajan en el remanente que quedaba por gastar.
+                // - Los disponibles suman ese mismo remanente (vuelve a estar libre).
+                // - Si se borra sin reubicación (o mandándolo a imprevisto si no se especificó otra cosa, aunque aquí imprevisto suele ser para el gasto consumido), 
+                //   los fondos libres vuelven a los disponibles de forma limpia.
+                let nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) - sumaRemanentesBorrados;
+                let nuevosDisponibles = (datosUsuario.fondosDisponibles || 0) + sumaRemanentesBorrados;
+                let nuevosTotales = (datosUsuario.fondosTotales || 0);
 
                 let acumuladoresGastosDestino = {};
                 reubicaciones.forEach(r => {
                     if (r.idDestino === 'imprevisto') {
-                        nuevosDisponibles -= r.importe;
+                        // Si se opta por convertir el gasto en imprevisto definitivo al borrar, 
+                        // ese dinero ya consumido descuenta de Totales reales del banco.
+                        nuevosTotales -= r.importe;
                     } else {
-                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastosDestino[r.idDestino] || 0) + r.importe;
+                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastos[r.idDestino] || 0) + r.importe;
                     }
                 });
 
@@ -1141,7 +1153,7 @@
                     await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
                 }
 
-                // Procesar reubicaciones
+                // Procesar reubicaciones si van a otra categoría
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
@@ -1168,8 +1180,9 @@
                     }
                 }
 
-                // Actualizar saldos finales del usuario en Firestore
+                // Actualizar saldos definitivos en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosTotales: nuevosTotales,
                     fondosRetenidos: Math.max(0, nuevosRetenidos),
                     fondosDisponibles: nuevosDisponibles
                 });
