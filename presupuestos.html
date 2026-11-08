@@ -380,7 +380,7 @@
     </div>
 
 
-    <!-- MODAL ELIMINAR CATEGORÍA (Con Opciones de Radio Buttons y Control de Disponibles) -->
+    <!-- MODAL ELIMINAR CATEGORÍA (Con Opciones, Información Detallada y Doble Verificación) -->
     <div class="modal-overlay" id="modal-delete-cat">
         <div class="modal-content">
             <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría(s)</h3>
@@ -395,7 +395,7 @@
                     Suman un total de <span id="del-gastado-val"></span>€ gastados.<br>¿Cómo deseas reubicar este gasto?
                 </div>
                 
-                <!-- 3 OPCIONES CON RADIO BUTTONS (Círculos) -->
+                <!-- 3 OPCIONES CON RADIO BUTTONS -->
                 <div style="display:flex; flex-direction:column; gap:10px; margin-top:5px;">
                     <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:normal;">
                         <input type="radio" name="destino-borrado" value="imprevisto" checked onchange="cambiarOpcionDestino()"> 
@@ -417,13 +417,13 @@
                     <input type="text" id="del-concepto-imprevisto" placeholder="Ej: Gastos reubicados">
                 </div>
 
-                <!-- OPCIÓN 2: OTRA CATEGORÍA -->
+                <!-- OPCIÓN 2: OTRA CATEGORÍA (Con info detallada) -->
                 <div id="bloque-opc-categoria" class="field-wrapper" style="display:none;">
                     <label>Selecciona la categoría destino <span style="color:var(--color-retenidos)">*</span></label>
                     <select id="del-categoria-destino" style="background:#fff;"></select>
                 </div>
 
-                <!-- OPCIÓN 3: REPARTIR -->
+                <!-- OPCIÓN 3: REPARTIR (Con info detallada en cada una) -->
                 <div id="bloque-opc-repartir" style="display:none; flex-direction:column; gap:12px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
                     <div style="font-size:13px; font-weight:bold; color:var(--text-main);">1. Parte para Gasto Imprevisto:</div>
                     <div style="display:flex; flex-direction:column; gap:6px;">
@@ -438,6 +438,13 @@
                         Faltan por asignar: 0.00€
                     </div>
                 </div>
+            </div>
+
+            <!-- MODAL INTERNO DE ADVERTENCIA DE EXCESOS (Doble Verificación) -->
+            <div id="aviso-excesos-box" style="display:none; background:#FDEDEC; border:1px solid var(--color-retenidos); border-radius:8px; padding:12px; color:#C0392B; font-size:13px;">
+                <b>¡Atención! Las siguientes categorías superarán su presupuesto máximo con este traspaso:</b>
+                <ul id="lista-excesos-aviso" style="margin: 5px 0 0 15px; padding:0;"></ul>
+                <div style="margin-top:10px; text-align:center; font-weight:bold;">¿Deseas continuar de todas formas?</div>
             </div>
 
             <p id="err-delete" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
