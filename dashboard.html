@@ -26,28 +26,32 @@
             --card-bg: #FFFFFF;
             --nav-bg: #FFFFFF;
         }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0; padding: 0; color: var(--text-main);
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
 
-        /* ZONA FIJA SUPERIOR (Panel financiero y Botones de acción) */
+        /* ZONA FIJA SUPERIOR */
         .fixed-top-section {
-            position: fixed; top: 60px; left: 0; width: 100%;
-            background-color: var(--bg-color); z-index: 50;
+            margin-top: 60px; flex-shrink: 0; background-color: var(--bg-color); z-index: 50;
             display: flex; flex-direction: column; align-items: center; gap: 15px;
-            padding: 15px 15px 10px 15px; box-sizing: border-box;
+            padding: 15px 15px 10px 15px; box-sizing: border-box; width: 100%;
         }
 
-        /* CONTENEDOR CON SCROLL (Para todas las tarjetas del centro) */
+        /* PANEL FINANCIERO IDÉNTICO */
+        .financial-panel {
+            background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
+        }
+
+        .action-buttons-row { width: 100%; max-width: 500px; display: flex; gap: 15px; box-sizing: border-box; }
+
+        /* CONTENEDOR CON SCROLL AUTOMÁTICO */
         .scrollable-cards-container {
-            width: 100%; max-width: 500px; 
-            position: absolute; top: 235px; bottom: 80px; 
-            left: 50%; transform: translateX(-50%);
-            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            flex-grow: 1; width: 100%; max-width: 500px; 
+            overflow-y: auto; padding: 0 15px 90px 15px; box-sizing: border-box; 
             display: flex; flex-direction: column; gap: 20px;
         }
         
@@ -232,10 +236,11 @@
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
 
-    <!-- ZONA FIJA SUPERIOR (Panel y Botones que no se mueven) -->
+
+    <!-- ZONA FIJA SUPERIOR -->
     <div class="fixed-top-section">
         
-        <!-- PANEL DE VARIABLES (CON MODALES) -->
+        <!-- PANEL DE VARIABLES (Clase unificada .financial-panel) -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
                 <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
