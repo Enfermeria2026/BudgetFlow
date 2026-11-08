@@ -379,8 +379,7 @@
         </div>
     </div>
 
-
-    <!-- MODAL ELIMINAR CATEGORÍA (Con Opciones, Información Detallada y Doble Verificación) -->
+<!-- MODAL ELIMINAR CATEGORÍA (Con Opciones, Detalles y Doble Verificación) -->
     <div class="modal-overlay" id="modal-delete-cat">
         <div class="modal-content">
             <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría(s)</h3>
@@ -417,13 +416,13 @@
                     <input type="text" id="del-concepto-imprevisto" placeholder="Ej: Gastos reubicados">
                 </div>
 
-                <!-- OPCIÓN 2: OTRA CATEGORÍA (Con info detallada) -->
+                <!-- OPCIÓN 2: OTRA CATEGORÍA -->
                 <div id="bloque-opc-categoria" class="field-wrapper" style="display:none;">
                     <label>Selecciona la categoría destino <span style="color:var(--color-retenidos)">*</span></label>
-                    <select id="del-categoria-destino" style="background:#fff;"></select>
+                    <select id="del-categoria-destino" style="background:#fff; padding:12px;"></select>
                 </div>
 
-                <!-- OPCIÓN 3: REPARTIR (Con info detallada en cada una) -->
+                <!-- OPCIÓN 3: REPARTIR -->
                 <div id="bloque-opc-repartir" style="display:none; flex-direction:column; gap:12px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
                     <div style="font-size:13px; font-weight:bold; color:var(--text-main);">1. Parte para Gasto Imprevisto:</div>
                     <div style="display:flex; flex-direction:column; gap:6px;">
@@ -432,7 +431,7 @@
                     </div>
 
                     <div style="font-size:13px; font-weight:bold; color:var(--text-main); margin-top:5px;">2. Parte para otras categorías:</div>
-                    <div id="repartir-lista-categorias" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    <div id="repartir-lista-categorias" style="display:flex; flex-direction:column; gap:10px;"></div>
                     
                     <div style="text-align:right; font-weight:bold; font-size:14px; margin-top:5px; padding-top:10px; border-top:1px dashed #ccc;" id="repartir-restante">
                         Faltan por asignar: 0.00€
@@ -440,7 +439,7 @@
                 </div>
             </div>
 
-            <!-- MODAL INTERNO DE ADVERTENCIA DE EXCESOS (Doble Verificación) -->
+            <!-- ADVERTENCIA DE EXCESOS (Doble Verificación) -->
             <div id="aviso-excesos-box" style="display:none; background:#FDEDEC; border:1px solid var(--color-retenidos); border-radius:8px; padding:12px; color:#C0392B; font-size:13px;">
                 <b>¡Atención! Las siguientes categorías superarán su presupuesto máximo con este traspaso:</b>
                 <ul id="lista-excesos-aviso" style="margin: 5px 0 0 15px; padding:0;"></ul>
@@ -454,7 +453,6 @@
             </div>
         </div>
     </div>
-
     
     <!-- SCRIPTS -->
     <script type="module">
@@ -848,6 +846,7 @@
         // VARIABLES PARA CONTROL DE SELECCIÓN MÚLTIPLE Y BORRADO
         let idsCategoriasABorrar = [];
         let sumaGastadoGlobalBorrar = 0;
+        let confirmandoExcesos = false;
 
         window.abrirModalBorrarCategoriasMulti = function() {
             const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
@@ -859,10 +858,14 @@
                 if (cat) sumaGastadoGlobalBorrar += (cat.gastado || 0);
             });
 
+            confirmandoExcesos = false;
+            const avisoBox = document.getElementById('aviso-excesos-box');
+            if (avisoBox) avisoBox.style.display = 'none';
+            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
+
             document.getElementById('modal-delete-cat').style.display = 'flex';
             document.getElementById('del-cat-name').textContent = `${idsCategoriasABorrar.length} categoría(s) seleccionada(s)`;
             
-            // Comprobar si tras borrar quedan más categorías
             const categoriasRestantes = colCategorias.filter(c => !idsCategoriasABorrar.includes(c.id));
             const hayRestantes = categoriasRestantes.length > 0;
 
@@ -872,16 +875,18 @@
             const labelDiv = document.getElementById('label-opt-div');
 
             if (!hayRestantes) {
-                radioCat.disabled = true; radioCat.checked = false;
-                radioDiv.disabled = true; radioDiv.checked = false;
-                labelCat.style.color = '#BDC3C7'; labelDiv.style.color = '#BDC3C7';
-                document.querySelector('input[name="destino-borrado"][value="imprevisto"]').checked = true;
+                if (radioCat) { radioCat.disabled = true; radioCat.checked = false; }
+                if (radioDiv) { radioDiv.disabled = true; radioDiv.checked = false; }
+                if (labelCat) labelCat.style.color = '#BDC3C7';
+                if (labelDiv) labelDiv.style.color = '#BDC3C7';
+                const radioImp = document.querySelector('input[name="destino-borrado"][value="imprevisto"]');
+                if (radioImp) radioImp.checked = true;
             } else {
-                radioCat.disabled = false; labelCat.style.color = 'var(--text-main)';
-                radioDiv.disabled = false; labelDiv.style.color = 'var(--text-main)';
+                if (radioCat) { radioCat.disabled = false; labelCat.style.color = 'var(--text-main)'; }
+                if (radioDiv) { radioDiv.disabled = false; labelDiv.style.color = 'var(--text-main)'; }
             }
 
-            if (sumaGastadoGlobalBorrar === 0) {
+            if (sumaGastadoGlobalBorrar === 0 && idsCategoriasABorrar.every(id => (colCategorias.find(c=>c.id===id).presupuestoMaximo || 0) === 0)) {
                 document.getElementById('del-no-gastos').style.display = 'block';
                 document.getElementById('del-con-gastos').style.display = 'none';
             } else {
@@ -891,14 +896,23 @@
 
                 if (hayRestantes) {
                     let selHTML = "";
-                    categoriasRestantes.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Máx: ${c.presupuestoMaximo.toFixed(2)}€)</option>`);
+                    categoriasRestantes.forEach(c => {
+                        let gastC = Number(c.gastado) || 0;
+                        let maxC = Number(c.presupuestoMaximo) || 0;
+                        selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€)</option>`;
+                    });
                     document.getElementById('del-categoria-destino').innerHTML = selHTML;
 
                     let divHTML = "";
                     categoriasRestantes.forEach(c => {
+                        let gastC = Number(c.gastado) || 0;
+                        let maxC = Number(c.presupuestoMaximo) || 0;
                         divHTML += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                            <span style="font-size:12px; font-weight:bold;">${c.icono} ${c.nombre}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; padding:8px; border:1px solid #e5e7e9; border-radius:6px;">
+                            <div style="font-size:12px; font-weight:bold; color:var(--text-main);">
+                                ${c.icono} ${c.nombre}<br>
+                                <span style="font-weight:normal; font-size:11px; color:#7F8C8D;">Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€</span>
+                            </div>
                             <input type="number" class="input-repartir-cat" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:8px; text-align:right;" oninput="calcularRestanteReparto()">
                         </div>`;
                     });
@@ -911,6 +925,11 @@
         };
 
         window.cambiarOpcionDestino = function() {
+            confirmandoExcesos = false;
+            const avisoBox = document.getElementById('aviso-excesos-box');
+            if (avisoBox) avisoBox.style.display = 'none';
+            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
+
             const opcion = document.querySelector('input[name="destino-borrado"]:checked').value;
             document.getElementById('bloque-opc-imprevisto').style.display = (opcion === 'imprevisto') ? 'flex' : 'none';
             document.getElementById('bloque-opc-categoria').style.display = (opcion === 'categoria') ? 'flex' : 'none';
@@ -919,6 +938,11 @@
         };
 
         window.calcularRestanteReparto = function() {
+            confirmandoExcesos = false;
+            const avisoBox = document.getElementById('aviso-excesos-box');
+            if (avisoBox) avisoBox.style.display = 'none';
+            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
+
             let suma = parseFloat(document.getElementById('repartir-imp-imprevisto').value) || 0;
             document.querySelectorAll('.input-repartir-cat').forEach(inp => {
                 suma += parseFloat(inp.value) || 0;
@@ -929,22 +953,6 @@
             restDiv.textContent = `Faltan por asignar: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
             restDiv.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
         };
-
-        function simularReubicacionMultiple(vars, importe, destinoId) {
-            if (destinoId === 'imprevisto') {
-                vars.totales -= importe; vars.disponibles -= importe;
-            } else {
-                vars.totales -= importe;
-                const catDestino = colCategorias.find(c => c.id === destinoId);
-                const rem = catDestino.presupuestoMaximo - (catDestino.gastado + (vars.gastosAcumulados[destinoId] || 0));
-                
-                if (rem >= importe) { vars.retenidos -= importe; }
-                else if (rem > 0) { vars.retenidos -= rem; vars.disponibles -= (importe - rem); }
-                else { vars.disponibles -= importe; }
-                
-                vars.gastosAcumulados[destinoId] = (vars.gastosAcumulados[destinoId] || 0) + importe;
-            }
-        }
 
         window.procesarEliminarMultiples = async function() {
             const btn = document.getElementById('btn-submit-delete');
@@ -987,35 +995,74 @@
                 }
             }
 
-            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
+            // --- FASE DE DOBLE VERIFICACIÓN DE EXCEDENTES ---
+            if (!confirmandoExcesos && reubicaciones.length > 0) {
+                let excesosDetectados = [];
+                let simuladorGastos = {};
 
-            try {
-                let totalPresupuestosEliminados = 0;
-                let totalGastadoEliminados = 0;
-
-                idsCategoriasABorrar.forEach(id => {
-                    const cat = colCategorias.find(c => c.id === id);
-                    if (cat) {
-                        totalPresupuestosEliminados += (cat.presupuestoMaximo || 0);
-                        totalGastadoEliminados += (cat.gastado || 0);
+                reubicaciones.forEach(r => {
+                    if (r.idDestino !== 'imprevisto') {
+                        const cat = colCategorias.find(c => c.id === r.idDestino);
+                        simuladorGastos[r.idDestino] = (simuladorGastos[r.idDestino] || 0) + r.importe;
+                        const totalPrevisto = (cat.gastado || 0) + simuladorGastos[r.idDestino];
+                        if (totalPrevisto > cat.presupuestoMaximo) {
+                            if (!excesosDetectados.some(e => e.id === cat.id)) {
+                                excesosDetectados.push({
+                                    id: cat.id,
+                                    nombre: `${cat.icono} ${cat.nombre}`,
+                                    previsto: totalPrevisto,
+                                    maximo: cat.presupuestoMaximo
+                                });
+                            }
+                        }
                     }
                 });
 
-                let v_tot = datosUsuario.fondosTotales + totalGastadoEliminados;
-                let v_ret = datosUsuario.fondosRetenidos - totalPresupuestosEliminados;
-                let v_dis = datosUsuario.fondosDisponibles + totalPresupuestosEliminados + totalGastadoEliminados;
+                if (excesosDetectados.length > 0) {
+                    let htmlExcesos = "";
+                    excesosDetectados.forEach(e => {
+                        htmlExcesos += `<li><b>${e.nombre}</b>: Llegará a ${e.previsto.toFixed(2)}€ (Su máximo es ${e.maximo.toFixed(2)}€)</li>`;
+                    });
+                    document.getElementById('lista-excesos-aviso').innerHTML = htmlExcesos;
+                    document.getElementById('aviso-excesos-box').style.display = 'block';
+                    btn.textContent = "SÍ, BORRAR Y TRASPASAR";
+                    confirmandoExcesos = true;
+                    return;
+                }
+            }
 
-                let vars = { totales: v_tot, retenidos: v_ret, disponibles: v_dis, gastosAcumulados: {} };
-                reubicaciones.forEach(r => simularReubicacionMultiple(vars, r.importe, r.idDestino));
+            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
 
+            try {
+                // Cálculo contable correcto:
+                // 1. Al eliminar una categoría, su presupuesto máximo (retenido virtual) deja de existir y pasa a Disponibles.
+                // 2. El dinero ya gastado de esa categoría no se resta de retenidos porque ya no estaba retenido, sino gastado.
+                let sumaPresupuestosMaximosBorrados = 0;
+                idsCategoriasABorrar.forEach(id => {
+                    const cat = colCategorias.find(c => c.id === id);
+                    if (cat) {
+                        sumaPresupuestosMaximosBorrados += (cat.presupuestoMaximo || 0);
+                    }
+                });
+
+                let nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) - sumaPresupuestosMaximosBorrados;
+                let nuevosDisponibles = (datosUsuario.fondosDisponibles || 0) + sumaPresupuestosMaximosBorrados;
+
+                let acumuladoresGastosDestino = {};
+                reubicaciones.forEach(r => {
+                    if (r.idDestino === 'imprevisto') {
+                        nuevosDisponibles -= r.importe; // Convierte en gasto imprevisto restando de disponibles
+                    } else {
+                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastos[r.idDestino] || 0) + r.importe;
+                    }
+                });
+
+                // Eliminar de Firestore las categorías seleccionadas
                 for (let id of idsCategoriasABorrar) {
                     await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
                 }
 
-                await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosTotales: vars.totales, fondosRetenidos: vars.retenidos, fondosDisponibles: vars.disponibles
-                });
-
+                // Actualizar las categorías de destino y registrar movimientos
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
@@ -1023,14 +1070,29 @@
                         });
                     } else {
                         const targetCat = colCategorias.find(c => c.id === r.idDestino);
-                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0);
-                        await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGasto });
+                        const gastoAdicional = acumuladoresGastosDestino[r.idDestino] || 0;
+                        const nuevoGastadoTotal = (targetCat.gastado || 0) + gastoAdicional;
+                        const presupuestoMaxDestino = targetCat.presupuestoMaximo || 0;
+
+                        // Si el nuevo gasto supera el máximo de la categoría destino, el exceso sale de Disponibles y reduce Retenidos
+                        if (nuevoGastadoTotal > presupuestoMaxDestino) {
+                            const exceso = nuevoGastadoTotal - Math.max(presupuestoMaxDestino, targetCat.gastado || 0);
+                            nuevosDisponibles -= exceso;
+                        }
+
+                        await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGastadoTotal });
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
                             tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString()
                         });
-                        targetCat.gastado = nuevoGasto; vars.gastosAcumulados[r.idDestino] = 0;
+                        acumuladoresGastosDestino[r.idDestino] = 0; // Evitar duplicar
                     }
                 }
+
+                // Guardar los nuevos saldos del usuario en Firestore
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosRetenidos: Math.max(0, nuevosRetenidos),
+                    fondosDisponibles: nuevosDisponibles
+                });
 
                 cerrarModal('modal-delete-cat');
                 await recargarPantalla();
