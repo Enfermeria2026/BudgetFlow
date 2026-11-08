@@ -88,14 +88,27 @@
             padding: 15px 15px 10px 15px; box-sizing: border-box;
         }
 
-        /* CONTENEDOR CON SCROLL (Únicamente para las tarjetas) */
+       /* CONTENEDOR CON SCROLL (Ajustado para que no se corte la primera tarjeta) */
         .page-content {
             width: 100%; max-width: 500px; 
-            position: absolute; top: 295px; bottom: 80px; 
+            position: absolute; top: 310px; bottom: 80px; 
             left: 50%; transform: translateX(-50%);
             overflow-y: auto; padding: 0 15px; box-sizing: border-box; 
             display: flex; flex-direction: column; gap: 15px;
         }
+
+        /* FILA DE CATEGORÍA (Casilla + Tarjeta) */
+        .categoria-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+        .categoria-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--color-retenidos); flex-shrink: 0; }
+
+        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE (Borrar X categorías) */
+        .delete-action-bar {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 460px; background: var(--text-main); color: white;
+            padding: 12px 20px; border-radius: 30px; display: none; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 95; font-size: 14px; font-weight: bold; box-sizing: border-box;
+        }
+        .btn-borrar-multi { background: var(--color-retenidos); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
         .financial-panel {
             background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
@@ -276,6 +289,12 @@
 
     <!-- BOTÓN FLOTANTE GIGANTE -->
     <button class="fab-btn" id="btn-fab" onclick="animarYabrirModal('modal-crear-cat', this)">+</button>
+
+    <!-- BARRA FLOTANTE DE BORRADO MÚLTIPLE DE CATEGORÍAS -->
+    <div class="delete-action-bar" id="delete-bar-cat">
+        <span id="delete-counter-cat">0 seleccionadas</span>
+        <button class="btn-borrar-multi" onclick="abrirModalBorrarCategoriasMulti()">Borrar categorías</button>
+    </div>
 
     <!-- BARRA NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
@@ -599,15 +618,16 @@
             }
         }
 
-        // RENDERIZAR TARJETAS (Con ordenación inteligente por % real y exceso)
+        // RENDERIZAR TARJETAS (Con casillas, sin papelera y con SVG limpios)
         function renderizarCategorias() {
             const container = document.getElementById('contenedor-categorias');
             container.innerHTML = "";
             let sumaGastos = 0; let sumaMaximos = 0;
 
             if(colCategorias.length === 0) { 
-                container.innerHTML = "<div style='text-align:center;color:#7F8C8D;'>No tienes ninguna categoría creada. Pulsa el botón + para empezar.</div>"; 
+                container.innerHTML = "<div style='text-align:center;color:#7F8C8D; margin-top:20px;'>No tienes ninguna categoría creada. Pulsa el botón + para empezar.</div>"; 
                 document.getElementById('ui-resumen-gastos').innerHTML = `Total: 0.00€ / 0.00€`;
+                actualizarSeleccionBorrarCat();
                 return; 
             }
             
@@ -618,26 +638,15 @@
                 let gastB = Number(b.gastado) || 0;
                 let maxB = Number(b.presupuestoMaximo) || 0;
 
-                // Porcentaje real (permite pasar del 100%, ej: 1.25 para 125%)
                 let pctRealA = maxA > 0 ? (gastA / maxA) : 0;
                 let pctRealB = maxB > 0 ? (gastB / maxB) : 0;
 
                 if (criterioOrdenActual === 'pct-mayor') {
-                    // De mayor a menor porcentaje (las excedidas > 100% irán arriba del todo de forma natural)
-                    if (pctRealB !== pctRealA) {
-                        return pctRealB - pctRealA;
-                    }
-                    // Si tienen el mismo porcentaje (o ambas están excedidas con idéntico ratio), 
-                    // desempata ordenando por la cantidad exacta de dinero excedido
+                    if (pctRealB !== pctRealA) return pctRealB - pctRealA;
                     return (gastB - maxB) - (gastA - maxA);
-
                 } else if (criterioOrdenActual === 'pct-menor') {
-                    // De menor a mayor porcentaje (las más sanas al principio, las excedidas al final)
-                    if (pctRealA !== pctRealB) {
-                        return pctRealA - pctRealB;
-                    }
+                    if (pctRealA !== pctRealB) return pctRealA - pctRealB;
                     return (gastA - maxA) - (gastB - maxB);
-
                 } else if (criterioOrdenActual === 'az') {
                     return a.nombre.localeCompare(b.nombre);
                 } else if (criterioOrdenActual === 'za') {
@@ -659,7 +668,6 @@
                 let gast = Number(cat.gastado) || 0;
                 sumaGastos += gast; sumaMaximos += max;
 
-                // En la tarjeta visual limitamos a 100% pero el cálculo interno usa el real
                 let pctVisual = max > 0 ? Math.min(100, Math.round((gast / max) * 100)) : 0;
                 let colorBar = (pctVisual < 50) ? '#27AE60' : (pctVisual < 80 ? '#F4D03F' : '#E74C3C');
 
@@ -669,34 +677,77 @@
                 }
 
                 container.innerHTML += `
-                    <div class="item-card">
-                        <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
-                        <div class="card-details">
-                            <div class="card-header-row">
-                                <div class="card-title">${cat.nombre}</div>
-                                <div class="card-action-btns">
-                                    <button class="action-mini-btn" onclick="abrirGasto('${cat.id}', '${cat.nombre}')">+</button>
-                                    <button class="action-mini-btn" onclick="abrirRetiro('${cat.id}', '${cat.nombre}')">-</button>
-                                    <button class="action-mini-btn" style="color:var(--color-retenidos); border-color:var(--color-retenidos);" onclick="abrirEliminar('${cat.id}')">
-                                        <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
+                    <div class="categoria-row">
+                        <input type="checkbox" class="categoria-checkbox" value="${cat.id}" onchange="actualizarSeleccionBorrarCat()">
+                        <div class="item-card" style="flex:1;">
+                            <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
+                            <div class="card-details">
+                                <div class="card-header-row">
+                                    <div class="card-title">${cat.nombre}</div>
+                                    <div class="card-action-btns">
+                                        <button class="action-mini-btn" title="Añadir gasto" onclick="abrirGasto('${cat.id}', '${cat.nombre}')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                        <button class="action-mini-btn" title="Retirar gasto" onclick="abrirRetiro('${cat.id}', '${cat.nombre}')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
                                 </div>
+                                <div class="card-progress-row">
+                                    <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pctVisual}%; background:${colorBar};"></div></div>
+                                    <div class="card-percent" style="color:${colorBar};">${pctVisual}%</div>
+                                </div>
+                                <div class="card-amounts">${gast.toFixed(2)}€ / ${max.toFixed(2)}€ ${textoExceso}</div>
                             </div>
-                            <div class="card-progress-row">
-                                <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pctVisual}%; background:${colorBar};"></div></div>
-                                <div class="card-percent" style="color:${colorBar};">${pctVisual}%</div>
-                            </div>
-                            <div class="card-amounts">${gast.toFixed(2)}€ / ${max.toFixed(2)}€ ${textoExceso}</div>
                         </div>
                     </div>
                 `;
             });
 
-            // Actualizar Mini-tarjeta de resumen
             const cTotal = (sumaGastos > sumaMaximos) ? 'var(--color-retenidos)' : 'var(--text-main)';
             document.getElementById('ui-resumen-gastos').innerHTML = `Total: <span style="color:${cTotal}">${sumaGastos.toFixed(2)}€</span> / ${sumaMaximos.toFixed(2)}€`;
+            actualizarSeleccionBorrarCat();
         }
 
+        // CONTROL DE SELECCIÓN MÚLTIPLE DE CATEGORÍAS
+        window.actualizarSeleccionBorrarCat = function() {
+            const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
+            const bar = document.getElementById('delete-bar-cat');
+            const counter = document.getElementById('delete-counter-cat');
+
+            if (checkboxes.length > 0) {
+                bar.style.display = 'flex';
+                counter.textContent = checkboxes.length === 1 ? '1 categoría seleccionada' : `${checkboxes.length} categorías seleccionadas`;
+            } else {
+                bar.style.display = 'none';
+            }
+        };
+
+        window.abrirModalBorrarCategoriasMulti = function() {
+            const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
+            let sumaGastadoTotal = 0;
+
+            checkboxes.forEach(chk => {
+                const cat = colCategorias.find(c => c.id === chk.value);
+                if (cat) {
+                    sumaGastadoTotal += (cat.gastado || 0);
+                }
+            });
+
+            document.getElementById('modal-delete-cat').style.display = 'flex';
+            document.getElementById('del-cat-name').textContent = `${checkboxes.length} categoría(s) seleccionada(s)`;
+            
+            if (sumaGastadoTotal === 0) {
+                document.getElementById('del-no-gastos').style.display = 'block';
+                document.getElementById('del-con-gastos').style.display = 'none';
+            } else {
+                document.getElementById('del-no-gastos').style.display = 'none';
+                document.getElementById('del-con-gastos').style.display = 'flex';
+                document.getElementById('del-gastado-val').textContent = sumaGastadoTotal.toFixed(2);
+            }
+        };
+
+        
         // LÓGICA: CREAR CATEGORÍA
         window.crearCategoriaBD = async function() {
             const btn = document.getElementById('btn-submit-cat');
