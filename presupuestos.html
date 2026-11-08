@@ -379,44 +379,62 @@
         </div>
     </div>
 
-    <!-- MODAL ELIMINAR CATEGORÍA (Con Reubicación) -->
+
+    <!-- MODAL ELIMINAR CATEGORÍA (Con Opciones de Radio Buttons y Control de Disponibles) -->
     <div class="modal-overlay" id="modal-delete-cat">
         <div class="modal-content">
-            <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría</h3>
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría(s)</h3>
             <p id="del-cat-name" style="text-align:center; font-weight:bold; margin-top:5px; margin-bottom:15px; font-size:18px;"></p>
             
             <div id="del-no-gastos" style="display:none; text-align:center; font-size:14px; color:#555;">
-                Esta categoría no tiene gastos. Al eliminarla, su presupuesto protegido volverá a tus Fondos Disponibles.
+                Las categorías seleccionadas no tienen gastos. Al eliminarlas, sus presupuestos volverán a tus Fondos Disponibles.
             </div>
 
             <div id="del-con-gastos" style="display:none; flex-direction:column; gap:15px;">
                 <div style="background:#FDEDEC; color:#C0392B; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
-                    Tiene <span id="del-gastado-val"></span>€ gastados.<br>¿Qué hacemos con este gasto?
+                    Suman un total de <span id="del-gastado-val"></span>€ gastados.<br>¿Cómo deseas reubicar este gasto?
                 </div>
                 
-                <div class="field-wrapper">
-                    <label>Destino del gasto</label>
-                    <select id="del-destino-tipo" onchange="cambiarDestinoEliminar()" style="background:#fff;">
-                        <option value="imprevisto">Convertir todo en Gasto Imprevisto</option>
-                        <option value="categoria" id="opt-cat-unica" style="display:none;">Sumarlo a otra categoría</option>
-                        <option value="dividir" id="opt-cat-dividir" style="display:none;">Dividir el gasto</option>
-                    </select>
+                <!-- 3 OPCIONES CON RADIO BUTTONS (Círculos) -->
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:5px;">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:normal;">
+                        <input type="radio" name="destino-borrado" value="imprevisto" checked onchange="cambiarOpcionDestino()"> 
+                        <b>Convertir en gasto imprevisto</b>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:normal;" id="label-opt-cat">
+                        <input type="radio" name="destino-borrado" value="categoria" onchange="cambiarOpcionDestino()" id="radio-opt-cat"> 
+                        <b id="text-opt-cat">Traspasar a otra categoría</b>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:normal;" id="label-opt-div">
+                        <input type="radio" name="destino-borrado" value="repartir" onchange="cambiarOpcionDestino()" id="radio-opt-div"> 
+                        <b id="text-opt-div">Repartir</b>
+                    </label>
                 </div>
 
-                <div id="del-bloque-imprevisto" class="field-wrapper">
+                <!-- OPCIÓN 1: IMPREVISTO -->
+                <div id="bloque-opc-imprevisto" class="field-wrapper">
                     <label>Concepto del imprevisto <span style="color:var(--color-retenidos)">*</span></label>
                     <input type="text" id="del-concepto-imprevisto" placeholder="Ej: Gastos reubicados">
                 </div>
 
-                <div id="del-bloque-categoria" class="field-wrapper" style="display:none;">
+                <!-- OPCIÓN 2: OTRA CATEGORÍA -->
+                <div id="bloque-opc-categoria" class="field-wrapper" style="display:none;">
                     <label>Selecciona la categoría destino <span style="color:var(--color-retenidos)">*</span></label>
                     <select id="del-categoria-destino" style="background:#fff;"></select>
                 </div>
 
-                <div id="del-bloque-dividir" style="display:none; flex-direction:column; gap:10px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
-                    <div style="font-size:12px; font-weight:bold; color:var(--text-main); margin-bottom:5px;">Reparte los fondos exactos:</div>
-                    <div id="del-dividir-lista" style="display:flex; flex-direction:column; gap:10px;"></div>
-                    <div style="text-align:right; font-weight:bold; font-size:14px; margin-top:5px; padding-top:10px; border-top:1px dashed #ccc;" id="del-dividir-restante">
+                <!-- OPCIÓN 3: REPARTIR -->
+                <div id="bloque-opc-repartir" style="display:none; flex-direction:column; gap:12px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
+                    <div style="font-size:13px; font-weight:bold; color:var(--text-main);">1. Parte para Gasto Imprevisto:</div>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <input type="text" id="repartir-con-imprevisto" placeholder="Concepto del imprevisto..." style="padding:10px; font-size:13px; box-sizing:border-box;">
+                        <input type="number" id="repartir-imp-imprevisto" placeholder="0.00" min="0" step="0.01" style="padding:10px; font-size:13px; box-sizing:border-box;" oninput="calcularRestanteReparto()">
+                    </div>
+
+                    <div style="font-size:13px; font-weight:bold; color:var(--text-main); margin-top:5px;">2. Parte para otras categorías:</div>
+                    <div id="repartir-lista-categorias" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    
+                    <div style="text-align:right; font-weight:bold; font-size:14px; margin-top:5px; padding-top:10px; border-top:1px dashed #ccc;" id="repartir-restante">
                         Faltan por asignar: 0.00€
                     </div>
                 </div>
@@ -425,11 +443,12 @@
             <p id="err-delete" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
             <div class="btn-row">
                 <button class="btn-cancel" onclick="cerrarModal('modal-delete-cat')">Cancelar</button>
-                <button class="btn-confirm" style="background:var(--color-retenidos);" id="btn-submit-delete" onclick="procesarEliminar()">ELIMINAR</button>
+                <button class="btn-confirm" style="background:var(--color-retenidos);" id="btn-submit-delete" onclick="procesarEliminarMultiples()">ELIMINAR</button>
             </div>
         </div>
     </div>
 
+    
     <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
@@ -819,163 +838,202 @@
             finally { btn.disabled = false; }
         };
 
-        // LÓGICA: ELIMINAR CATEGORÍA Y REUBICAR (Corregido para mostrar siempre todas las opciones)
-        window.abrirEliminar = function(catId) {
-            categoriaSeleccionada = colCategorias.find(c => c.id === catId);
-            document.getElementById('del-cat-name').textContent = categoriaSeleccionada.icono + " " + categoriaSeleccionada.nombre;
-            const gAct = categoriaSeleccionada.gastado || 0;
+        // VARIABLES PARA CONTROL DE SELECCIÓN MÚLTIPLE Y BORRADO
+        let idsCategoriasABorrar = [];
+        let sumaGastadoGlobalBorrar = 0;
+
+        window.abrirModalBorrarCategoriasMulti = function() {
+            const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
+            idsCategoriasABorrar = Array.from(checkboxes).map(chk => chk.value);
             
-            if (gAct === 0) {
+            sumaGastadoGlobalBorrar = 0;
+            idsCategoriasABorrar.forEach(id => {
+                const cat = colCategorias.find(c => c.id === id);
+                if (cat) sumaGastadoGlobalBorrar += (cat.gastado || 0);
+            });
+
+            document.getElementById('modal-delete-cat').style.display = 'flex';
+            document.getElementById('del-cat-name').textContent = `${idsCategoriasABorrar.length} categoría(s) seleccionada(s)`;
+            
+            // Comprobar si tras borrar quedan más categorías
+            const categoriasRestantes = colCategorias.filter(c => !idsCategoriasABorrar.includes(c.id));
+            const hayRestantes = categoriasRestantes.length > 0;
+
+            const radioCat = document.getElementById('radio-opt-cat');
+            const radioDiv = document.getElementById('radio-opt-div');
+            const labelCat = document.getElementById('label-opt-cat');
+            const labelDiv = document.getElementById('label-opt-div');
+
+            if (!hayRestantes) {
+                radioCat.disabled = true; radioCat.checked = false;
+                radioDiv.disabled = true; radioDiv.checked = false;
+                labelCat.style.color = '#BDC3C7'; labelDiv.style.color = '#BDC3C7';
+                document.querySelector('input[name="destino-borrado"][value="imprevisto"]').checked = true;
+            } else {
+                radioCat.disabled = false; labelCat.style.color = 'var(--text-main)';
+                radioDiv.disabled = false; labelDiv.style.color = 'var(--text-main)';
+            }
+
+            if (sumaGastadoGlobalBorrar === 0) {
                 document.getElementById('del-no-gastos').style.display = 'block';
                 document.getElementById('del-con-gastos').style.display = 'none';
             } else {
                 document.getElementById('del-no-gastos').style.display = 'none';
                 document.getElementById('del-con-gastos').style.display = 'flex';
-                document.getElementById('del-gastado-val').textContent = gAct.toFixed(2);
-                
-                // Filtrar las demás categorías disponibles
-                const otrasCats = colCategorias.filter(c => c.id !== catId);
-                
-                if (otrasCats.length > 0) {
-                    document.getElementById('opt-cat-unica').style.display = 'block';
-                    document.getElementById('opt-cat-dividir').style.display = 'block';
-                    
+                document.getElementById('del-gastado-val').textContent = sumaGastadoGlobalBorrar.toFixed(2);
+
+                if (hayRestantes) {
                     let selHTML = "";
-                    otrasCats.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Máx: ${c.presupuestoMaximo.toFixed(2)}€)</option>`);
+                    categoriasRestantes.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Máx: ${c.presupuestoMaximo.toFixed(2)}€)</option>`);
                     document.getElementById('del-categoria-destino').innerHTML = selHTML;
-                    
+
                     let divHTML = "";
-                    otrasCats.forEach(c => {
+                    categoriasRestantes.forEach(c => {
                         divHTML += `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                            <span style="font-size:13px; font-weight:bold;">${c.icono} ${c.nombre}</span>
-                            <input type="number" class="input-dividir" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
+                            <span style="font-size:12px; font-weight:bold;">${c.icono} ${c.nombre}</span>
+                            <input type="number" class="input-repartir-cat" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:8px; text-align:right;" oninput="calcularRestanteReparto()">
                         </div>`;
                     });
-                    divHTML += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:5px; padding-top:10px; border-top:1px solid #ddd;">
-                            <span style="font-size:13px; font-weight:bold;">🧾 Imprevisto</span>
-                            <input type="number" class="input-dividir" data-id="imprevisto" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
-                        </div>
-                        <div id="dividir-concepto-container" style="display:none; margin-top:5px;">
-                            <input type="text" id="del-dividir-concepto" placeholder="Concepto del imprevisto..." style="padding:10px; font-size:13px; width:100%; box-sizing:border-box;">
-                        </div>
-                    `;
-                    document.getElementById('del-dividir-lista').innerHTML = divHTML;
-                } else {
-                    document.getElementById('opt-cat-unica').style.display = 'none';
-                    document.getElementById('opt-cat-dividir').style.display = 'none';
+                    document.getElementById('repartir-lista-categorias').innerHTML = divHTML;
+                    document.getElementById('repartir-imp-imprevisto').value = "";
+                    document.getElementById('repartir-con-imprevisto').value = "";
                 }
-                document.getElementById('del-destino-tipo').value = 'imprevisto';
-                cambiarDestinoEliminar();
+                cambiarOpcionDestino();
             }
-            abrirModal('modal-delete-cat');
         };
 
-        window.cambiarDestinoEliminar = function() {
-            const val = document.getElementById('del-destino-tipo').value;
-            document.getElementById('del-bloque-imprevisto').style.display = (val === 'imprevisto') ? 'flex' : 'none';
-            document.getElementById('del-bloque-categoria').style.display = (val === 'categoria') ? 'flex' : 'none';
-            document.getElementById('del-bloque-dividir').style.display = (val === 'dividir') ? 'flex' : 'none';
-            if(val === 'dividir') calcularRestanteDividir();
+        window.cambiarOpcionDestino = function() {
+            const opcion = document.querySelector('input[name="destino-borrado"]:checked').value;
+            document.getElementById('bloque-opc-imprevisto').style.display = (opcion === 'imprevisto') ? 'flex' : 'none';
+            document.getElementById('bloque-opc-categoria').style.display = (opcion === 'categoria') ? 'flex' : 'none';
+            document.getElementById('bloque-opc-repartir').style.display = (opcion === 'repartir') ? 'flex' : 'none';
+            if (opcion === 'repartir') calcularRestanteReparto();
         };
 
-        window.calcularRestanteDividir = function() {
-            const total = categoriaSeleccionada.gastado;
-            let suma = 0; let impVal = 0;
-            document.querySelectorAll('.input-dividir').forEach(inp => {
-                const v = parseFloat(inp.value) || 0; suma += v;
-                if(inp.getAttribute('data-id') === 'imprevisto') impVal = v;
+        window.calcularRestanteReparto = function() {
+            let suma = parseFloat(document.getElementById('repartir-imp-imprevisto').value) || 0;
+            document.querySelectorAll('.input-repartir-cat').forEach(inp => {
+                suma += parseFloat(inp.value) || 0;
             });
-            
-            const rest = total - suma;
-            const restDiv = document.getElementById('del-dividir-restante');
+
+            const rest = sumaGastadoGlobalBorrar - suma;
+            const restDiv = document.getElementById('repartir-restante');
             restDiv.textContent = `Faltan por asignar: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
             restDiv.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
-            
-            document.getElementById('dividir-concepto-container').style.display = (impVal > 0) ? 'block' : 'none';
         };
 
-        function simularGastoReubicado(vars, importe, catDestinoId) {
-            if (catDestinoId === 'imprevisto') {
+        function simularReubicacionMultiple(vars, importe, destinoId) {
+            if (destinoId === 'imprevisto') {
                 vars.totales -= importe; vars.disponibles -= importe;
             } else {
                 vars.totales -= importe;
-                const catDestino = colCategorias.find(c => c.id === catDestinoId);
-                const rem = catDestino.presupuestoMaximo - (catDestino.gastado + (vars.gastosAcumulados[catDestinoId] || 0));
+                const catDestino = colCategorias.find(c => c.id === destinoId);
+                const rem = catDestino.presupuestoMaximo - (catDestino.gastado + (vars.gastosAcumulados[destinoId] || 0));
                 
                 if (rem >= importe) { vars.retenidos -= importe; }
                 else if (rem > 0) { vars.retenidos -= rem; vars.disponibles -= (importe - rem); }
                 else { vars.disponibles -= importe; }
                 
-                vars.gastosAcumulados[catDestinoId] = (vars.gastosAcumulados[catDestinoId] || 0) + importe;
+                vars.gastosAcumulados[destinoId] = (vars.gastosAcumulados[destinoId] || 0) + importe;
             }
         }
 
-        window.procesarEliminar = async function() {
+        window.procesarEliminarMultiples = async function() {
             const btn = document.getElementById('btn-submit-delete');
             const err = document.getElementById('err-delete');
-            const gAct = categoriaSeleccionada.gastado || 0;
-            const tipoDes = document.getElementById('del-destino-tipo').value;
-            
-            let reubicaciones = []; 
+            const opcion = document.querySelector('input[name="destino-borrado"]:checked').value;
 
-            if (gAct > 0) {
-                if (tipoDes === 'imprevisto') {
+            let reubicaciones = [];
+
+            if (sumaGastadoGlobalBorrar > 0) {
+                if (opcion === 'imprevisto') {
                     const con = document.getElementById('del-concepto-imprevisto').value.trim();
-                    if(!con) { err.textContent = "Indica un concepto para el imprevisto."; err.style.display='block'; return; }
-                    reubicaciones.push({ idDestino: 'imprevisto', importe: gAct, concepto: con });
-                } else if (tipoDes === 'categoria') {
+                    if (!con) { err.textContent = "Indica un concepto para el gasto imprevisto."; err.style.display = 'block'; return; }
+                    reubicaciones.push({ idDestino: 'imprevisto', importe: sumaGastadoGlobalBorrar, concepto: con });
+                } else if (opcion === 'categoria') {
                     const idCat = document.getElementById('del-categoria-destino').value;
-                    reubicaciones.push({ idDestino: idCat, importe: gAct, concepto: `Reubicado de ${categoriaSeleccionada.nombre}` });
-                } else if (tipoDes === 'dividir') {
-                    let suma = 0; let errorConcepto = false;
-                    document.querySelectorAll('.input-dividir').forEach(inp => {
+                    reubicaciones.push({ idDestino: idCat, importe: sumaGastadoGlobalBorrar, concepto: `Reubicado de categorías eliminadas` });
+                } else if (opcion === 'repartir') {
+                    let sumaReparto = 0;
+                    const impImprevisto = parseFloat(document.getElementById('repartir-imp-imprevisto').value) || 0;
+                    const conImprevisto = document.getElementById('repartir-con-imprevisto').value.trim();
+
+                    if (impImprevisto > 0) {
+                        if (!conImprevisto) { err.textContent = "Indica un concepto para la parte de gasto imprevisto."; err.style.display = 'block'; return; }
+                        sumaReparto += impImprevisto;
+                        reubicaciones.push({ idDestino: 'imprevisto', importe: impImprevisto, concepto: conImprevisto });
+                    }
+
+                    document.querySelectorAll('.input-repartir-cat').forEach(inp => {
                         const v = parseFloat(inp.value) || 0;
                         if (v > 0) {
-                            suma += v;
-                            const id = inp.getAttribute('data-id');
-                            let con = `Reubicado de ${categoriaSeleccionada.nombre}`;
-                            if (id === 'imprevisto') {
-                                const conImp = document.getElementById('del-dividir-concepto').value.trim();
-                                if(!conImp) errorConcepto = true; else con = conImp;
-                            }
-                            reubicaciones.push({ idDestino: id, importe: v, concepto: con });
+                            sumaReparto += v;
+                            reubicaciones.push({ idDestino: inp.getAttribute('data-id'), importe: v, concepto: `Reubicado de categorías eliminadas` });
                         }
                     });
-                    if (errorConcepto) { err.textContent = "Indica un concepto para el imprevisto."; err.style.display='block'; return; }
-                    if (Math.abs(gAct - suma) > 0.01) { err.textContent = "El reparto no cuadra con el total gastado."; err.style.display='block'; return; }
+
+                    if (Math.abs(sumaGastadoGlobalBorrar - sumaReparto) > 0.01) {
+                        err.textContent = "El reparto no cuadra exactamente con el total gastado de las categorías eliminadas.";
+                        err.style.display = 'block'; return;
+                    }
                 }
             }
 
             btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
-            try {
-                const pMax = categoriaSeleccionada.presupuestoMaximo;
-                let v_tot = datosUsuario.fondosTotales + gAct;
-                let v_ret = datosUsuario.fondosRetenidos - (pMax - Math.min(pMax, gAct));
-                let v_dis = datosUsuario.fondosDisponibles + (pMax + Math.max(0, gAct - pMax));
-                
-                let vars = { totales: v_tot, retenidos: v_ret, disponibles: v_dis, gastosAcumulados: {} };
-                reubicaciones.forEach(r => simularGastoReubicado(vars, r.importe, r.idDestino));
 
-                await deleteDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id));
+            try {
+                let totalPresupuestosEliminados = 0;
+                let totalGastadoEliminados = 0;
+
+                idsCategoriasABorrar.forEach(id => {
+                    const cat = colCategorias.find(c => c.id === id);
+                    if (cat) {
+                        totalPresupuestosEliminados += (cat.presupuestoMaximo || 0);
+                        totalGastadoEliminados += (cat.gastado || 0);
+                    }
+                });
+
+                let v_tot = datosUsuario.fondosTotales + totalGastadoEliminados;
+                let v_ret = datosUsuario.fondosRetenidos - totalPresupuestosEliminados;
+                let v_dis = datosUsuario.fondosDisponibles + totalPresupuestosEliminados + totalGastadoEliminados;
+
+                let vars = { totales: v_tot, retenidos: v_ret, disponibles: v_dis, gastosAcumulados: {} };
+                reubicaciones.forEach(r => simularReubicacionMultiple(vars, r.importe, r.idDestino));
+
+                for (let id of idsCategoriasABorrar) {
+                    await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
+                }
+
                 await updateDoc(doc(db, "usuarios", uidActual), {
                     fondosTotales: vars.totales, fondosRetenidos: vars.retenidos, fondosDisponibles: vars.disponibles
                 });
+
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
-                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "imprevisto", concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
+                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
+                            tipo: "gasto", subtipo: "imprevisto", concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString()
+                        });
                     } else {
                         const targetCat = colCategorias.find(c => c.id === r.idDestino);
-                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0); 
+                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0);
                         await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGasto });
-                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
-                        targetCat.gastado = nuevoGasto; vars.gastosAcumulados[r.idDestino] = 0; 
+                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
+                            tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString()
+                        });
+                        targetCat.gastado = nuevoGasto; vars.gastosAcumulados[r.idDestino] = 0;
                     }
                 }
-                cerrarModal('modal-delete-cat'); await recargarPantalla();
-            } catch(e) { console.error(e); err.textContent="Error al eliminar."; err.style.display='block'; }
-            finally { btn.disabled = false; btn.textContent = "ELIMINAR"; }
+
+                cerrarModal('modal-delete-cat');
+                await recargarPantalla();
+            } catch (e) {
+                console.error(e);
+                err.textContent = "Error al eliminar las categorías.";
+                err.style.display = 'block';
+            } finally {
+                btn.disabled = false; btn.textContent = "ELIMINAR";
+            }
         };
     </script>
 </body>
