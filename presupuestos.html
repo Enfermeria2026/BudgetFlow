@@ -179,20 +179,23 @@
         .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ddd; }
         .breakdown-item:last-child { border-bottom: none; }
 
-        /* ESTILOS SELECTOR AVANZADO DE ICONOS Y COLORES */
-        .color-grid-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 5px; }
-        .color-opt-item { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; position: relative; }
-        .color-opt-item.selected { border-color: var(--text-main); transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        .color-opt-item.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+        /* ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
+        .inline-selector { display: flex; gap: 8px; align-items: center; margin-top: 5px; overflow-x: auto; padding-bottom: 5px; }
+        .inline-opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
+        .inline-opt-btn.color-btn { border-color: transparent; }
+        .inline-opt-btn.selected { border-color: #000 !important; box-shadow: 0 0 0 2px #000; transform: scale(1.1); }
+        .inline-opt-btn.btn-mas { background: #F4F6F9; color: var(--text-main); font-weight: bold; border: 2px solid #D5D8DC; }
+
+        .modal-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 10px 5px; }
+        .modal-opt-item { width: 45px; height: 45px; border-radius: 50%; border: 2px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; margin: 0 auto; }
+        .modal-opt-item.color-item { border: 2px solid #E5E7E9; }
+        .modal-opt-item.selected { border-color: #000 !important; box-shadow: 0 0 0 2px #000; transform: scale(1.1); background: #fff; }
+        .modal-opt-item.locked { filter: grayscale(100%); opacity: 0.35; cursor: not-allowed; }
+
+        .acordeon-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--text-main); background: #F4F6F9; padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 1px solid #E5E7E9; }
+        .acordeon-content { display: none; padding: 5px; }
+        .acordeon-content.open { display: block; }
         
-        .icon-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 250px; overflow-y: auto; padding: 5px; }
-        .icon-opt-item { width: 45px; height: 45px; border-radius: 10px; border: 2px solid #E5E7E9; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: 0.2s; position: relative; }
-        .icon-opt-item.selected { border-color: var(--color-disponibles); background: #E8F8F5; transform: scale(1.05); }
-        .icon-opt-item.locked { opacity: 0.3; cursor: not-allowed; background: #F4F6F9; }
-        .rarity-title { font-size: 12px; font-weight: bold; margin: 10px 0 5px 0; text-transform: uppercase; color: #7F8C8D; border-bottom: 1px solid #eee; padding-bottom: 3px; }
-        
-        .expand-btn { background: #E5E7E9; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: var(--text-main); transition: 0.2s; }
-        .expand-btn:hover { background: #D5D8DC; }
     </style>
 </head>
 <body>
@@ -311,22 +314,20 @@
     </div>
 
 
-    <!-- MODAL SELECTOR DE ICONOS AVANZADO -->
+    <!-- MODALES DE CATÁLOGO COMPLETO -->
     <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
-        <div class="modal-content" style="max-width: 450px;">
-            <h3 class="modal-title" style="color: var(--text-main);">Selecciona un Icono</h3>
-            
-            <div style="margin-bottom: 10px;">
-                <input type="text" id="buscador-iconos" placeholder="🔍 Buscar icono..." oninput="filtrarIconos(this.value)" style="padding: 10px; font-size: 13px;">
-            </div>
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Iconos</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-iconos"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-cancel" onclick="cerrarModal('modal-selector-iconos')">Cerrar</button></div>
+        </div>
+    </div>
 
-            <div id="contenedor-lista-iconos" style="display:flex; flex-direction:column; gap:10px;">
-                <!-- Se rellena dinámicamente -->
-            </div>
-
-            <div class="btn-row" style="margin-top: 15px;">
-                <button class="btn-cancel" onclick="cerrarModal('modal-selector-iconos')">Cerrar</button>
-            </div>
+    <div class="modal-overlay" id="modal-selector-colores" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Colores</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-colores"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-cancel" onclick="cerrarModal('modal-selector-colores')">Cerrar</button></div>
         </div>
     </div>
     
@@ -371,10 +372,10 @@
             <h3 class="modal-title">Nueva Categoría</h3>
             <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="cat-nombre"></div>
             <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="cat-selector-iconos-avanzado"></div>
+                <div class="inline-selector" id="cat-iconos-inline"></div>
             </div>
             <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="cat-selector-colores-avanzado"></div>
+                <div class="inline-selector" id="cat-colores-inline"></div>
             </div>
             <div class="field-wrapper">
                 <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
@@ -432,11 +433,12 @@
             
             <div class="field-wrapper">
                 <label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="edit-cat-selector-iconos-avanzado"></div>
+                <div class="inline-selector" id="edit-cat-iconos-inline"></div>
             </div>
+
             <div class="field-wrapper">
                 <label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="edit-cat-selector-colores-avanzado"></div>
+                <div class="inline-selector" id="edit-cat-colores-inline"></div>
             </div>
 
             <div class="field-wrapper">
@@ -590,15 +592,22 @@
         // MODALES
         window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
         window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; };
+
         window.animarYabrirModal = function(id, btn) {
             btn.classList.add('spin');
             setTimeout(() => { 
                 btn.classList.remove('spin'); 
                 document.getElementById(id).style.display = 'flex'; 
                 document.body.style.overflow = 'hidden'; 
-                if (id === 'modal-crear-cat') renderizarSelectoresAvanzados('cat', '#58D68D', '🏠');
+                
+                if (id === 'modal-crear-cat') {
+                    colorActualSeleccionado = "#58D68D";
+                    iconoActualSeleccionado = "🏠";
+                    renderizarSelectoresInline('cat');
+                }
             }, 300);
         };
+        
         window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
         window.cerrarModal = function(id, limpiarError=false) { 
             document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; 
@@ -1286,7 +1295,9 @@
             document.getElementById('edit-cat-nombre').value = cat.nombre || '';
             document.getElementById('edit-cat-max').value = cat.presupuestoMaximo || 0;
             
-            renderizarSelectoresAvanzados('edit-cat', cat.color, cat.icono);
+            colorActualSeleccionado = cat.color || "#58D68D";
+            iconoActualSeleccionado = cat.icono || "🏠";
+            renderizarSelectoresInline('edit-cat');
 
             const gastadoActual = Number(cat.gastado) || 0;
             document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior al gasto)`;
@@ -1395,128 +1406,159 @@
         let iconoActualSeleccionado = "🏠";
         let prefijoFormularioActual = "cat"; 
 
-        const CATALOGO_COLORES = [
-            { id: "granate", hex: "#800020", desbloqueado: false }, { id: "rojo", hex: "#E74C3C", desbloqueado: true },
-            { id: "coral", hex: "#FF6F61", desbloqueado: false }, { id: "frambuesa", hex: "#C71585", desbloqueado: false },
-            { id: "naranja", hex: "#EB984E", desbloqueado: true }, { id: "dorado", hex: "#D4AC0D", desbloqueado: true },
-            { id: "melon", hex: "#FFB347", desbloqueado: false }, { id: "calabaza", hex: "#D35400", desbloqueado: false },
-            { id: "amarillo", hex: "#F4D03F", desbloqueado: true }, { id: "oro", hex: "#FFD700", desbloqueado: false },
-            { id: "limon", hex: "#CCFF00", desbloqueado: false }, { id: "crema", hex: "#FFFDD0", desbloqueado: false },
-            { id: "verde", hex: "#58D68D", desbloqueado: true }, { id: "esmeralda", hex: "#2ECC71", desbloqueado: false },
-            { id: "verde_botella", hex: "#006600", desbloqueado: false }, { id: "oliva", hex: "#808000", desbloqueado: false },
-            { id: "menta", hex: "#AAF0D1", desbloqueado: false }, { id: "turquesa", hex: "#40E0D0", desbloqueado: false },
-            { id: "pistacho", hex: "#93C572", desbloqueado: false }, { id: "azul", hex: "#5DADE2", desbloqueado: true },
-            { id: "azul_marino", hex: "#000080", desbloqueado: false }, { id: "celeste", hex: "#B0E0E6", desbloqueado: false },
-            { id: "violeta", hex: "#8A2BE2", desbloqueado: false }, { id: "purpura", hex: "#6A0DAD", desbloqueado: false },
-            { id: "morado", hex: "#4B0082", desbloqueado: false }, { id: "lila", hex: "#C8A2C8", desbloqueado: false },
-            { id: "rosa", hex: "#FFC0CB", desbloqueado: false }, { id: "magenta", hex: "#FF00FF", desbloqueado: false },
-            { id: "fucsia", hex: "#FF00FF", desbloqueado: false }, { id: "salmon", hex: "#FA8072", desbloqueado: false },
-            { id: "marron", hex: "#8B4513", desbloqueado: false }, { id: "beige", hex: "#F5F5DC", desbloqueado: false },
-            { id: "cafe", hex: "#6F4E37", desbloqueado: false }, { id: "chocolate", hex: "#D2691E", desbloqueado: false },
-            { id: "caoba", hex: "#C04000", desbloqueado: false }, { id: "gris", hex: "#7F8C8D", desbloqueado: true }
-        ];
-
-        const CATALOGO_ICONOS = {
-            comunes: [
-                { emoji: "🏠", desbloqueado: true }, { emoji: "🚗", desbloqueado: true }, { emoji: "🛒", desbloqueado: true }, { emoji: "💼", desbloqueado: true }, 
-                { emoji: "🧳", desbloqueado: true }, { emoji: "🐶", desbloqueado: false }, { emoji: "🐱", desbloqueado: false }, { emoji: "🌸", desbloqueado: false }, 
-                { emoji: "☀️", desbloqueado: false }, { emoji: "⭐", desbloqueado: false }, { emoji: "🍼", desbloqueado: false }, { emoji: "⚽", desbloqueado: false }, 
-                { emoji: "💅", desbloqueado: false }, { emoji: "✂️", desbloqueado: false }, { emoji: "👄", desbloqueado: false }, { emoji: "⏰", desbloqueado: false }, 
-                { emoji: "💧", desbloqueado: false }, { emoji: "💡", desbloqueado: false }, { emoji: "🔒", desbloqueado: false }, { emoji: "🔑", desbloqueado: false }, 
-                { emoji: "⛺", desbloqueado: false }, { emoji: "🪵", desbloqueado: false }, { emoji: "🪑", desbloqueado: false }, { emoji: "👕", desbloqueado: false }, 
-                { emoji: "👖", desbloqueado: false }, { emoji: "🐚", desbloqueado: false }, { emoji: "📦", desbloqueado: false }, { emoji: "🎲", desbloqueado: false }
+        // --- CATÁLOGOS CON ESTRUCTURA BÁSICA + BLOQUEADOS ---
+        const CATALOGO_COLORES = {
+            Básicos: [
+                { id: "verde", hex: "#58D68D", desbloqueado: true }, { id: "azul", hex: "#5DADE2", desbloqueado: true },
+                { id: "amarillo", hex: "#F4D03F", desbloqueado: true }, { id: "rojo", hex: "#E74C3C", desbloqueado: true },
+                { id: "naranja", hex: "#EB984E", desbloqueado: true }
             ],
-            raros: [
-                { emoji: "🐰", desbloqueado: false }, { emoji: "🐎", desbloqueado: false }, { emoji: "🎂", desbloqueado: false }, { emoji: "🍔", desbloqueado: false }, 
-                { emoji: "🥳", desbloqueado: false }, { emoji: "📞", desbloqueado: false }, { emoji: "❤️", desbloqueado: false }, { emoji: "💊", desbloqueado: false }, 
-                { emoji: "✉️", desbloqueado: false }, { emoji: "📌", desbloqueado: false }, { emoji: "👁️", desbloqueado: false }, { emoji: "📢", desbloqueado: false }, 
-                { emoji: "📺", desbloqueado: false }, { emoji: "🛏️", desbloqueado: false }, { emoji: "🧥", desbloqueado: false }, { emoji: "👟", desbloqueado: false }, 
-                { emoji: "👠", desbloqueado: false }, { emoji: "🎤", desbloqueado: false }, { emoji: "🎨", desbloqueado: false }, { emoji: "🍿", desbloqueado: false }, 
-                { emoji: "🎳", desbloqueado: false }, { emoji: "🎸", desbloqueado: false }
-            ],
-            epicos: [
-                { emoji: "🏆", desbloqueado: false }, { emoji: "🎮", desbloqueado: false }, { emoji: "🎹", desbloqueado: false }, { emoji: "🚲", desbloqueado: false }, 
-                { emoji: "🚆", desbloqueado: false }, { emoji: "💻", desbloqueado: false }, { emoji: "💍", desbloqueado: false }, { emoji: "📅", desbloqueado: false }, 
-                { emoji: "📖", desbloqueado: false }, { emoji: "📍", desbloqueado: false }, { emoji: "📶", desbloqueado: false }, { emoji: "🎵", desbloqueado: false }, 
-                { emoji: "👓", desbloqueado: false }, { emoji: "🦷", desbloqueado: false }, { emoji: "🧾", desbloqueado: false }
-            ],
-            legendarios: [
-                { emoji: "✈️", desbloqueado: false }, { emoji: "🍷", desbloqueado: false }, { emoji: "🚢", desbloqueado: false }, { emoji: "🏖️", desbloqueado: false }, 
-                { emoji: "🎓", desbloqueado: false }, { emoji: "⚖️", desbloqueado: false }, { emoji: "🎬", desbloqueado: false }, { emoji: "🏋️", desbloqueado: false }, 
-                { emoji: "🎧", desbloqueado: false }, { emoji: "📻", desbloqueado: false }, { emoji: "🌊", desbloqueado: false }, { emoji: "🚀", desbloqueado: false }
+            Otros: [
+                { id: "gris", hex: "#7F8C8D", desbloqueado: true }, { id: "granate", hex: "#800020", desbloqueado: false },
+                { id: "coral", hex: "#FF6F61", desbloqueado: false }, { id: "frambuesa", hex: "#C71585", desbloqueado: false },
+                { id: "dorado", hex: "#D4AC0D", desbloqueado: true }, { id: "melon", hex: "#FFB347", desbloqueado: false },
+                { id: "calabaza", hex: "#D35400", desbloqueado: false }, { id: "oro", hex: "#FFD700", desbloqueado: false },
+                { id: "limon", hex: "#CCFF00", desbloqueado: false }, { id: "crema", hex: "#FFFDD0", desbloqueado: false },
+                { id: "esmeralda", hex: "#2ECC71", desbloqueado: false }, { id: "verde_botella", hex: "#006600", desbloqueado: false },
+                { id: "oliva", hex: "#808000", desbloqueado: false }, { id: "menta", hex: "#AAF0D1", desbloqueado: false },
+                { id: "turquesa", hex: "#40E0D0", desbloqueado: false }, { id: "pistacho", hex: "#93C572", desbloqueado: false },
+                { id: "azul_marino", hex: "#000080", desbloqueado: false }, { id: "celeste", hex: "#B0E0E6", desbloqueado: false },
+                { id: "violeta", hex: "#8A2BE2", desbloqueado: false }, { id: "purpura", hex: "#6A0DAD", desbloqueado: false },
+                { id: "morado", hex: "#4B0082", desbloqueado: false }, { id: "lila", hex: "#C8A2C8", desbloqueado: false },
+                { id: "rosa", hex: "#FFC0CB", desbloqueado: false }, { id: "magenta", hex: "#FF00FF", desbloqueado: false },
+                { id: "fucsia", hex: "#FF00FF", desbloqueado: false }, { id: "salmon", hex: "#FA8072", desbloqueado: false },
+                { id: "marron", hex: "#8B4513", desbloqueado: false }, { id: "beige", hex: "#F5F5DC", desbloqueado: false },
+                { id: "cafe", hex: "#6F4E37", desbloqueado: false }, { id: "chocolate", hex: "#D2691E", desbloqueado: false },
+                { id: "caoba", hex: "#C04000", desbloqueado: false }
             ]
         };
 
-        window.seleccionarColorGlobal = function(hex, desbloqueado) {
-            if (!desbloqueado) { alert("Este color está bloqueado. ¡Desbloquéalo completando logros!"); return; }
-            colorActualSeleccionado = hex;
-            document.querySelectorAll(`.${prefijoFormularioActual}-color-item`).forEach(el => {
-                el.style.border = (el.getAttribute('data-hex') === hex) ? '3px solid var(--text-main)' : '2px solid transparent';
-            });
-            document.getElementById(`${prefijoFormularioActual}-preview-color`).style.backgroundColor = hex;
+        const CATALOGO_ICONOS = {
+            Básicos: [
+                { emoji: "🏠", desbloqueado: true }, { emoji: "🚗", desbloqueado: true }, { emoji: "🛒", desbloqueado: true }, 
+                { emoji: "💼", desbloqueado: true }, { emoji: "🧳", desbloqueado: true }
+            ],
+            Comunes: [
+                { emoji: "🐶", desbloqueado: false }, { emoji: "🐱", desbloqueado: false }, { emoji: "🌸", desbloqueado: false }, 
+                { emoji: "☀️", desbloqueado: false }, { emoji: "⭐", desbloqueado: false }, { emoji: "🍼", desbloqueado: false }, 
+                { emoji: "⚽", desbloqueado: false }, { emoji: "💅", desbloqueado: false }, { emoji: "✂️", desbloqueado: false }, 
+                { emoji: "👄", desbloqueado: false }, { emoji: "⏰", desbloqueado: false }, { emoji: "💧", desbloqueado: false }, 
+                { emoji: "💡", desbloqueado: false }, { emoji: "🔒", desbloqueado: false }, { emoji: "🔑", desbloqueado: false }, 
+                { emoji: "⛺", desbloqueado: false }, { emoji: "🪵", desbloqueado: false }, { emoji: "🪑", desbloqueado: false }, 
+                { emoji: "👕", desbloqueado: false }, { emoji: "👖", desbloqueado: false }, { emoji: "🐚", desbloqueado: false }, 
+                { emoji: "📦", desbloqueado: false }, { emoji: "🎲", desbloqueado: false }
+            ],
+            Raros: [
+                { emoji: "🐰", desbloqueado: false }, { emoji: "🐎", desbloqueado: false }, { emoji: "🎂", desbloqueado: false }, 
+                { emoji: "🍔", desbloqueado: false }, { emoji: "🥳", desbloqueado: false }, { emoji: "📞", desbloqueado: false }, 
+                { emoji: "❤️", desbloqueado: false }, { emoji: "💊", desbloqueado: false }, { emoji: "✉️", desbloqueado: false }, 
+                { emoji: "📌", desbloqueado: false }, { emoji: "👁️", desbloqueado: false }, { emoji: "📢", desbloqueado: false }, 
+                { emoji: "📺", desbloqueado: false }, { emoji: "🛏️", desbloqueado: false }, { emoji: "🧥", desbloqueado: false }, 
+                { emoji: "👟", desbloqueado: false }, { emoji: "👠", desbloqueado: false }, { emoji: "🎤", desbloqueado: false }, 
+                { emoji: "🎨", desbloqueado: false }, { emoji: "🍿", desbloqueado: false }, { emoji: "🎳", desbloqueado: false }, 
+                { emoji: "🎸", desbloqueado: false }
+            ],
+            Épicos: [
+                { emoji: "🏆", desbloqueado: false }, { emoji: "🎮", desbloqueado: false }, { emoji: "🎹", desbloqueado: false }, 
+                { emoji: "🚲", desbloqueado: false }, { emoji: "🚆", desbloqueado: false }, { emoji: "💻", desbloqueado: false }, 
+                { emoji: "💍", desbloqueado: false }, { emoji: "📅", desbloqueado: false }, { emoji: "📖", desbloqueado: false }, 
+                { emoji: "📍", desbloqueado: false }, { emoji: "📶", desbloqueado: false }, { emoji: "🎵", desbloqueado: false }, 
+                { emoji: "👓", desbloqueado: false }, { emoji: "🦷", desbloqueado: false }, { emoji: "🧾", desbloqueado: false }
+            ],
+            Legendarios: [
+                { emoji: "✈️", desbloqueado: false }, { emoji: "🍷", desbloqueado: false }, { emoji: "🚢", desbloqueado: false }, 
+                { emoji: "🏖️", desbloqueado: false }, { emoji: "🎓", desbloqueado: false }, { emoji: "⚖️", desbloqueado: false }, 
+                { emoji: "🎬", desbloqueado: false }, { emoji: "🏋️", desbloqueado: false }, { emoji: "🎧", desbloqueado: false }, 
+                { emoji: "📻", desbloqueado: false }, { emoji: "🌊", desbloqueado: false }, { emoji: "🚀", desbloqueado: false }
+            ]
         };
 
-        window.seleccionarIconoGlobal = function(emoji, desbloqueado) {
-            if (!desbloqueado) { alert("Este icono está bloqueado. ¡Sigue avanzando en BudgetFlow para conseguirlo!"); return; }
-            iconoActualSeleccionado = emoji;
-            document.getElementById(`${prefijoFormularioActual}-preview-icono`).textContent = emoji;
-            cerrarModal('modal-selector-iconos');
+        let prefijoFormularioActual = "cat"; 
+
+        window.abrirModalCatalogo = function(tipo) {
+            renderizarAcordeon(tipo, tipo === 'iconos' ? CATALOGO_ICONOS : CATALOGO_COLORES, tipo === 'iconos' ? iconoActualSeleccionado : colorActualSeleccionado);
+            abrirModal(`modal-selector-${tipo}`);
         };
 
-        window.abrirSelectorIconos = function(prefijo) {
-            prefijoFormularioActual = prefijo;
-            renderizarModalIconos('');
-            abrirModal('modal-selector-iconos');
+        window.toggleAcordeon = function(id) {
+            const content = document.getElementById(id);
+            const flecha = document.getElementById(id + '-flecha');
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                flecha.textContent = '▲';
+            } else {
+                content.style.display = 'none';
+                flecha.textContent = '▼';
+            }
         };
 
-        function renderizarModalIconos(filtro) {
-            const contenedor = document.getElementById('contenedor-lista-iconos');
+        function renderizarAcordeon(tipo, catalogo, seleccionadoActual) {
+            let contenedor = document.getElementById(`contenedor-lista-${tipo}`);
             let html = "";
-            Object.keys(CATALOGO_ICONOS).forEach(categoria => {
-                let iconosFiltrados = CATALOGO_ICONOS[categoria].filter(i => filtro === '' || i.emoji.includes(filtro));
-                if (iconosFiltrados.length > 0) {
-                    html += `<div class="rarity-title">${categoria}</div><div class="icon-grid-container">`;
-                    iconosFiltrados.forEach(i => {
-                        let claseLocked = i.desbloqueado ? '' : 'locked';
-                        let onclickAccion = i.desbloqueado ? `seleccionarIconoGlobal('${i.emoji}', true)` : `seleccionarIconoGlobal('${i.emoji}', false)`;
-                        html += `<div class="icon-opt-item ${claseLocked}" onclick="${onclickAccion}">${i.emoji}${!i.desbloqueado ? '🔒' : ''}</div>`;
-                    });
-                    html += `</div>`;
-                }
+            
+            Object.keys(catalogo).forEach((categoria, index) => {
+                let isOpen = index === 0 ? 'open' : '';
+                let flecha = index === 0 ? '▲' : '▼';
+                
+                html += `
+                    <div class="acordeon-header" onclick="toggleAcordeon('${tipo}-${categoria}')">
+                        <span>${categoria}</span> <span id="${tipo}-${categoria}-flecha">${flecha}</span>
+                    </div>
+                    <div class="acordeon-content ${isOpen}" id="${tipo}-${categoria}">
+                        <div class="modal-grid-container">
+                `;
+                
+                catalogo[categoria].forEach(item => {
+                    let isLocked = !item.desbloqueado;
+                    let claseL = isLocked ? 'locked' : '';
+                    let isSelected = (tipo === 'iconos' ? item.emoji === seleccionadoActual : item.hex === seleccionadoActual);
+                    let claseS = isSelected ? 'selected' : '';
+                    
+                    if (tipo === 'iconos') {
+                        let onclickAccion = isLocked ? `alert('Icono bloqueado. ¡Completa logros para conseguirlo!')` : `seleccionarValorGlobal('iconos', '${item.emoji}')`;
+                        html += `<div class="modal-opt-item ${claseL} ${claseS}" onclick="${onclickAccion}">${item.emoji}</div>`;
+                    } else {
+                        let onclickAccion = isLocked ? `alert('Color bloqueado. ¡Completa logros para conseguirlo!')` : `seleccionarValorGlobal('colores', '${item.hex}')`;
+                        html += `<div class="modal-opt-item color-item ${claseL} ${claseS}" style="background:${item.hex};" onclick="${onclickAccion}"></div>`;
+                    }
+                });
+                
+                html += `</div></div>`;
             });
             contenedor.innerHTML = html;
         }
 
-        window.filtrarIconos = function(texto) { renderizarModalIconos(texto.trim()); };
+        window.seleccionarValorGlobal = function(tipo, valor) {
+            if (tipo === 'iconos') { iconoActualSeleccionado = valor; } 
+            else { colorActualSeleccionado = valor; }
+            cerrarModal(`modal-selector-${tipo}`);
+            renderizarSelectoresInline(prefijoFormularioActual);
+        };
 
-        window.renderizarSelectoresAvanzados = function(prefijo, colorInicial, iconoInicial) {
+        window.renderizarSelectoresInline = function(prefijo) {
             prefijoFormularioActual = prefijo;
-            colorActualSeleccionado = colorInicial || "#58D68D";
-            iconoActualSeleccionado = iconoInicial || "🏠";
 
-            const contColor = document.getElementById(`${prefijo}-selector-colores-avanzado`);
-            if (contColor) {
-                let htmlColores = `<div style="display:flex; align-items:center; gap:10px;">
-                    <div id="${prefijo}-preview-color" style="width:40px; height:40px; border-radius:50%; background:${colorActualSeleccionado}; border:2px solid #ccc; flex-shrink:0;"></div>
-                    <div class="color-grid-container" style="flex:1;">`;
-                CATALOGO_COLORES.forEach(c => {
-                    let claseL = c.desbloqueado ? '' : 'locked';
-                    let sel = c.hex === colorActualSeleccionado ? 'selected' : '';
-                    htmlColores += `<div class="color-opt-item ${prefijo}-color-item ${sel} ${claseL}" data-hex="${c.hex}" style="background:${c.hex};" onclick="seleccionarColorGlobal('${c.hex}', ${c.desbloqueado})"></div>`;
-                });
-                htmlColores += `</div></div>`;
-                contColor.innerHTML = htmlColores;
-            }
+            // RENDER ICONOS EN LÍNEA (Los 5 básicos + seleccionado + botón más)
+            let htmlIconos = '';
+            CATALOGO_ICONOS.Básicos.forEach(i => {
+                let sel = (i.emoji === iconoActualSeleccionado) ? 'selected' : '';
+                htmlIconos += `<div class="inline-opt-btn ${sel}" onclick="seleccionarValorGlobal('iconos', '${i.emoji}')">${i.emoji}</div>`;
+            });
+            let isIconoBasico = CATALOGO_ICONOS.Básicos.some(b => b.emoji === iconoActualSeleccionado);
+            if (!isIconoBasico) { htmlIconos += `<div class="inline-opt-btn selected">${iconoActualSeleccionado}</div>`; }
+            htmlIconos += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('iconos')">+</div>`;
+            document.getElementById(`${prefijo}-iconos-inline`).innerHTML = htmlIconos;
 
-            const contIcono = document.getElementById(`${prefijo}-selector-iconos-avanzado`);
-            if (contIcono) {
-                contIcono.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <div id="${prefijo}-preview-icono" style="width:50px; height:50px; border-radius:12px; background:#fff; border:2px solid #E5E7E9; display:flex; align-items:center; justify-content:center; font-size:26px;">${iconoActualSeleccionado}</div>
-                        <button type="button" class="expand-btn" onclick="abrirSelectorIconos('${prefijo}')" title="Ver todos los iconos desbloqueados">▼</button>
-                    </div>
-                `;
-            }
+            // RENDER COLORES EN LÍNEA (Los 5 básicos + seleccionado + botón más)
+            let htmlColores = '';
+            CATALOGO_COLORES.Básicos.forEach(c => {
+                let sel = (c.hex === colorActualSeleccionado) ? 'selected' : '';
+                htmlColores += `<div class="inline-opt-btn color-btn ${sel}" style="background:${c.hex};" onclick="seleccionarValorGlobal('colores', '${c.hex}')"></div>`;
+            });
+            let isColorBasico = CATALOGO_COLORES.Básicos.some(b => b.hex === colorActualSeleccionado);
+            if (!isColorBasico) { htmlColores += `<div class="inline-opt-btn color-btn selected" style="background:${colorActualSeleccionado};"></div>`; }
+            htmlColores += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('colores')">+</div>`;
+            document.getElementById(`${prefijo}-colores-inline`).innerHTML = htmlColores;
         };
     </script>
 </body>
