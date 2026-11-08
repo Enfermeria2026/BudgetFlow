@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetFlow - Dashboard</title>
     <style>
-        /* LOADER GLOBAL */
-        #global-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); z-index: 99999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles);
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         :root {
             --bg-color: #F4F6F9;
             --text-main: #2C3E50;
@@ -32,30 +20,22 @@
             background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
             height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
-
-        /* ZONA FIJA SUPERIOR */
-        .fixed-top-section {
-            margin-top: 60px; flex-shrink: 0; background-color: var(--bg-color); z-index: 50;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-            padding: 15px 15px 10px 15px; box-sizing: border-box; width: 100%;
-        }
-
-        /* PANEL FINANCIERO IDÉNTICO */
-        .financial-panel {
-            background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
-        }
-
-        .action-buttons-row { width: 100%; max-width: 500px; display: flex; gap: 15px; box-sizing: border-box; }
-
-        /* CONTENEDOR CON SCROLL AUTOMÁTICO */
-        .scrollable-cards-container {
-            flex-grow: 1; width: 100%; max-width: 500px; 
-            overflow-y: auto; padding: 0 15px 90px 15px; box-sizing: border-box; 
-            display: flex; flex-direction: column; gap: 20px;
-        }
         
-        /* HEADER FIJO SUPERIOR */
+        button, a, .info-icon, .action-btn, .fab-btn { -webkit-tap-highlight-color: transparent; }
+
+        /* LOADER GLOBAL */
+        #global-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* HEADER FIJO SUPERIOR DE LA APP */
         .top-header {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
             background-color: var(--bg-color); z-index: 100;
@@ -66,7 +46,6 @@
         .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
         .header-logo img { width: 40px; height: auto; }
         .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); }
-
 
         /* MENÚ LATERAL (SIDEBAR) */
         .sidebar-overlay {
@@ -86,82 +65,51 @@
         .sidebar-menu a {
             display: flex; align-items: center; gap: 15px; padding: 15px 20px;
             text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9;
-            -webkit-tap-highlight-color: transparent; /* Elimina el flash azul al pulsar */
         }
         .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
         .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
 
-        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; -webkit-tap-highlight-color: transparent; }
-        .nav-item.active { color: var(--color-disponibles); }
-        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
-        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
-        
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
-            height: 100vh; overflow: hidden; /* Bloquea el scroll general de la página */
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        /* ZONA FIJA SUPERIOR (Panel financiero y Botones de acción) */
+        /* ZONA FIJA SUPERIOR (Altura fija calculada para albergar el panel y los botones) */
         .fixed-top-section {
-            position: fixed; top: 60px; left: 0; width: 100%;
+            position: fixed; top: 60px; left: 0; width: 100%; height: 175px;
             background-color: var(--bg-color); z-index: 50;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
             padding: 15px 15px 10px 15px; box-sizing: border-box;
         }
 
-        .dashboard-content {
+        /* PANEL FINANCIERO */
+        .financial-panel {
             background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
         }
-
-        .action-buttons-row { width: 100%; max-width: 500px; display: flex; gap: 15px; box-sizing: border-box; }
-
-        /* CONTENEDOR CON SCROLL (Para todas las secciones del centro) */
-        .scrollable-cards-container {
-            width: 100%; max-width: 500px; 
-            position: absolute; top: 235px; bottom: 80px; 
-            left: 50%; transform: translateX(-50%);
-            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
-            display: flex; flex-direction: column; gap: 20px;
-        }
-
-        /* ELIMINAR EL COLOR AZUL AL PULSAR EN MÓVILES */
-        button, .info-icon, .card-btn-ver, .btn-action { -webkit-tap-highlight-color: transparent; }
-
-        /* PANEL FINANCIERO (3 VARIABLES) */
-        .financial-panel {
-            background-color: var(--card-bg); border-radius: 16px; padding: 20px 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center;
-        }
         .fin-block { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
-        .info-icon-wrapper { margin-bottom: 2px; } /* Envuelve la "i" para ponerla encima */
-        .fin-title { font-size: 12px; font-weight: bold; text-align: center; line-height: 1.3; } /* Centrado y sin iconos al lado */
+        .info-icon-wrapper { margin-bottom: 2px; }
+        .fin-title { font-size: 12px; font-weight: bold; text-align: center; line-height: 1.3; }
         .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
         .fin-amount { font-size: 18px; font-weight: bold; }
 
         /* BOTONES DE ACCIÓN PRINCIPALES */
-        .action-buttons-row { display: flex; gap: 15px; }
+        .action-buttons-row { width: 100%; max-width: 500px; display: flex; gap: 15px; box-sizing: border-box; }
         .btn-action {
             flex: 1; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center;
         }
         .btn-ingreso { background-color: var(--color-disponibles); color: white; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); }
         .btn-finalizar { background-color: transparent; color: var(--text-main); border: 2px solid var(--text-main); }
 
+        /* CONTENEDOR CON SCROLL (Empieza exactamente debajo de la zona fija y termina antes de la barra inferior) */
+        .scrollable-cards-container {
+            position: fixed; top: 245px; bottom: 70px; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px;
+            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
         /* SECCIONES Y CUADRÍCULAS (GRIDS) */
         .section-header { font-size: 18px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; margin-top: 5px; }
         .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
-        /* TARJETAS COMPACTAS (Diseño del boceto) */
+        /* TARJETAS COMPACTAS */
         .mini-card {
             background-color: var(--card-bg); border-radius: 12px; padding: 12px; box-sizing: border-box;
             box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 8px; border: 1px solid #F0F0F0;
@@ -182,6 +130,17 @@
         .card-btn-ver:hover { background-color: #F2F4F4; }
         .arrow-icon { font-size: 24px; color: var(--text-main); margin-bottom: 5px; }
         .card-btn-text { font-size: 13px; font-weight: bold; color: var(--text-main); text-decoration: none; }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
 
         /* MODALES DE INFORMACIÓN */
         .modal-overlay {
@@ -236,11 +195,9 @@
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
 
-
     <!-- ZONA FIJA SUPERIOR -->
     <div class="fixed-top-section">
-        
-        <!-- PANEL DE VARIABLES (Clase unificada .financial-panel) -->
+        <!-- PANEL DE VARIABLES -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
                 <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
@@ -261,34 +218,30 @@
 
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons-row">
-           <button class="btn-action btn-ingreso" onclick="abrirModal('modal-ingreso')">Añadir ingreso</button>
+            <button class="btn-action btn-ingreso" onclick="abrirModal('modal-ingreso')">Añadir ingreso</button>
             <button class="btn-action btn-finalizar">Finalizar mes</button>
         </div>
-
     </div>
 
     <!-- ZONA CON SCROLL (Únicamente las tarjetas del centro se mueven) -->
     <div class="scrollable-cards-container">
-
-        <!-- SECCIÓN: PRESUPUESTOS (CATEGORÍAS) -->
+        <!-- SECCIÓN CATEGORÍAS -->
         <div>
             <div class="section-header">Categorías</div>
             <div class="grid-2x2" id="grid-categorias">
-                <!-- Cargando datos... -->
+                <!-- Se llena por JavaScript -->
             </div>
         </div>
 
-        <!-- SECCIÓN: GASTOS IMPREVISTOS -->
+        <!-- SECCIÓN GASTOS IMPREVISTOS -->
         <div>
             <div class="section-header">Gastos imprevistos</div>
             <div class="grid-2x2">
-                <!-- Tarjeta Total Imprevistos -->
                 <div class="mini-card" style="justify-content: center; align-items: center; text-align: center;">
                     <div class="mini-icon" style="background: #E5E7E9; color: #555;">🧾</div>
                     <div class="mini-title" style="color: #7F8C8D;">Gastos totales</div>
                     <div class="fin-amount" id="ui-imprevistos">0.00 €</div>
                 </div>
-                <!-- Botón Ver Todos -->
                 <div class="mini-card card-btn-ver" onclick="window.location.href='gastos.html'">
                     <div class="arrow-icon">➔</div>
                     <div class="card-btn-text">Ver todos los<br>gastos</div>
@@ -296,22 +249,21 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: HUCHAS DE AHORRO -->
+        <!-- SECCIÓN HUCHAS -->
         <div>
             <div class="section-header">Huchas de ahorro</div>
             <div class="grid-2x2" id="grid-huchas">
-                <!-- Cargando datos... -->
+                <!-- Se llena por JavaScript -->
             </div>
         </div>
 
-        <!-- SECCIÓN: FONDOS RESERVADOS -->
+        <!-- SECCIÓN FONDOS -->
         <div>
             <div class="section-header">Fondos Reservados</div>
             <div class="grid-2x2" id="grid-fondos">
-                <!-- Cargando datos... -->
+                <!-- Se llena por JavaScript -->
             </div>
         </div>
-
     </div>
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR -->
@@ -343,7 +295,6 @@
             <h3 class="modal-title" style="color: var(--color-retenidos);">Fondos Retenidos</h3>
             <p class="modal-text">Es el dinero que sigue siendo tuyo, pero que la aplicación "bloquea" virtualmente porque lo has destinado a tus presupuestos mensuales, huchas o fondos reservados.</p>
             <div class="breakdown-list" id="lista-retenidos">
-                <!-- Se rellena por JS -->
                 Cargando desglose...
             </div>
             <button class="btn-cerrar-modal" onclick="cerrarInfo('modal-retenidos')">Entendido</button>
@@ -404,7 +355,6 @@
                 </div>
             </div>
             
-            
             <p id="err-ingreso" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align: center; margin-top: 10px;"></p>
             
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -464,20 +414,20 @@
       // MODALES GENERALES E INFO
         window.abrirInfo = function(id) { 
             document.getElementById(id).style.display = 'flex'; 
-            document.body.style.overflow = 'hidden'; /* Bloquea el scroll del fondo */
+            document.body.style.overflow = 'hidden'; 
         };
         window.cerrarInfo = function(id) { 
             document.getElementById(id).style.display = 'none'; 
-            document.body.style.overflow = ''; /* Restaura el scroll */
+            document.body.style.overflow = ''; 
         };
         
         window.abrirModal = function(id) { 
             document.getElementById(id).style.display = 'flex'; 
-            document.body.style.overflow = 'hidden'; /* Bloquea el scroll del fondo */
+            document.body.style.overflow = 'hidden'; 
         };
         window.cerrarModal = function(id) { 
             document.getElementById(id).style.display = 'none'; 
-            document.body.style.overflow = ''; /* Restaura el scroll */
+            document.body.style.overflow = ''; 
             if(document.getElementById('err-ingreso')) document.getElementById('err-ingreso').style.display = 'none';
         };
 
@@ -488,7 +438,6 @@
             const tipo = document.getElementById('ing-tipo').value;
             const concepto = document.getElementById('ing-concepto').value.trim();
             
-            // Campos opcionales
             const importeBruto = parseFloat(document.getElementById('ing-bruto').value) || null;
             const checkNomina = document.getElementById('check-nomina').checked;
             
@@ -499,19 +448,16 @@
 
             const errDiv = document.getElementById('err-ingreso');
 
-            // 1. Validación de campos obligatorios
             if (isNaN(importeNeto) || importeNeto <= 0 || !tipo || !concepto) {
                 errDiv.textContent = "Por favor, rellena todos los campos obligatorios (*).";
                 errDiv.style.display = 'block';
                 return;
             }
 
-            // 2. Validación matemática de retenciones (Solo si ha puesto Bruto y ha marcado la nómina)
             if (checkNomina && importeBruto) {
                 const totalRetenciones = irpfEur + segSocial + otrasRet;
                 const diferenciaBrutoNeto = importeBruto - importeNeto;
 
-                // Si las retenciones declaradas superan la diferencia real entre Bruto y Neto, bloqueamos
                 if (totalRetenciones > diferenciaBrutoNeto) {
                     errDiv.textContent = `Error: Tus retenciones (${totalRetenciones.toFixed(2)}€) superan la diferencia entre el Bruto y el Neto (${diferenciaBrutoNeto.toFixed(2)}€). Revisa los importes.`;
                     errDiv.style.display = 'block';
@@ -524,12 +470,11 @@
             errDiv.style.display = 'none';
 
             try {
-                // 3. Añadir a historial de movimientos en Firestore
                 await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
                     tipo: "ingreso",
                     subtipo: tipo,
                     concepto: concepto,
-                    importe: importeNeto, // Este es el importe principal que suma a la cuenta
+                    importe: importeNeto,
                     importeBruto: importeBruto,
                     conceptosNomina: checkNomina ? {
                         irpfPorcentaje: irpfPct > 0 ? irpfPct : null,
@@ -540,7 +485,6 @@
                     fecha: new Date().toISOString()
                 });
 
-                // 4. Actualizar las cifras del usuario
                 const userRef = doc(db, "usuarios", uidActual);
                 const userDoc = await getDoc(userRef);
                 const data = userDoc.data();
@@ -553,11 +497,9 @@
                     fondosDisponibles: nuevosDisponibles
                 });
 
-                // 5. Actualizar los números en pantalla
                 document.getElementById('ui-totales').textContent = nuevosTotales.toFixed(2) + " €";
                 document.getElementById('ui-disponibles').textContent = nuevosDisponibles.toFixed(2) + " €";
 
-                // 6. Limpiar formulario y cerrar
                 document.getElementById('ing-importe').value = "";
                 document.getElementById('ing-bruto').value = "";
                 document.getElementById('ing-tipo').value = "";
@@ -581,7 +523,6 @@
             }
         };
 
-        // LÓGICA PRINCIPAL DE DATOS
         let uidActual = null;
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -593,15 +534,12 @@
         });
 
         async function cargarDatosDashboard() {
-            // 1. Cargar Variables Principales PRIMERO para dar respuesta visual instantánea
             const userDocPromise = getDoc(doc(db, "usuarios", uidActual));
             
-            // Lanzar las colecciones en paralelo sin esperar
             const categoriasPromise = fetchColeccion("categorias");
             const huchasPromise = fetchColeccion("huchas");
             const fondosPromise = fetchColeccion("fondos_reservados");
 
-            // Renderizar saldos en cuanto el usuario llega
             const userDoc = await userDocPromise;
             if (userDoc.exists()) {
                 const data = userDoc.data();
@@ -610,19 +548,15 @@
                 document.getElementById('ui-retenidos').textContent = (data.fondosRetenidos || 0).toFixed(2) + " €";
             }
 
-            // 2. Esperar al resto de colecciones simultáneamente
             const [categorias, huchas, fondos] = await Promise.all([categoriasPromise, huchasPromise, fondosPromise]);
 
-            // 3. Renderizar Grids
             renderizarGrid("grid-categorias", categorias, "cat", "presupuestos.html", "Ver todas las<br>categorías");
             renderizarGrid("grid-huchas", huchas, "huc", "huchas.html", "Ver todas las<br>huchas");
             renderizarGrid("grid-fondos", fondos, "fon", "fondos.html", "Ver todos los<br>fondos");
 
-            // 4. Preparar desglose para modal "Retenidos"
             prepararDesgloseRetenidos(categorias, huchas, fondos);
 
             document.getElementById('global-loader').style.display = 'none';
-            
         }
 
         async function fetchColeccion(nombreCol) {
@@ -636,15 +570,12 @@
             const contenedor = document.getElementById(containerId);
             contenedor.innerHTML = "";
             
-            // Ordenar para sacar las de mayor importe/gasto (opcional, por ahora por id/orden creacion)
-            // Limitamos a máximo 3 tarjetas
             const limit = Math.min(items.length, 3);
             
             for (let i = 0; i < limit; i++) {
                 contenedor.innerHTML += generarMiniTarjeta(items[i], tipo);
             }
 
-            // Añadir siempre la tarjeta botón al final
             contenedor.innerHTML += `
                 <div class="mini-card card-btn-ver" onclick="window.location.href='${urlTodas}'">
                     <div class="arrow-icon">➔</div>
@@ -663,7 +594,6 @@
             if (max > 0) {
                 let porcentaje = Math.min(100, Math.round((actual / max) * 100));
                 
-                // Lógica de color de barras invertida según tipo
                 if (tipo === 'cat') {
                     if (porcentaje < 50) colorBarra = '#27AE60'; else if (porcentaje < 80) colorBarra = '#F4D03F'; else colorBarra = '#E74C3C';
                 } else {
