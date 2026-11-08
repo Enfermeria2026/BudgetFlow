@@ -389,6 +389,29 @@
                 <label>Título <span style="color:var(--color-retenidos)">*</span></label>
                 <input type="text" id="edit-cat-nombre">
             </div>
+            
+            <div class="field-wrapper">
+                <label>Icono <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="icon-selector" id="edit-cat-iconos">
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">💼</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🧳</div>
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label>Color <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="color-selector" id="edit-cat-colores">
+                    <div class="opt-btn" style="background:#58D68D;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#E74C3C"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#EB984E"></div>
+                </div>
+            </div>
+
             <div class="field-wrapper">
                 <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
                 <input type="number" id="edit-cat-max" placeholder="0.00" min="0" step="0.01">
@@ -1231,8 +1254,26 @@
             document.getElementById('edit-cat-nombre').value = cat.nombre || '';
             document.getElementById('edit-cat-max').value = cat.presupuestoMaximo || 0;
             
+            // Marcar icono actual
+            document.querySelectorAll('#edit-cat-iconos .opt-btn').forEach(btn => {
+                if (btn.textContent.trim() === cat.icono) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+
+            // Marcar color actual
+            document.querySelectorAll('#edit-cat-colores .opt-btn').forEach(btn => {
+                if (btn.getAttribute('data-color') === cat.color) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+
             const gastadoActual = Number(cat.gastado) || 0;
-            document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior)`;
+            document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior al gasto)`;
             
             const err = document.getElementById('err-editar-cat');
             if (err) err.style.display = 'none';
@@ -1248,6 +1289,9 @@
             const idCat = document.getElementById('edit-cat-id').value;
             const nuevoNombre = document.getElementById('edit-cat-nombre').value.trim();
             const nuevoMax = parseFloat(document.getElementById('edit-cat-max').value);
+            
+            const iconoSel = document.querySelector('#edit-cat-iconos .selected');
+            const colorSel = document.querySelector('#edit-cat-colores .selected');
 
             const catOriginal = colCategorias.find(c => c.id === idCat);
             if (!catOriginal) return;
@@ -1255,32 +1299,73 @@
             const gastadoActual = Number(catOriginal.gastado) || 0;
             const maxAntiguo = Number(catOriginal.presupuestoMaximo) || 0;
 
-            if (!nuevoNombre || isNaN(nuevoMax) || nuevoMax < 0) {
-                if (err) { err.textContent = "Rellena los campos obligatorios correctamente."; err.style.display = 'block'; }
+            if (!nuevoNombre || isNaN(nuevoMax) || nuevoMax < 0 || !iconoSel || !colorSel) {
+                if (err) { err.textContent = "Rellena todos los campos obligatorios correctamente."; err.style.display = 'block'; }
                 return;
             }
 
-            if (nuevoMax < gastadoActual) {
-                if (err) { 
-                    err.textContent = `El presupuesto máximo no puede ser inferior a lo ya gastado (${gastadoActual.toFixed(2)}€).`; 
-                    err.style.display = 'block'; 
+            let disponiblesActuales = Number(datosUsuario.fondosDisponibles) || 0;
+            let retenidosActuales = Number(datosUsuario.fondosRetenidos) || 0;
+
+            let deltaRetenidos = 0;
+            let deltaDisponibles = 0;
+
+            // OPCIÓN 1: NUEVO PRESUPUESTO > ANTIGUO PRESUPUESTO
+            if (nuevoMax > maxAntiguo) {
+                // CASO 1.1: Si estaba excedido (gastado > maxAntiguo)
+                if (gastadoActual > maxAntiguo) {
+                    if (nuevoMax < gastadoActual) {
+                        if (err) { err.textContent = `El presupuesto nuevo no puede ser inferior al gasto actual (${gastadoActual.toFixed(2)}€).`; err.style.display = 'block'; }
+                        return;
+                    }
+                    // La diferencia a cubrir es entre el nuevo presupuesto y el gasto con el exceso
+                    let diferencia = nuevoMax - gastadoActual;
+                    if (diferencia > disponiblesActuales) {
+                        if (err) { err.textContent = `No tienes suficientes fondos disponibles. Te faltan ${(diferencia - disponiblesActuales).toFixed(2)}€ libres.`; err.style.display = 'block'; }
+                        return;
+                    }
+                    deltaRetenidos = diferencia;
+                    deltaDisponibles = -diferencia;
+                } 
+                // CASO 1.2: Si no tenía presupuesto excedido
+                else {
+                    let diferencia = nuevoMax - maxAntiguo;
+                    if (diferencia > disponiblesActuales) {
+                        if (err) { err.textContent = `No tienes suficientes fondos disponibles. Te faltan ${(diferencia - disponiblesActuales).toFixed(2)}€ libres.`; err.style.display = 'block'; }
+                        return;
+                    }
+                    deltaRetenidos = diferencia;
+                    deltaDisponibles = -diferencia;
                 }
-                return;
+            } 
+            // OPCIÓN 2: NUEVO PRESUPUESTO < ANTIGUO PRESUPUESTO
+            else if (nuevoMax < maxAntiguo) {
+                // Verificar que el gasto sea estrictamente inferior al nuevo presupuesto
+                if (gastadoActual >= nuevoMax) {
+                    if (err) { err.textContent = `El gasto actual (${gastadoActual.toFixed(2)}€) es superior o igual al nuevo presupuesto. No se puede realizar.`; err.style.display = 'block'; }
+                    return;
+                }
+                // La diferencia entre el presupuesto anterior y el nuevo se resta de retenido y se suma a disponible
+                let diferencia = maxAntiguo - nuevoMax;
+                deltaRetenidos = -diferencia;
+                deltaDisponibles = diferencia;
             }
 
             btn.disabled = true; btn.textContent = "GUARDANDO...";
 
             try {
-                const diferenciaMax = nuevoMax - maxAntiguo;
-                const nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) + diferenciaMax;
-
+                // Actualizar la categoría en Firestore (nombre, icono, color y nuevo presupuesto máximo)
                 await updateDoc(doc(db, "usuarios", uidActual, "categorias", idCat), {
                     nombre: nuevoNombre,
+                    icono: iconoSel.textContent,
+                    color: colorSel.getAttribute('data-color'),
                     presupuestoMaximo: nuevoMax
                 });
 
+                // Actualizar saldos globales del usuario en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosRetenidos: Math.max(0, nuevosRetenidos)
+                    fondosRetenidos: Math.max(0, retenidosActuales + deltaRetenidos),
+                    fondosDisponibles: disponiblesActuales + deltaDisponibles
                 });
 
                 cerrarModal('modal-editar-cat');
