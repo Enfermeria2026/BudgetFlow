@@ -29,7 +29,7 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+        
         /* HEADER FIJO SUPERIOR */
         .top-header {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
@@ -41,7 +41,7 @@
         .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
         .header-logo img { width: 40px; height: auto; }
         .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); }
-
+        
         /* MENÚ LATERAL (SIDEBAR) */
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .sidebar {
@@ -60,8 +60,8 @@
         .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
         .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
-
-        /* ZONA FIJA SUPERIOR (Panel, Título y Filtros) -> Altura exacta de 215px */
+        
+        /* ZONA FIJA SUPERIOR */
         .fixed-top-section {
             position: fixed; top: 60px; left: 0; width: 100%; height: 215px;
             background-color: var(--bg-color); z-index: 50;
@@ -83,7 +83,7 @@
         .totals-mini-card { background: #fff; padding: 10px 12px; border-radius: 8px; border: 1px solid #E5E7E9; font-size: 12px; font-weight: bold; color: var(--text-main); }
         .filter-btn { background: #E5E7E9; border: none; padding: 10px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* CONTENEDOR CON SCROLL (Empieza exactamente en 285px para dejar libre el bloque superior sin cortes) */
+        /* CONTENEDOR CON SCROLL */
         .page-content {
             position: fixed; top: 285px; bottom: 70px; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 500px;
@@ -91,8 +91,8 @@
             display: flex; flex-direction: column; gap: 15px;
         }
         .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-
-        /* FILA DE CATEGORÍA (Casilla + Tarjeta) */
+        
+        /* FILA DE CATEGORÍA */
         .categoria-row { display: flex; align-items: center; gap: 12px; width: 100%; }
         .categoria-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--color-retenidos); flex-shrink: 0; }
 
@@ -122,8 +122,8 @@
         
         .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); }
         .text-excedido { color: var(--color-retenidos); margin-left: 5px; }
-
-        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE (Borrar X categorías) */
+        
+        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE */
         .delete-action-bar {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 460px; background: var(--text-main); color: white;
@@ -141,7 +141,7 @@
             transition: transform 0.3s ease;
         }
         .fab-btn.spin { transform: rotate(90deg); }
-
+        
         /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
@@ -167,10 +167,6 @@
         label { font-size: 13px; font-weight: bold; color: var(--text-main); }
         input, select { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
         
-        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 5px; }
-        .opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D5D8DC; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
-        .opt-btn.selected { border-color: var(--color-disponibles); box-shadow: 0 0 0 2px var(--color-disponibles); }
-        
         .btn-row { display: flex; gap: 10px; margin-top: 20px; }
         .btn-cancel { flex: 1; padding: 15px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
         .btn-confirm { flex: 1; padding: 15px; border: none; background: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
@@ -178,8 +174,8 @@
         .breakdown-list { text-align: left; font-size: 13px; color: #555; background: #F9F9F9; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ddd; }
         .breakdown-item:last-child { border-bottom: none; }
-
-        /* ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
+        
+        * ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
         .inline-selector { display: flex; gap: 8px; align-items: center; margin-top: 5px; overflow-x: auto; padding-bottom: 5px; }
         .inline-opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
         .inline-opt-btn.color-btn { border-color: transparent; }
@@ -195,7 +191,6 @@
         .acordeon-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--text-main); background: #F4F6F9; padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 1px solid #E5E7E9; }
         .acordeon-content { display: none; padding: 5px; }
         .acordeon-content.open { display: block; }
-        
     </style>
 </head>
 <body>
@@ -230,10 +225,9 @@
         <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> <span style="color:#000;">Budget</span><span style="color:var(--color-disponibles);">Flow</span></div>
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
-
-    <!-- ZONA FIJA SUPERIOR (No se mueve con el scroll) -->
+    
+    <!-- ZONA FIJA SUPERIOR -->
     <div class="fixed-top-section">
-        <!-- PANEL DE VARIABLES -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
                 <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
@@ -254,7 +248,6 @@
 
         <div class="page-title">PRESUPUESTOS - CATEGORÍAS</div>
         
-        <!-- BARRA DE FILTROS Y RESUMEN -->
         <div class="filter-row">
             <div class="totals-mini-card" id="ui-resumen-gastos">Total: 0.00€ / 0.00€</div>
             <div style="position: relative; display: inline-block;">
@@ -273,8 +266,8 @@
             </div>
         </div>
     </div>
-
-    <!-- ZONA CON SCROLL (Únicamente las tarjetas) -->
+    
+    <!-- ZONA CON SCROLL -->
     <main class="page-content">
         <div class="items-list" id="contenedor-categorias"></div>
     </main>
@@ -282,12 +275,12 @@
     <!-- BOTÓN FLOTANTE GIGANTE -->
     <button class="fab-btn" id="btn-fab" onclick="animarYabrirModal('modal-crear-cat', this)">+</button>
 
-    <!-- BARRA FLOTANTE DE BORRADO MÚLTIPLE DE CATEGORÍAS -->
+    <!-- BARRA FLOTANTE DE BORRADO MÚLTIPLE -->
     <div class="delete-action-bar" id="delete-bar-cat">
         <span id="delete-counter-cat">0 seleccionadas</span>
         <button class="btn-borrar-multi" onclick="abrirModalBorrarCategoriasMulti()">Borrar categorías</button>
     </div>
-
+    
     <!-- BARRA NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
         <a href="huchas.html" class="nav-item nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
@@ -313,8 +306,7 @@
         </div>
     </div>
 
-
-    <!-- MODALES DE CATÁLOGO COMPLETO -->
+    <!-- MODALES DE CATÁLOGO COMPLETO (ACORDEONES) -->
     <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
         <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
             <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Iconos</h3>
@@ -330,7 +322,7 @@
             <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-cancel" onclick="cerrarModal('modal-selector-colores')">Cerrar</button></div>
         </div>
     </div>
-    
+
     <!-- MODAL CONFIRMACIÓN EXCESO PRESUPUESTO -->
     <div class="modal-overlay" id="modal-confirm-exceso" style="z-index: 10002;">
         <div class="modal-content" style="border-top: 5px solid var(--color-totales);">
@@ -342,7 +334,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- MODAL SELECTOR DE ICONOS AVANZADO -->
     <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
         <div class="modal-content" style="max-width: 450px;">
@@ -539,10 +531,9 @@
         const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 
-        // FECHA HEADER
         const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const fechaActual = new Date(); document.getElementById('header-date').textContent = `${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
-
+        
         // EFECTO LOADER EN ENLACES DE NAVEGACIÓN
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('a').forEach(link => {
@@ -556,7 +547,7 @@
 
         // Variables Globales
         let uidActual = null; let datosUsuario = null; let colCategorias = []; 
-        let categoriaSeleccionada = null; 
+        let categoriaSeleccionada = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) { 
@@ -587,7 +578,7 @@
         });
 
         window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
-
+        
         // MODALES
         window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
         window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; };
@@ -602,6 +593,8 @@
                 if (id === 'modal-crear-cat') {
                     colorActualSeleccionado = "#58D68D";
                     iconoActualSeleccionado = "🏠";
+                    document.getElementById('cat-nombre').value = '';
+                    document.getElementById('cat-presupuesto').value = '';
                     renderizarSelectoresInline('cat');
                 }
             }, 300);
@@ -613,8 +606,7 @@
             document.querySelectorAll('p[id^="err-"]').forEach(el => el.style.display = 'none');
         };
         window.cerrarAlertError = function() { document.getElementById('modal-alert-error').style.display = 'none'; };
-        window.selOpc = function(el, cont) { document.getElementById(cont).querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); };
-
+        
         async function fetchColeccion(nombreCol) {
             const arr = [];
             const qs = await getDocs(collection(db, "usuarios", uidActual, nombreCol));
@@ -631,9 +623,9 @@
             cats.forEach(c => {
                 let gastC = Number(c.gastado) || 0;
                 let maxC = Number(c.presupuestoMaximo) || 0;
-                let remanenteC = Math.max(0, maxC - gastC); // Lo que realmente queda por gastar
-                
-                html += `<div class="breakdown-item"><span>${c.icono} ${c.nombre}</span> <b>${remanenteC.toFixed(2)}€</b></div>`;
+                let remanenteC = Math.max(0, maxC - gastC);
+                let iconoC = c.icono || '🏠';
+                html += `<div class="breakdown-item"><span>${iconoC} ${c.nombre}</span> <b>${remanenteC.toFixed(2)}€</b></div>`;
                 total += remanenteC; 
             });
             
@@ -685,7 +677,7 @@
             }
         }
 
-        let criterioOrdenActual = 'pct-mayor'; // Criterio por defecto
+        let criterioOrdenActual = 'pct-mayor';
 
         window.ordenarCategorias = function(criterio) {
             criterioOrdenActual = criterio;
@@ -729,7 +721,6 @@
                 return; 
             }
             
-            // ORDENACIÓN INTELIGENTE
             colCategorias.sort((a, b) => {
                 let gastA = Number(a.gastado) || 0;
                 let maxA = Number(a.presupuestoMaximo) || 0;
@@ -774,11 +765,14 @@
                     textoExceso = `<span class="text-excedido">+${(gast - max).toFixed(2)}€ exced.</span>`;
                 }
 
+                let colorFondo = cat.color || '#58D68D';
+                let iconoFondo = cat.icono || '🏠';
+
                 container.innerHTML += `
                     <div class="categoria-row">
                         <input type="checkbox" class="categoria-checkbox" value="${cat.id}" onchange="actualizarSeleccionBorrarCat()">
                         <div class="item-card">
-                            <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
+                            <div class="card-icon" style="background-color:${colorFondo}20; color:${colorFondo};">${iconoFondo}</div>
                             <div class="card-details">
                                 <div class="card-header-row">
                                     <div class="card-title">${cat.nombre}</div>
@@ -815,7 +809,6 @@
             const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
             const bar = document.getElementById('delete-bar-cat');
             const counter = document.getElementById('delete-counter-cat');
-
             if (checkboxes.length > 0) {
                 bar.style.display = 'flex';
                 counter.textContent = checkboxes.length === 1 ? '1 categoría seleccionada' : `${checkboxes.length} categorías seleccionadas`;
@@ -827,12 +820,9 @@
         window.abrirModalBorrarCategoriasMulti = function() {
             const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
             let sumaGastadoTotal = 0;
-
             checkboxes.forEach(chk => {
                 const cat = colCategorias.find(c => c.id === chk.value);
-                if (cat) {
-                    sumaGastadoTotal += (cat.gastado || 0);
-                }
+                if (cat) sumaGastadoTotal += (cat.gastado || 0);
             });
 
             document.getElementById('modal-delete-cat').style.display = 'flex';
@@ -847,7 +837,7 @@
                 document.getElementById('del-gastado-val').textContent = sumaGastadoTotal.toFixed(2);
             }
         };
-
+        
         // LÓGICA: CREAR CATEGORÍA
         window.crearCategoriaBD = async function() {
             const btn = document.getElementById('btn-submit-cat');
@@ -1162,7 +1152,6 @@
                 }
             }
 
-            // --- DOBLE VERIFICACIÓN DE EXCESOS ---
             if (!confirmandoExcesos && reubicaciones.length > 0) {
                 let excesosDetectados = [];
                 let simuladorGastos = {};
@@ -1176,10 +1165,8 @@
                             if (totalPrevisto > cat.presupuestoMaximo) {
                                 if (!excesosDetectados.some(e => e.id === cat.id)) {
                                     excesosDetectados.push({
-                                        id: cat.id,
-                                        nombre: `${cat.icono} ${cat.nombre}`,
-                                        previsto: totalPrevisto,
-                                        maximo: cat.presupuestoMaximo
+                                        id: cat.id, nombre: `${cat.icono} ${cat.nombre}`,
+                                        previsto: totalPrevisto, maximo: cat.presupuestoMaximo
                                     });
                                 }
                             }
@@ -1208,7 +1195,6 @@
 
             try {
                 let sumaRemanentesBorrados = 0;
-
                 idsCategoriasABorrar.forEach(id => {
                     const cat = colCategorias.find(c => c.id === id);
                     if (cat) {
@@ -1221,26 +1207,20 @@
                 let nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) - sumaRemanentesBorrados;
                 let nuevosDisponibles = (datosUsuario.fondosDisponibles || 0) + sumaRemanentesBorrados;
                 let nuevosTotales = datosUsuario.fondosTotales || 0;
-
                 let acumuladoresGastosDestino = {};
+
                 reubicaciones.forEach(r => {
-                    if (r.idDestino === 'imprevisto') {
-                        // Imprevisto: No requiere segundo paso de traspaso en retenidos/disponibles
-                    } else {
-                        // Traspaso a otra categoría: Segundo paso exigido por tu regla
+                    if (r.idDestino !== 'imprevisto') {
                         nuevosRetenidos -= r.importe;
                         nuevosDisponibles += r.importe;
-
                         acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastosDestino[r.idDestino] || 0) + r.importe;
                     }
                 });
 
-                // Borrar categorías de Firestore
                 for (let id of idsCategoriasABorrar) {
                     await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
                 }
 
-                // Procesar reubicaciones en Firestore
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
@@ -1267,7 +1247,6 @@
                     }
                 }
 
-                // Actualizar saldos definitivos en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual), {
                     fondosTotales: nuevosTotales,
                     fondosRetenidos: Math.max(0, nuevosRetenidos),
@@ -1278,14 +1257,12 @@
                 await recargarPantalla();
             } catch (e) {
                 console.error("Error detallado al eliminar:", e);
-                if (err) { 
-                    err.textContent = "Error: " + e.message; 
-                    err.style.display = 'block'; 
-                }
+                if (err) { err.textContent = "Error: " + e.message; err.style.display = 'block'; }
             } finally {
                 if (btn) { btn.disabled = false; btn.textContent = "ELIMINAR"; }
             }
-        };
+        }
+// --- SISTEMA DE EDICIÓN CON LÓGICA ESTRICTA ---
         window.abrirModalEditarCat = function(idCat) {
             const cat = colCategorias.find(c => c.id === idCat);
             if (!cat) return;
@@ -1299,7 +1276,7 @@
             renderizarSelectoresInline('edit-cat');
 
             const gastadoActual = Number(cat.gastado) || 0;
-            document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior al gasto)`;
+            document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior)`;
             
             const err = document.getElementById('err-editar-cat');
             if (err) err.style.display = 'none';
@@ -1323,61 +1300,46 @@
             const maxAntiguo = Number(catOriginal.presupuestoMaximo) || 0;
 
             if (!nuevoNombre || isNaN(nuevoMax) || nuevoMax < 0) {
-                if (err) { err.textContent = "Rellena todos los campos obligatorios correctamente."; err.style.display = 'block'; }
+                if (err) { err.textContent = "Rellena los campos obligatorios correctamente."; err.style.display = 'block'; }
                 return;
             }
 
             let disponiblesActuales = Number(datosUsuario.fondosDisponibles) || 0;
             let retenidosActuales = Number(datosUsuario.fondosRetenidos) || 0;
+            let deltaRetenidos = 0; let deltaDisponibles = 0;
 
-            let deltaRetenidos = 0;
-            let deltaDisponibles = 0;
-
-            // OPCIÓN 1: NUEVO PRESUPUESTO > ANTIGUO PRESUPUESTO
             if (nuevoMax > maxAntiguo) {
-                // CASO 1.1: Si estaba excedido (gastado > maxAntiguo)
                 if (gastadoActual > maxAntiguo) {
                     if (nuevoMax < gastadoActual) {
                         if (err) { err.textContent = `El presupuesto nuevo no puede ser inferior al gasto actual (${gastadoActual.toFixed(2)}€).`; err.style.display = 'block'; }
                         return;
                     }
-                    // La diferencia a cubrir es entre el nuevo presupuesto y el gasto con el exceso
                     let diferencia = nuevoMax - gastadoActual;
                     if (diferencia > disponiblesActuales) {
                         if (err) { err.textContent = `No tienes suficientes fondos disponibles. Te faltan ${(diferencia - disponiblesActuales).toFixed(2)}€ libres.`; err.style.display = 'block'; }
                         return;
                     }
-                    deltaRetenidos = diferencia;
-                    deltaDisponibles = -diferencia;
-                } 
-                // CASO 1.2: Si no tenía presupuesto excedido
-                else {
+                    deltaRetenidos = diferencia; deltaDisponibles = -diferencia;
+                } else {
                     let diferencia = nuevoMax - maxAntiguo;
                     if (diferencia > disponiblesActuales) {
                         if (err) { err.textContent = `No tienes suficientes fondos disponibles. Te faltan ${(diferencia - disponiblesActuales).toFixed(2)}€ libres.`; err.style.display = 'block'; }
                         return;
                     }
-                    deltaRetenidos = diferencia;
-                    deltaDisponibles = -diferencia;
+                    deltaRetenidos = diferencia; deltaDisponibles = -diferencia;
                 }
-            } 
-            // OPCIÓN 2: NUEVO PRESUPUESTO < ANTIGUO PRESUPUESTO
-            else if (nuevoMax < maxAntiguo) {
-                // Verificar que el gasto sea estrictamente inferior al nuevo presupuesto
+            } else if (nuevoMax < maxAntiguo) {
                 if (gastadoActual > nuevoMax) {
-                    if (err) { err.textContent = `El gasto actual (${gastadoActual.toFixed(2)}€) es superior o igual al nuevo presupuesto. No se puede realizar.`; err.style.display = 'block'; }
+                    if (err) { err.textContent = `El gasto actual (${gastadoActual.toFixed(2)}€) es superior al nuevo presupuesto. No se puede realizar.`; err.style.display = 'block'; }
                     return;
                 }
-                // La diferencia entre el presupuesto anterior y el nuevo se resta de retenido y se suma a disponible
                 let diferencia = maxAntiguo - nuevoMax;
-                deltaRetenidos = -diferencia;
-                deltaDisponibles = diferencia;
+                deltaRetenidos = -diferencia; deltaDisponibles = diferencia;
             }
 
             btn.disabled = true; btn.textContent = "GUARDANDO...";
 
             try {
-                // Actualizar la categoría en Firestore (nombre, icono, color y nuevo presupuesto máximo)
                 await updateDoc(doc(db, "usuarios", uidActual, "categorias", idCat), {
                     nombre: nuevoNombre,
                     icono: iconoActualSeleccionado,
@@ -1385,7 +1347,6 @@
                     presupuestoMaximo: nuevoMax
                 });
 
-                // Actualizar saldos globales del usuario en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual), {
                     fondosRetenidos: Math.max(0, retenidosActuales + deltaRetenidos),
                     fondosDisponibles: disponiblesActuales + deltaDisponibles
@@ -1401,9 +1362,10 @@
             }
         };
 
-        let colorActualSeleccionado = "#58D68D";
-        let iconoActualSeleccionado = "🏠";
+        // --- SISTEMA DE CATÁLOGO (RarezAS, ACORDEÓN, LÍNEA) ---
         let prefijoFormularioActual = "cat"; 
+        let colorActualSeleccionado = "#58D68D";
+        let iconoActualSeleccionado = "🏠"; 
 
         // --- CATÁLOGOS CON ESTRUCTURA BÁSICA + BLOQUEADOS ---
         const CATALOGO_COLORES = {
@@ -1472,8 +1434,6 @@
             ]
         };
 
-        let prefijoFormularioActual = "cat"; 
-
         window.abrirModalCatalogo = function(tipo) {
             renderizarAcordeon(tipo, tipo === 'iconos' ? CATALOGO_ICONOS : CATALOGO_COLORES, tipo === 'iconos' ? iconoActualSeleccionado : colorActualSeleccionado);
             abrirModal(`modal-selector-${tipo}`);
@@ -1514,10 +1474,10 @@
                     let claseS = isSelected ? 'selected' : '';
                     
                     if (tipo === 'iconos') {
-                        let onclickAccion = isLocked ? `alert('Icono bloqueado. ¡Completa logros para conseguirlo!')` : `seleccionarValorGlobal('iconos', '${item.emoji}')`;
+                        let onclickAccion = isLocked ? `alert('Icono bloqueado. ¡Sigue avanzando para conseguirlo!')` : `seleccionarValorGlobal('iconos', '${item.emoji}')`;
                         html += `<div class="modal-opt-item ${claseL} ${claseS}" onclick="${onclickAccion}">${item.emoji}</div>`;
                     } else {
-                        let onclickAccion = isLocked ? `alert('Color bloqueado. ¡Completa logros para conseguirlo!')` : `seleccionarValorGlobal('colores', '${item.hex}')`;
+                        let onclickAccion = isLocked ? `alert('Color bloqueado. ¡Sigue avanzando para conseguirlo!')` : `seleccionarValorGlobal('colores', '${item.hex}')`;
                         html += `<div class="modal-opt-item color-item ${claseL} ${claseS}" style="background:${item.hex};" onclick="${onclickAccion}"></div>`;
                     }
                 });
@@ -1526,6 +1486,13 @@
             });
             contenedor.innerHTML = html;
         }
+
+        window.seleccionarValorGlobal = function(tipo, valor) {
+            if (tipo === 'iconos') { iconoActualSeleccionado = valor; } 
+            else { colorActualSeleccionado = valor; }
+            cerrarModal(`modal-selector-${tipo}`);
+            renderizarSelectoresInline(prefijoFormularioActual);
+        };
 
         window.seleccionarValorGlobal = function(tipo, valor) {
             if (tipo === 'iconos') { iconoActualSeleccionado = valor; } 
