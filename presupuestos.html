@@ -538,12 +538,31 @@
             const div = document.getElementById('lista-retenidos');
             if (!div) return;
             let html = ""; let total = 0;
+            
             if(cats.length > 0) html += `<div style="font-weight:bold; margin-top:5px; color:var(--text-main);">Presupuestos:</div>`;
-            cats.forEach(c => { html += `<div class="breakdown-item"><span>${c.icono} ${c.nombre}</span> <b>${c.presupuestoMaximo.toFixed(2)}€</b></div>`; total += c.presupuestoMaximo; });
+            cats.forEach(c => {
+                let gastC = Number(c.gastado) || 0;
+                let maxC = Number(c.presupuestoMaximo) || 0;
+                let remanenteC = Math.max(0, maxC - gastC); // Lo que realmente queda por gastar
+                
+                html += `<div class="breakdown-item"><span>${c.icono} ${c.nombre}</span> <b>${remanenteC.toFixed(2)}€</b></div>`;
+                total += remanenteC; 
+            });
+            
             if(huchs.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Huchas:</div>`;
-            huchs.forEach(h => { html += `<div class="breakdown-item"><span>${h.icono} ${h.nombre}</span> <b>${h.guardado.toFixed(2)}€</b></div>`; total += h.guardado; });
+            huchs.forEach(h => { 
+                let guardadoH = Number(h.guardado) || 0;
+                html += `<div class="breakdown-item"><span>${h.icono} ${h.nombre}</span> <b>${guardadoH.toFixed(2)}€</b></div>`; 
+                total += guardadoH; 
+            });
+            
             if(fonds.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Fondos:</div>`;
-            fonds.forEach(f => { html += `<div class="breakdown-item"><span>${f.icono} ${f.nombre}</span> <b>${f.guardado.toFixed(2)}€</b></div>`; total += f.guardado; });
+            fonds.forEach(f => { 
+                let guardadoF = Number(f.guardado) || 0;
+                html += `<div class="breakdown-item"><span>${f.icono} ${f.nombre}</span> <b>${guardadoF.toFixed(2)}€</b></div>`; 
+                total += guardadoF; 
+            });
+            
             if (total === 0) html = "<div style='text-align:center; padding:10px;'>No hay fondos retenidos actualmente.</div>";
             div.innerHTML = html;
         }
