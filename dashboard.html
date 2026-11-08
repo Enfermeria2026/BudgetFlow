@@ -35,6 +35,7 @@
         .header-logo img { width: 40px; height: auto; }
         .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); }
 
+
         /* MENÚ LATERAL (SIDEBAR) */
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -53,9 +54,11 @@
         .sidebar-menu a {
             display: flex; align-items: center; gap: 15px; padding: 15px 20px;
             text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9;
+            -webkit-tap-highlight-color: transparent; /* Elimina el flash azul al pulsar */
         }
         .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
-        .sidebar-icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
 
         /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
         .bottom-nav {
@@ -63,13 +66,17 @@
             background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             display: flex; justify-content: space-around; align-items: center; z-index: 100;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; -webkit-tap-highlight-color: transparent; }
         .nav-item.active { color: var(--color-disponibles); }
-        .nav-icon { font-size: 24px; }
-        .nav-item.active .nav-icon { transform: scale(1.1); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
+        
 
         /* CONTENIDO PRINCIPAL */
         .dashboard-content { width: 100%; max-width: 500px; padding: 0 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ELIMINAR EL COLOR AZUL AL PULSAR EN MÓVILES */
+        button, .info-icon, .card-btn-ver, .btn-action { -webkit-tap-highlight-color: transparent; }
 
         /* PANEL FINANCIERO (3 VARIABLES) */
         .financial-panel {
@@ -77,8 +84,9 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center;
         }
         .fin-block { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
-        .fin-title { font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 14px; height: 14px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+        .info-icon-wrapper { margin-bottom: 2px; } /* Envuelve la "i" para ponerla encima */
+        .fin-title { font-size: 12px; font-weight: bold; text-align: center; line-height: 1.3; } /* Centrado y sin iconos al lado */
+        .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
         .fin-amount { font-size: 18px; font-weight: bold; }
 
         /* BOTONES DE ACCIÓN PRINCIPALES */
@@ -113,7 +121,7 @@
         }
         .card-btn-ver:hover { background-color: #F2F4F4; }
         .arrow-icon { font-size: 24px; color: var(--text-main); margin-bottom: 5px; }
-        .card-btn-text { font-size: 12px; font-weight: bold; color: #2980B9; text-decoration: underline; }
+        .card-btn-text { font-size: 13px; font-weight: bold; color: var(--text-main); text-decoration: none; }
 
         /* MODALES DE INFORMACIÓN */
         .modal-overlay {
@@ -140,18 +148,18 @@
         <div class="sidebar-header">
             <img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="dashboard.html" class="active"><span class="sidebar-icon">🏠</span> Dashboard</a></li>
-            <li><a href="presupuestos.html"><span class="sidebar-icon">📋</span> Presupuestos</a></li>
-            <li><a href="gastos.html"><span class="sidebar-icon">🧾</span> Gastos imprevistos</a></li>
-            <li><a href="fondos.html"><span class="sidebar-icon">🏛️</span> Fondos reservados</a></li>
-            <li><a href="huchas.html"><span class="sidebar-icon">🐷</span> Huchas de ahorro</a></li>
-            <li><a href="historial.html"><span class="sidebar-icon">📅</span> Historial mensual</a></li>
-            <li><a href="exportar.html"><span class="sidebar-icon">⬇️</span> Exportar datos</a></li>
-            <li><a href="configuracion.html"><span class="sidebar-icon">⚙️</span> Configuración</a></li>
-            <li><a href="ayuda.html"><span class="sidebar-icon">❓</span> Centro de ayuda</a></li>
-            <li><a href="info.html"><span class="sidebar-icon">ℹ️</span> Información de la app</a></li>
-            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon">🚪</span> Cerrar sesión</a></li>
+       <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span> Centro de ayuda</a></li>
+            <li><a href="info.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span> Información de la app</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Cerrar sesión</a></li>
         </ul>
     </aside>
 
@@ -165,21 +173,27 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="dashboard-content">
         
-        <!-- PANEL DE VARIABLES (CON MODALES) -->
+    <!-- PANEL DE VARIABLES (CON MODALES) -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
-                <div class="fin-title">Fondos Totales <span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
+                <div class="fin-title">Fondos<br>Totales</div>
                 <div class="fin-amount" id="ui-totales">0.00 €</div>
             </div>
             <div class="fin-block" style="color: var(--color-disponibles); border-left: 1px solid #eee; border-right: 1px solid #eee;">
-                <div class="fin-title">Fondos Disponibles <span class="info-icon" onclick="abrirInfo('modal-disponibles')">i</span></div>
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-disponibles')">i</span></div>
+                <div class="fin-title">Fondos<br>Disponibles</div>
                 <div class="fin-amount" id="ui-disponibles">0.00 €</div>
             </div>
             <div class="fin-block" style="color: var(--color-retenidos);">
-                <div class="fin-title">Fondos Retenidos <span class="info-icon" onclick="abrirInfo('modal-retenidos')">i</span></div>
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-retenidos')">i</span></div>
+                <div class="fin-title">Fondos<br>Retenidos</div>
                 <div class="fin-amount" id="ui-retenidos">0.00 €</div>
             </div>
         </div>
+
+
+        
 
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons-row">
@@ -188,7 +202,7 @@
         </div>
 
         <!-- SECCIÓN: PRESUPUESTOS (CATEGORÍAS) -->
-        <div class="section-header">Presupuestos</div>
+        <div class="section-header">Categorías</div>
         <div class="grid-2x2" id="grid-categorias">
             <!-- Cargando datos... -->
         </div>
@@ -225,11 +239,11 @@
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
-        <a href="huchas.html" class="nav-item"><span class="nav-icon">🐷</span>Huchas</a>
-        <a href="fondos.html" class="nav-item"><span class="nav-icon">🏛️</span>Fondos</a>
-        <a href="dashboard.html" class="nav-item active"><span class="nav-icon" style="background: var(--color-disponibles); color: white; border-radius: 8px; padding: 2px 8px;">⊞</span>Dashboard</a>
-        <a href="presupuestos.html" class="nav-item"><span class="nav-icon">📋</span>Presupuestos</a>
-        <a href="gastos.html" class="nav-item"><span class="nav-icon">🧾</span>Gastos</a>
+        <a href="huchas.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span>Fondos</a>
+        <a href="dashboard.html" class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>Presupuestos</a>
+        <a href="gastos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span>Gastos</a>
     </nav>
 
     <!-- MODALES DE INFORMACIÓN -->
@@ -243,7 +257,7 @@
     <div class="modal-overlay" id="modal-disponibles">
         <div class="modal-content">
             <h3 class="modal-title" style="color: var(--color-disponibles);">Fondos Disponibles</h3>
-            <p class="modal-text">Es el dinero "libre" que te queda. Es la cantidad que puedes gastar en imprevistos o usar para crear nuevas huchas, sin tocar el dinero que ya tienes asignado a tus categorías o ahorros.</p>
+            <p class="modal-text">Es el dinero "libre" que te queda. Es la cantidad que puedes gastar en imprevistos o usar para aportar a tus huchas o fondos, sin tocar el dinero que ya tienes asignado a tus categorías o ahorros.</p>
             <button class="btn-cerrar-modal" onclick="cerrarInfo('modal-disponibles')">Entendido</button>
         </div>
     </div>
@@ -259,15 +273,10 @@
         </div>
     </div>
 
-    <!-- MODAL AÑADIR INGRESO -->
+   <!-- MODAL AÑADIR INGRESO -->
     <div class="modal-overlay" id="modal-ingreso">
         <div class="modal-content" style="text-align: left;">
             <h3 class="modal-title" style="color: var(--color-disponibles); text-align: center;">Añadir Ingreso</h3>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
-                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Importe <span style="color:var(--color-retenidos)">*</span></label>
-                <input type="number" id="ing-importe" placeholder="0.00" min="0.01" step="0.01" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
-            </div>
             
             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
                 <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Tipo de ingreso <span style="color:var(--color-retenidos)">*</span></label>
@@ -282,6 +291,36 @@
             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
                 <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Concepto <span style="color:var(--color-retenidos)">*</span></label>
                 <input type="text" id="ing-concepto" placeholder="Ej: Sueldo Noviembre" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Importe neto <span style="color:var(--color-retenidos)">*</span></label>
+                <input type="number" id="ing-importe" placeholder="0.00" min="0.01" step="0.01" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                <label style="font-size: 13px; font-weight: bold; color: var(--text-main);">Importe bruto (Opcional)</label>
+                <input type="number" id="ing-bruto" placeholder="0.00" min="0.01" step="0.01" style="padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box;">
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:8px; margin-top:15px;">
+                <input type="checkbox" id="check-nomina" style="width:18px; height:18px;" onchange="document.getElementById('bloque-nomina').style.display = this.checked ? 'flex' : 'none';">
+                <label for="check-nomina" style="font-size: 13px; font-weight: bold; color: var(--text-main);">Rellenar conceptos de nómina</label>
+            </div>
+
+            <div id="bloque-nomina" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--text-main);">% IRPF aplicado (Opcional)</label>
+                    <input type="number" id="ing-irpf-pct" placeholder="Ej: 15" step="0.01" style="padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--text-main);">IRPF retenido en € (Opcional)</label>
+                    <input type="number" id="ing-irpf-eur" placeholder="0.00" step="0.01" style="padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 12px; font-weight: bold; color: var(--text-main);">Otras retenciones en € (Opcional)</label>
+                    <input type="number" id="ing-otras-ret" placeholder="0.00" step="0.01" style="padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;">
+                </div>
             </div>
             
             <p id="err-ingreso" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align: center; margin-top: 10px;"></p>
@@ -346,13 +385,21 @@
         // LÓGICA AÑADIR INGRESO
         window.guardarIngreso = async function() {
             const btn = document.getElementById('btn-guardar-ingreso');
-            const importe = parseFloat(document.getElementById('ing-importe').value);
+            const importeNeto = parseFloat(document.getElementById('ing-importe').value);
             const tipo = document.getElementById('ing-tipo').value;
             const concepto = document.getElementById('ing-concepto').value.trim();
+            
+            // Campos opcionales
+            const importeBruto = parseFloat(document.getElementById('ing-bruto').value) || null;
+            const checkNomina = document.getElementById('check-nomina').checked;
+            const irpfPct = checkNomina ? (parseFloat(document.getElementById('ing-irpf-pct').value) || null) : null;
+            const irpfEur = checkNomina ? (parseFloat(document.getElementById('ing-irpf-eur').value) || null) : null;
+            const otrasRet = checkNomina ? (parseFloat(document.getElementById('ing-otras-ret').value) || null) : null;
+
             const errDiv = document.getElementById('err-ingreso');
 
-            if (isNaN(importe) || importe <= 0 || !tipo || !concepto) {
-                errDiv.textContent = "Por favor, rellena todos los campos obligatorios.";
+            if (isNaN(importeNeto) || importeNeto <= 0 || !tipo || !concepto) {
+                errDiv.textContent = "Por favor, rellena todos los campos obligatorios (*).";
                 errDiv.style.display = 'block';
                 return;
             }
@@ -367,7 +414,13 @@
                     tipo: "ingreso",
                     subtipo: tipo,
                     concepto: concepto,
-                    importe: importe,
+                    importe: importeNeto, // Este es el importe principal que suma a la cuenta
+                    importeBruto: importeBruto,
+                    conceptosNomina: checkNomina ? {
+                        irpfPorcentaje: irpfPct,
+                        irpfRetenido: irpfEur,
+                        otrasRetenciones: otrasRet
+                    } : null,
                     fecha: new Date().toISOString()
                 });
 
@@ -376,22 +429,29 @@
                 const userDoc = await getDoc(userRef);
                 const data = userDoc.data();
                 
-                const nuevosTotales = (data.fondosTotales || 0) + importe;
-                const nuevosDisponibles = (data.fondosDisponibles || 0) + importe;
+                const nuevosTotales = (data.fondosTotales || 0) + importeNeto;
+                const nuevosDisponibles = (data.fondosDisponibles || 0) + importeNeto;
 
                 await updateDoc(userRef, {
                     fondosTotales: nuevosTotales,
                     fondosDisponibles: nuevosDisponibles
                 });
 
-                // 3. Actualizar los números de la pantalla visualmente sin recargar
+                // 3. Actualizar los números en pantalla
                 document.getElementById('ui-totales').textContent = nuevosTotales.toFixed(2) + " €";
                 document.getElementById('ui-disponibles').textContent = nuevosDisponibles.toFixed(2) + " €";
 
                 // 4. Limpiar formulario y cerrar
                 document.getElementById('ing-importe').value = "";
+                document.getElementById('ing-bruto').value = "";
                 document.getElementById('ing-tipo').value = "";
                 document.getElementById('ing-concepto').value = "";
+                document.getElementById('check-nomina').checked = false;
+                document.getElementById('bloque-nomina').style.display = 'none';
+                document.getElementById('ing-irpf-pct').value = "";
+                document.getElementById('ing-irpf-eur').value = "";
+                document.getElementById('ing-otras-ret').value = "";
+                
                 cerrarModal('modal-ingreso');
                 
             } catch (error) {
