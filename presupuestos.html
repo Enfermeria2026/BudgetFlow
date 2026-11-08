@@ -354,13 +354,25 @@
     </div>
 
     <!-- MODAL CREAR CATEGORÍA -->
+    <div class="modal-overlay" id="modal-crear-cat">
+        <div class="modal-content">
+            <h3 class="modal-title">Nueva Categoría</h3>
+            <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="cat-nombre"></div>
             <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="cat-selector-iconos-avanzado"></div>
+                <div class="icon-selector" id="cat-iconos">
+                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🏠</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🛒</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💼</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🧳</div>
+                </div>
             </div>
             <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="cat-selector-colores-avanzado"></div>
+                <div class="color-selector" id="cat-colores">
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'cat-colores')" data-color="#E74C3C"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'cat-colores')" data-color="#EB984E"></div>
+                </div>
             </div>
-    
             <div class="field-wrapper">
                 <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
                 <p class="info-text">Cantidad máxima que prevees gastar cada mes en esta categoría:</p>
@@ -404,15 +416,37 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR CATEGORÍA -->
-             <div class="field-wrapper">
+   <!-- MODAL EDITAR CATEGORÍA -->
+    <div class="modal-overlay" id="modal-editar-cat">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--text-main);">Editar Categoría</h3>
+            <input type="hidden" id="edit-cat-id">
+            
+            <div class="field-wrapper">
+                <label>Título <span style="color:var(--color-retenidos)">*</span></label>
+                <input type="text" id="edit-cat-nombre">
+            </div>
+            
+            <div class="field-wrapper">
                 <label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="edit-cat-selector-iconos-avanzado"></div>
+                <div class="icon-selector" id="edit-cat-iconos">
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🏠</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🛒</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">💼</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🧳</div>
+                </div>
             </div>
 
             <div class="field-wrapper">
                 <label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div id="edit-cat-selector-colores-avanzado"></div>
+                <div class="color-selector" id="edit-cat-colores">
+                    <div class="opt-btn" style="background:#58D68D;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#E74C3C"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#EB984E"></div>
+                </div>
             </div>
 
             <div class="field-wrapper">
@@ -572,11 +606,6 @@
                 btn.classList.remove('spin'); 
                 document.getElementById(id).style.display = 'flex'; 
                 document.body.style.overflow = 'hidden'; 
-                
-                // --- AQUÍ ESTÁ LA LÍNEA ---
-                if (id === 'modal-crear-cat') {
-                    renderizarSelectoresAvanzados('cat', '#58D68D', '🏠');
-                }
             }, 300);
         };
         window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
@@ -1265,7 +1294,6 @@
             document.getElementById('edit-cat-id').value = cat.id;
             document.getElementById('edit-cat-nombre').value = cat.nombre || '';
             document.getElementById('edit-cat-max').value = cat.presupuestoMaximo || 0;
-            renderizarSelectoresAvanzados('edit-cat', cat.color, cat.icono);
             
             // Marcar icono actual
             document.querySelectorAll('#edit-cat-iconos .opt-btn').forEach(btn => {
