@@ -1341,7 +1341,7 @@
             // OPCIÓN 2: NUEVO PRESUPUESTO < ANTIGUO PRESUPUESTO
             else if (nuevoMax < maxAntiguo) {
                 // Verificar que el gasto sea estrictamente inferior al nuevo presupuesto
-                if (gastadoActual >= nuevoMax) {
+                if (gastadoActual > nuevoMax) {
                     if (err) { err.textContent = `El gasto actual (${gastadoActual.toFixed(2)}€) es superior o igual al nuevo presupuesto. No se puede realizar.`; err.style.display = 'block'; }
                     return;
                 }
