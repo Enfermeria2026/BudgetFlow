@@ -671,6 +671,9 @@
                     document.getElementById('ui-totales').textContent = (datosUsuario.fondosTotales || 0).toFixed(2) + " €";
                     document.getElementById('ui-disponibles').textContent = (datosUsuario.fondosDisponibles || 0).toFixed(2) + " €";
                     document.getElementById('ui-retenidos').textContent = (datosUsuario.fondosRetenidos || 0).toFixed(2) + " €";
+                    
+                    // ¡Comprobamos qué tiene desbloqueado este usuario exclusivo!
+                    sincronizarDesbloqueos(datosUsuario);
                 }
 
                 const [cats, huchs, fonds] = await Promise.all([catsPromise, huchsPromise, fondsPromise]);
@@ -1548,6 +1551,30 @@
             htmlColores += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('colores')">+</div>`;
             document.getElementById(`${prefijo}-colores-inline`).innerHTML = htmlColores;
         };
+        // --- MAGIA DE SINCRONIZACIÓN CON FIREBASE ---
+        window.sincronizarDesbloqueos = function(datos) {
+            // 1. Lo que viene por defecto si el usuario es nuevo y no tiene nada en la BD
+            const iconosPorDefecto = ["🏠", "🚗", "🛒", "💼", "🧳"];
+            const coloresPorDefecto = ["#58D68D", "#5DADE2", "#F4D03F", "#E74C3C", "#EB984E", "#7F8C8D"];
+
+            // 2. Leemos sus arrays de Firebase (o usamos los por defecto)
+            const misIconos = datos.iconosDesbloqueados || iconosPorDefecto;
+            const misColores = datos.coloresDesbloqueados || coloresPorDefecto;
+
+            // 3. Actualizamos el estado del catálogo escaneando lo que posee el usuario
+            Object.keys(CATALOGO_ICONOS).forEach(categoria => {
+                CATALOGO_ICONOS[categoria].forEach(item => {
+                    item.desbloqueado = misIconos.includes(item.emoji);
+                });
+            });
+
+            Object.keys(CATALOGO_COLORES).forEach(categoria => {
+                CATALOGO_COLORES[categoria].forEach(item => {
+                    item.desbloqueado = misColores.includes(item.hex);
+                });
+            });
+        };
+        
     </script>
 </body>
 </html>
