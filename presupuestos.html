@@ -176,12 +176,13 @@
         .breakdown-item:last-child { border-bottom: none; }
         
         /* ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
-        .inline-selector { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 8px; align-items: center; margin-top: 5px; overflow-x: auto; padding-bottom: 5px; width: 100%; }
-        .inline-opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
+        .inline-selector { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 14px; align-items: center; margin-top: 5px; overflow-x: auto; padding-bottom: 8px; width: 100%; -ms-overflow-style: none; scrollbar-width: none; }
+        .inline-selector::-webkit-scrollbar { display: none; }
+        .inline-opt-btn { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
         .inline-opt-btn.color-btn { border-color: transparent; }
-        .inline-opt-btn.selected { border-color: #000 !important; box-shadow: 0 0 0 2px #000; transform: scale(1.1); }
+        .inline-opt-btn.selected { border-color: #000 !important; box-shadow: 0 0 0 2px #000; transform: scale(1.15); }
         .inline-opt-btn.btn-mas { background: #F4F6F9; color: var(--text-main); font-weight: bold; border: 2px solid #D5D8DC; }
-
+        
         .modal-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 10px 5px; }
         .modal-opt-item { width: 45px; height: 45px; border-radius: 50%; border: 2px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; margin: 0 auto; }
         .modal-opt-item.color-item { border: 2px solid #E5E7E9; }
