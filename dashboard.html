@@ -64,9 +64,9 @@
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
             background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-around; align-items: center; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; -webkit-tap-highlight-color: transparent; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; -webkit-tap-highlight-color: transparent; }
         .nav-item.active { color: var(--color-disponibles); }
         .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
@@ -377,13 +377,23 @@
             signOut(auth).then(() => { window.location.href = 'index.html'; });
         };
 
-       // MODALES GENERALES E INFO
-        window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; };
-        window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; };
+      // MODALES GENERALES E INFO
+        window.abrirInfo = function(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            document.body.style.overflow = 'hidden'; /* Bloquea el scroll del fondo */
+        };
+        window.cerrarInfo = function(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            document.body.style.overflow = ''; /* Restaura el scroll */
+        };
         
-        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; };
+        window.abrirModal = function(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            document.body.style.overflow = 'hidden'; /* Bloquea el scroll del fondo */
+        };
         window.cerrarModal = function(id) { 
             document.getElementById(id).style.display = 'none'; 
+            document.body.style.overflow = ''; /* Restaura el scroll */
             if(document.getElementById('err-ingreso')) document.getElementById('err-ingreso').style.display = 'none';
         };
 
