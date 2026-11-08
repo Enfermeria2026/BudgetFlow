@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -80,29 +81,34 @@
         .filter-btn-wrapper { display: flex; justify-content: flex-end; }
         .filter-btn { background: #E5E7E9; border: none; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* TARJETAS CATEGORÍAS */
+        /* TARJETAS CATEGORÍAS (Nuevo Diseño Compacto) */
         .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         .item-card {
             background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
-            display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+            display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
         }
-        .card-top { display: flex; gap: 15px; align-items: center; }
-        .card-icon { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; flex-shrink: 0; }
-        .card-details { flex: 1; }
-        .card-title { font-size: 16px; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
-        .card-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .card-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
+        .card-details { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+        
+        .card-header-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .card-title { font-size: 15px; font-weight: bold; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        
+        /* Botonera integrada circular */
+        .card-action-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .action-mini-btn {
+            width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--text-main);
+            background: transparent; color: var(--text-main); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 14px; font-weight: bold; padding: 0; transition: 0.2s;
+        }
+        .action-mini-btn:hover { background: #F4F6F9; }
+        .btn-svg { width: 14px; height: 14px; }
+
+        .card-progress-row { display: flex; align-items: center; gap: 10px; }
         .card-progress-bg { flex: 1; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; }
         .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
         .card-percent { font-size: 13px; font-weight: bold; }
-        .card-amounts { font-size: 13px; font-weight: bold; color: var(--text-main); }
         
-        /* BOTONERA DE LA TARJETA (+, -, Ojo, Papelera) */
-        .card-actions { display: flex; justify-content: space-between; border-top: 1px solid #F4F6F9; padding-top: 12px; }
-        .action-btn { background: #F8F9F9; border: 1px solid #D5D8DC; border-radius: 8px; width: 40px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
-        .action-btn:hover { background: #E5E7E9; }
-        .action-btn.btn-plus { color: var(--color-disponibles); font-weight: bold; font-size: 20px;}
-        .action-btn.btn-minus { color: var(--color-totales); font-weight: bold; font-size: 24px; line-height: 0;}
-        .action-btn.btn-trash { color: var(--color-retenidos); }
+        .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); }
 
         /* BOTÓN FLOTANTE GIGANTE (FAB) */
         .fab-btn {
@@ -147,7 +153,6 @@
 </head>
 <body>
 
-    <!-- SIDEBAR Y HEADER IGUAL QUE DASHBOARD -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
@@ -172,7 +177,6 @@
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
 
-    <!-- CONTENIDO -->
     <main class="page-content">
         <!-- PANEL DE VARIABLES -->
         <div class="financial-panel">
@@ -258,7 +262,7 @@
             </div>
             <div class="field-wrapper">
                 <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
-                <p class="info-text">El dinero que asignes aquí pasará a estar RETENIDO porque la app considera que debes destinarlo únicamente a este gasto. Si sobra al final de mes, volverá a disponibles.</p>
+                <p class="info-text">El dinero que asignes aquí pasará a estar RETENIDO porque la app considera que debes destinarlo únicamente a este gasto.</p>
                 <input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01">
             </div>
             <p id="err-crear-cat" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
@@ -305,12 +309,10 @@
             <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría</h3>
             <p id="del-cat-name" style="text-align:center; font-weight:bold; margin-top:5px; margin-bottom:15px; font-size:18px;"></p>
             
-            <!-- Bloque si NO hay gastos -->
             <div id="del-no-gastos" style="display:none; text-align:center; font-size:14px; color:#555;">
-                Esta categoría no tiene gastos registrados. Al eliminarla, su presupuesto protegido volverá a tus Fondos Disponibles.
+                Esta categoría no tiene gastos. Al eliminarla, su presupuesto protegido volverá a tus Fondos Disponibles.
             </div>
 
-            <!-- Bloque si SÍ hay gastos -->
             <div id="del-con-gastos" style="display:none; flex-direction:column; gap:15px;">
                 <div style="background:#FDEDEC; color:#C0392B; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
                     Tiene <span id="del-gastado-val"></span>€ gastados.<br>¿Qué hacemos con este gasto histórico?
@@ -325,19 +327,16 @@
                     </select>
                 </div>
 
-                <!-- Opcion A: Imprevisto -->
                 <div id="del-bloque-imprevisto" class="field-wrapper">
                     <label>Concepto del imprevisto <span style="color:var(--color-retenidos)">*</span></label>
                     <input type="text" id="del-concepto-imprevisto" placeholder="Ej: Gastos reubicados">
                 </div>
 
-                <!-- Opcion B: Categoría única -->
                 <div id="del-bloque-categoria" class="field-wrapper" style="display:none;">
                     <label>Selecciona la categoría destino <span style="color:var(--color-retenidos)">*</span></label>
                     <select id="del-categoria-destino" style="background:#fff;"></select>
                 </div>
 
-                <!-- Opcion C: Dividir -->
                 <div id="del-bloque-dividir" style="display:none; flex-direction:column; gap:10px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
                     <div style="font-size:12px; font-weight:bold; color:var(--text-main); margin-bottom:5px;">Reparte los fondos exactos:</div>
                     <div id="del-dividir-lista" style="display:flex; flex-direction:column; gap:10px;"></div>
@@ -354,22 +353,24 @@
             </div>
         </div>
     </div>
-    
+
     <!-- SCRIPTS -->
     <script type="module">
+        // Importación corregida en la parte superior del módulo
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 
+        // FECHA
         const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const fechaActual = new Date(); document.getElementById('header-date').textContent = `${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
 
         // Variables Globales
         let uidActual = null; let datosUsuario = null; let colCategorias = []; 
-        let categoriaSeleccionada = null; // Para saber qué categoría estamos editando (+ o -)
+        let categoriaSeleccionada = null; 
 
         onAuthStateChanged(auth, async (user) => {
             if (user) { uidActual = user.uid; await recargarPantalla(); } 
@@ -395,20 +396,19 @@
 
         // RECARGAR PANTALLA COMPLETA
         async function recargarPantalla() {
-            // Cargar Variables de Usuario
             const userDoc = await getDoc(doc(db, "usuarios", uidActual));
             datosUsuario = userDoc.data();
             document.getElementById('ui-totales').textContent = (datosUsuario.fondosTotales || 0).toFixed(2) + " €";
             document.getElementById('ui-disponibles').textContent = (datosUsuario.fondosDisponibles || 0).toFixed(2) + " €";
             document.getElementById('ui-retenidos').textContent = (datosUsuario.fondosRetenidos || 0).toFixed(2) + " €";
 
-            // Cargar Categorías
             colCategorias = [];
             const qs = await getDocs(collection(db, "usuarios", uidActual, "categorias"));
             qs.forEach((d) => colCategorias.push({ id: d.id, ...d.data() }));
             renderizarCategorias();
         }
 
+        // RENDERIZAR NUEVO DISEÑO COMPACTO
         function renderizarCategorias() {
             const container = document.getElementById('contenedor-categorias');
             container.innerHTML = "";
@@ -421,22 +421,26 @@
 
                 container.innerHTML += `
                     <div class="item-card">
-                        <div class="card-top">
-                            <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
-                            <div class="card-details">
+                        <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
+                        <div class="card-details">
+                            <div class="card-header-row">
                                 <div class="card-title">${cat.nombre}</div>
-                                <div class="card-progress-row">
-                                    <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pct}%; background:${colorBar};"></div></div>
-                                    <div class="card-percent" style="color:${colorBar};">${pct}%</div>
+                                <div class="card-action-btns">
+                                    <button class="action-mini-btn" onclick="abrirGasto('${cat.id}', '${cat.nombre}')">+</button>
+                                    <button class="action-mini-btn" onclick="abrirRetiro('${cat.id}', '${cat.nombre}')">-</button>
+                                    <button class="action-mini-btn" onclick="alert('Historial en desarrollo')">
+                                        <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                    <button class="action-mini-btn" onclick="abrirEliminar('${cat.id}')">
+                                        <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
                                 </div>
-                                <div class="card-amounts">${gast.toFixed(2)}€ / ${max.toFixed(2)}€</div>
                             </div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="action-btn btn-plus" onclick="abrirGasto('${cat.id}', '${cat.nombre}')">+</button>
-                            <button class="action-btn btn-minus" onclick="abrirRetiro('${cat.id}', '${cat.nombre}')">-</button>
-                            <button class="action-btn btn-eye" onclick="alert('Historial modal en desarrollo')">👁️</button>
-                            <button class="action-btn btn-trash" onclick="alert('Reubicación modal pendiente')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                            <div class="card-progress-row">
+                                <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pct}%; background:${colorBar};"></div></div>
+                                <div class="card-percent" style="color:${colorBar};">${pct}%</div>
+                            </div>
+                            <div class="card-amounts">${gast.toFixed(2)}€ / ${max.toFixed(2)}€</div>
                         </div>
                     </div>
                 `;
@@ -457,10 +461,7 @@
             try {
                 const nuevaCat = { nombre: nom, presupuestoMaximo: pre, gastado: 0, icono: document.querySelector('#cat-iconos .selected').textContent, color: document.querySelector('#cat-colores .selected').getAttribute('data-color') };
                 await addDoc(collection(db, "usuarios", uidActual, "categorias"), nuevaCat);
-                await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosDisponibles: (datosUsuario.fondosDisponibles - pre),
-                    fondosRetenidos: (datosUsuario.fondosRetenidos + pre)
-                });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosDisponibles: (datosUsuario.fondosDisponibles - pre), fondosRetenidos: (datosUsuario.fondosRetenidos + pre) });
                 document.getElementById('cat-nombre').value = ""; document.getElementById('cat-presupuesto').value = "";
                 cerrarModal('modal-crear-cat'); await recargarPantalla();
             } catch(e) { err.textContent="Error al crear categoría."; err.style.display='block'; }
@@ -489,35 +490,20 @@
             
             let aRestarRetenido = 0; let aRestarDisponible = 0;
 
-            if (remanente >= imp) {
-                // Hay margen suficiente en el presupuesto
-                aRestarRetenido = imp;
-            } else if (remanente > 0 && imp > remanente) {
-                // Agotamos el presupuesto y tocamos disponible
-                aRestarRetenido = remanente;
-                aRestarDisponible = imp - remanente;
-            } else if (remanente <= 0) {
-                // Ya estaba excedida, todo va a disponible
-                aRestarDisponible = imp;
-            }
+            if (remanente >= imp) { aRestarRetenido = imp; } 
+            else if (remanente > 0 && imp > remanente) { aRestarRetenido = remanente; aRestarDisponible = imp - remanente; } 
+            else if (remanente <= 0) { aRestarDisponible = imp; }
 
-            // VALIDACIÓN: ¿Hay suficientes fondos disponibles para cubrir el excedente?
             if (aRestarDisponible > datosUsuario.fondosDisponibles) {
                 document.getElementById('alert-msg').innerHTML = `No tienes suficientes <b>Fondos Disponibles</b> para cubrir el excedente de este gasto.<br><br>Te faltan ${(aRestarDisponible - datosUsuario.fondosDisponibles).toFixed(2)}€ libres.`;
-                document.getElementById('modal-alert-error').style.display = 'flex';
-                return; // Cortamos ejecución aquí, el alert tiene el botón de volver al mini-form.
+                document.getElementById('modal-alert-error').style.display = 'flex'; return;
             }
 
             btn.disabled = true; err.style.display = 'none';
             try {
-                // Guardar en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id), { gastado: gAct + imp });
                 await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "categoría", categoriaId: categoriaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
-                await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosTotales: datosUsuario.fondosTotales - imp,
-                    fondosRetenidos: datosUsuario.fondosRetenidos - aRestarRetenido,
-                    fondosDisponibles: datosUsuario.fondosDisponibles - aRestarDisponible
-                });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosTotales: datosUsuario.fondosTotales - imp, fondosRetenidos: datosUsuario.fondosRetenidos - aRestarRetenido, fondosDisponibles: datosUsuario.fondosDisponibles - aRestarDisponible });
                 cerrarModal('modal-add-gasto'); await recargarPantalla();
             } catch(e) { err.textContent="Error al guardar el gasto."; err.style.display='block'; }
             finally { btn.disabled = false; }
@@ -546,27 +532,15 @@
 
             let aSumarDisponible = 0; let aSumarRetenido = 0;
 
-            if (excesoActual >= imp) {
-                // Todo el retiro repone el exceso, va a disponible
-                aSumarDisponible = imp;
-            } else if (excesoActual > 0 && imp > excesoActual) {
-                // Repone el exceso a disponible y el resto va a retenido
-                aSumarDisponible = excesoActual;
-                aSumarRetenido = imp - excesoActual;
-            } else if (excesoActual <= 0) {
-                // No había exceso, todo vuelve a retenido (presupuesto intacto)
-                aSumarRetenido = imp;
-            }
+            if (excesoActual >= imp) { aSumarDisponible = imp; } 
+            else if (excesoActual > 0 && imp > excesoActual) { aSumarDisponible = excesoActual; aSumarRetenido = imp - excesoActual; } 
+            else if (excesoActual <= 0) { aSumarRetenido = imp; }
 
             btn.disabled = true; err.style.display = 'none';
             try {
                 await updateDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id), { gastado: gAct - imp });
                 await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "ingreso", subtipo: "devolución_cat", categoriaId: categoriaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
-                await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosTotales: datosUsuario.fondosTotales + imp,
-                    fondosRetenidos: datosUsuario.fondosRetenidos + aSumarRetenido,
-                    fondosDisponibles: datosUsuario.fondosDisponibles + aSumarDisponible
-                });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosTotales: datosUsuario.fondosTotales + imp, fondosRetenidos: datosUsuario.fondosRetenidos + aSumarRetenido, fondosDisponibles: datosUsuario.fondosDisponibles + aSumarDisponible });
                 cerrarModal('modal-remove-gasto'); await recargarPantalla();
             } catch(e) { err.textContent="Error al retirar gasto."; err.style.display='block'; }
             finally { btn.disabled = false; }
@@ -591,24 +565,22 @@
                     document.getElementById('opt-cat-unica').style.display = 'block';
                     document.getElementById('opt-cat-dividir').style.display = 'block';
                     
-                    // Llenar select de categoría única
                     let selHTML = "";
                     otrasCats.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre}</option>`);
                     document.getElementById('del-categoria-destino').innerHTML = selHTML;
                     
-                    // Llenar lista interactiva para dividir
                     let divHTML = "";
                     otrasCats.forEach(c => {
                         divHTML += `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
                             <span style="font-size:13px; font-weight:bold;">${c.icono} ${c.nombre}</span>
-                            <input type="number" class="input-dividir" data-id="${c.id}" data-nombre="${c.nombre}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
+                            <input type="number" class="input-dividir" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
                         </div>`;
                     });
                     divHTML += `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:5px; padding-top:10px; border-top:1px solid #ddd;">
                             <span style="font-size:13px; font-weight:bold;">🧾 Imprevisto</span>
-                            <input type="number" class="input-dividir" data-id="imprevisto" data-nombre="Gasto Imprevisto" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
+                            <input type="number" class="input-dividir" data-id="imprevisto" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
                         </div>
                         <div id="dividir-concepto-container" style="display:none; margin-top:5px;">
                             <input type="text" id="del-dividir-concepto" placeholder="Concepto del imprevisto..." style="padding:10px; font-size:13px; width:100%; box-sizing:border-box;">
@@ -649,7 +621,6 @@
             document.getElementById('dividir-concepto-container').style.display = (impVal > 0) ? 'block' : 'none';
         };
 
-        // Función Helper para simular matemáticamente un gasto
         function simularGastoReubicado(vars, importe, catDestinoId) {
             if (catDestinoId === 'imprevisto') {
                 vars.totales -= importe; vars.disponibles -= importe;
@@ -672,7 +643,7 @@
             const gAct = categoriaSeleccionada.gastado || 0;
             const tipoDes = document.getElementById('del-destino-tipo').value;
             
-            let reubicaciones = []; // [{ idDestino, importe, concepto }]
+            let reubicaciones = []; 
 
             if (gAct > 0) {
                 if (tipoDes === 'imprevisto') {
@@ -697,51 +668,40 @@
                             reubicaciones.push({ idDestino: id, importe: v, concepto: con });
                         }
                     });
-                    if (errorConcepto) { err.textContent = "Indica un concepto para el imprevisto asignado."; err.style.display='block'; return; }
-                    if (Math.abs(gAct - suma) > 0.01) { err.textContent = "El reparto no cuadra con el total gastado. Revisa los importes."; err.style.display='block'; return; }
+                    if (errorConcepto) { err.textContent = "Indica un concepto para el imprevisto."; err.style.display='block'; return; }
+                    if (Math.abs(gAct - suma) > 0.01) { err.textContent = "El reparto no cuadra con el total gastado."; err.style.display='block'; return; }
                 }
             }
 
             btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
             try {
-                import { deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
-                
-                // 1. Deshacer financieramente la categoría eliminada
                 const pMax = categoriaSeleccionada.presupuestoMaximo;
                 let v_tot = datosUsuario.fondosTotales + gAct;
                 let v_ret = datosUsuario.fondosRetenidos - (pMax - Math.min(pMax, gAct));
                 let v_dis = datosUsuario.fondosDisponibles + (pMax + Math.max(0, gAct - pMax));
                 
                 let vars = { totales: v_tot, retenidos: v_ret, disponibles: v_dis, gastosAcumulados: {} };
-
-                // 2. Simular reubicaciones (Nuevos gastos)
                 reubicaciones.forEach(r => simularGastoReubicado(vars, r.importe, r.idDestino));
 
-                // 3. Ejecutar en Firebase
-                // Borrar documento
                 await deleteDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id));
-                // Actualizar saldos usuario
                 await updateDoc(doc(db, "usuarios", uidActual), {
                     fondosTotales: vars.totales, fondosRetenidos: vars.retenidos, fondosDisponibles: vars.disponibles
                 });
-                // Actualizar categorías destino e historial
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "imprevisto", concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
                     } else {
                         const targetCat = colCategorias.find(c => c.id === r.idDestino);
-                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0); // Ojo, usamos el acumulado real
+                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0); 
                         await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGasto });
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
-                        // Solo sumamos para la siguiente iteracion del bucle por si manda 2 veces a la misma
                         targetCat.gastado = nuevoGasto; vars.gastosAcumulados[r.idDestino] = 0; 
                     }
                 }
                 cerrarModal('modal-delete-cat'); await recargarPantalla();
-            } catch(e) { console.error(e); err.textContent="Error al eliminar. Reintenta."; err.style.display='block'; }
+            } catch(e) { console.error(e); err.textContent="Error al eliminar."; err.style.display='block'; }
             finally { btn.disabled = false; btn.textContent = "ELIMINAR"; }
         };
-        
     </script>
 </body>
 </html>
