@@ -221,7 +221,18 @@
         <!-- BARRA DE FILTROS Y RESUMEN -->
         <div class="filter-row">
             <div class="totals-mini-card" id="ui-resumen-gastos">Total: 0.00€ / 0.00€</div>
-            <button class="filter-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
+            <div style="position: relative; display: inline-block;">
+    <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
+    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 220px; overflow: hidden;">
+        <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
+        <div onclick="ordenarCategorias('az')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🔤 Alfabéticamente (A - Z)</div>
+        <div onclick="ordenarCategorias('za')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🔤 Alfabéticamente (Z - A)</div>
+        <div onclick="ordenarCategorias('mayor-gasto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">📈 Mayor gasto</div>
+        <div onclick="ordenarCategorias('menor-gasto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">📉 Menor gasto</div>
+        <div onclick="ordenarCategorias('mayor-presupuesto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">💰 Mayor presupuesto</div>
+        <div onclick="ordenarCategorias('menor-presupuesto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🪙 Menor presupuesto</div>
+    </div>
+</div>
         </div>
 
         <!-- CONTENEDOR DE TARJETAS -->
@@ -428,7 +439,27 @@
             }
         });
 
-        window.toggleMenu = function() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display = 'none'; }else{ sb.classList.add('open'); ov.style.display = 'block'; } };
+        window.toggleMenu = function() { 
+            const sb = document.getElementById('sidebar'); 
+            const ov = document.getElementById('sidebar-overlay'); 
+            if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display = 'none'; }
+            else{ sb.classList.add('open'); ov.style.display = 'block'; } 
+        };
+
+        // --- PEGA ESTO JUSTO AQUÍ DEBAJO ---
+        window.toggleMenuFiltros = function() {
+            const drop = document.getElementById('dropdown-filtros');
+            drop.style.display = (drop.style.display === 'block') ? 'none' : 'block';
+        };
+
+        // Cerrar el desplegable si se hace clic fuera
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.filter-btn') && !e.target.closest('#dropdown-filtros')) {
+                const drop = document.getElementById('dropdown-filtros');
+                if (drop) drop.style.display = 'none';
+            }
+        });
+        // ------------------------------------
         window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
 
         // MODALES
@@ -496,7 +527,15 @@
             }
         }
 
-        // RENDERIZAR TARJETAS (Nuevo diseño con botones circulares)
+        let criterioOrdenActual = 'az'; // Criterio por defecto
+
+        window.ordenarCategorias = function(criterio) {
+            criterioOrdenActual = criterio;
+            document.getElementById('dropdown-filtros').style.display = 'none';
+            renderizarCategorias();
+        };
+
+        // RENDERIZAR TARJETAS (Con lógica de ordenación y diseño circular)
         function renderizarCategorias() {
             const container = document.getElementById('contenedor-categorias');
             container.innerHTML = "";
@@ -508,6 +547,24 @@
                 return; 
             }
             
+            // APLICAR ORDENACIÓN ANTES DE PINTAR
+            colCategorias.sort((a, b) => {
+                if (criterioOrdenActual === 'az') {
+                    return a.nombre.localeCompare(b.nombre);
+                } else if (criterioOrdenActual === 'za') {
+                    return b.nombre.localeCompare(a.nombre);
+                } else if (criterioOrdenActual === 'mayor-gasto') {
+                    return (b.gastado || 0) - (a.gastado || 0);
+                } else if (criterioOrdenActual === 'menor-gasto') {
+                    return (a.gastado || 0) - (b.gastado || 0);
+                } else if (criterioOrdenActual === 'mayor-presupuesto') {
+                    return b.presupuestoMaximo - a.presupuestoMaximo;
+                } else if (criterioOrdenActual === 'menor-presupuesto') {
+                    return a.presupuestoMaximo - b.presupuestoMaximo;
+                }
+                return 0;
+            });
+
             colCategorias.forEach(cat => {
                 let max = cat.presupuestoMaximo; let gast = cat.gastado || 0;
                 sumaGastos += gast; sumaMaximos += max;
