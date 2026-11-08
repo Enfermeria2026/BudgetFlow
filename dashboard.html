@@ -30,9 +30,25 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             margin: 0; padding: 0; color: var(--text-main);
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-top: 70px; /* Espacio para el header fijo */
-            padding-bottom: 90px; /* Espacio para la barra inferior fija */
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ZONA FIJA SUPERIOR (Panel financiero y Botones de acción) */
+        .fixed-top-section {
+            position: fixed; top: 60px; left: 0; width: 100%;
+            background-color: var(--bg-color); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            padding: 15px 15px 10px 15px; box-sizing: border-box;
+        }
+
+        /* CONTENEDOR CON SCROLL (Para todas las tarjetas del centro) */
+        .scrollable-cards-container {
+            width: 100%; max-width: 500px; 
+            position: absolute; top: 235px; bottom: 80px; 
+            left: 50%; transform: translateX(-50%);
+            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 20px;
         }
         
         /* HEADER FIJO SUPERIOR */
@@ -84,8 +100,36 @@
         .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
         
 
-        /* CONTENIDO PRINCIPAL */
-        .dashboard-content { width: 100%; max-width: 500px; padding: 0 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; /* Bloquea el scroll general de la página */
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ZONA FIJA SUPERIOR (Panel financiero y Botones de acción) */
+        .fixed-top-section {
+            position: fixed; top: 60px; left: 0; width: 100%;
+            background-color: var(--bg-color); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            padding: 15px 15px 10px 15px; box-sizing: border-box;
+        }
+
+        .dashboard-content {
+            background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
+        }
+
+        .action-buttons-row { width: 100%; max-width: 500px; display: flex; gap: 15px; box-sizing: border-box; }
+
+        /* CONTENEDOR CON SCROLL (Para todas las secciones del centro) */
+        .scrollable-cards-container {
+            width: 100%; max-width: 500px; 
+            position: absolute; top: 235px; bottom: 80px; 
+            left: 50%; transform: translateX(-50%);
+            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 20px;
+        }
 
         /* ELIMINAR EL COLOR AZUL AL PULSAR EN MÓVILES */
         button, .info-icon, .card-btn-ver, .btn-action { -webkit-tap-highlight-color: transparent; }
@@ -188,10 +232,10 @@
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="dashboard-content">
+    <!-- ZONA FIJA SUPERIOR (Panel y Botones que no se mueven) -->
+    <div class="fixed-top-section">
         
-    <!-- PANEL DE VARIABLES (CON MODALES) -->
+        <!-- PANEL DE VARIABLES (CON MODALES) -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
                 <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
@@ -210,50 +254,60 @@
             </div>
         </div>
 
-
-        
-
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons-row">
            <button class="btn-action btn-ingreso" onclick="abrirModal('modal-ingreso')">Añadir ingreso</button>
             <button class="btn-action btn-finalizar">Finalizar mes</button>
         </div>
 
+    </div>
+
+    <!-- ZONA CON SCROLL (Únicamente las tarjetas del centro se mueven) -->
+    <div class="scrollable-cards-container">
+
         <!-- SECCIÓN: PRESUPUESTOS (CATEGORÍAS) -->
-        <div class="section-header">Categorías</div>
-        <div class="grid-2x2" id="grid-categorias">
-            <!-- Cargando datos... -->
+        <div>
+            <div class="section-header">Categorías</div>
+            <div class="grid-2x2" id="grid-categorias">
+                <!-- Cargando datos... -->
+            </div>
         </div>
 
         <!-- SECCIÓN: GASTOS IMPREVISTOS -->
-        <div class="section-header">Gastos imprevistos</div>
-        <div class="grid-2x2">
-            <!-- Tarjeta Total Imprevistos -->
-            <div class="mini-card" style="justify-content: center; align-items: center; text-align: center;">
-                <div class="mini-icon" style="background: #E5E7E9; color: #555;">🧾</div>
-                <div class="mini-title" style="color: #7F8C8D;">Gastos totales</div>
-                <div class="fin-amount" id="ui-imprevistos">0.00 €</div>
-            </div>
-            <!-- Botón Ver Todos -->
-            <div class="mini-card card-btn-ver" onclick="window.location.href='gastos.html'">
-                <div class="arrow-icon">➔</div>
-                <div class="card-btn-text">Ver todos los<br>gastos</div>
+        <div>
+            <div class="section-header">Gastos imprevistos</div>
+            <div class="grid-2x2">
+                <!-- Tarjeta Total Imprevistos -->
+                <div class="mini-card" style="justify-content: center; align-items: center; text-align: center;">
+                    <div class="mini-icon" style="background: #E5E7E9; color: #555;">🧾</div>
+                    <div class="mini-title" style="color: #7F8C8D;">Gastos totales</div>
+                    <div class="fin-amount" id="ui-imprevistos">0.00 €</div>
+                </div>
+                <!-- Botón Ver Todos -->
+                <div class="mini-card card-btn-ver" onclick="window.location.href='gastos.html'">
+                    <div class="arrow-icon">➔</div>
+                    <div class="card-btn-text">Ver todos los<br>gastos</div>
+                </div>
             </div>
         </div>
 
         <!-- SECCIÓN: HUCHAS DE AHORRO -->
-        <div class="section-header">Huchas de ahorro</div>
-        <div class="grid-2x2" id="grid-huchas">
-            <!-- Cargando datos... -->
+        <div>
+            <div class="section-header">Huchas de ahorro</div>
+            <div class="grid-2x2" id="grid-huchas">
+                <!-- Cargando datos... -->
+            </div>
         </div>
 
         <!-- SECCIÓN: FONDOS RESERVADOS -->
-        <div class="section-header">Fondos Reservados</div>
-        <div class="grid-2x2" id="grid-fondos">
-            <!-- Cargando datos... -->
+        <div>
+            <div class="section-header">Fondos Reservados</div>
+            <div class="grid-2x2" id="grid-fondos">
+                <!-- Cargando datos... -->
+            </div>
         </div>
 
-    </main>
+    </div>
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
