@@ -1140,11 +1140,11 @@
                 let acumuladoresGastosDestino = {};
                 reubicaciones.forEach(r => {
                     if (r.idDestino === 'imprevisto') {
-                        // Si se opta por convertir el gasto en imprevisto definitivo al borrar, 
-                        // ese dinero ya consumido descuenta de Totales reales del banco.
-                        nuevosTotales -= r.importe;
+                        // IMPORTANTE: Al mandar a imprevisto un gasto que ya existía, 
+                        // los Fondos Totales NO se tocan porque el dinero ya salió del banco en su día.
+                        // Solo se reclasifica el gasto.
                     } else {
-                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastos[r.idDestino] || 0) + r.importe;
+                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastosDestino[r.idDestino] || 0) + r.importe;
                     }
                 });
 
@@ -1180,12 +1180,12 @@
                     }
                 }
 
-                // Actualizar saldos definitivos en Firestore
+                // Actualizar saldos definitivos en Firestore (Los Totales se quedan tal cual estaban)
                 await updateDoc(doc(db, "usuarios", uidActual), {
-                    fondosTotales: nuevosTotales,
+                    fondosTotales: datosUsuario.fondosTotales, // <- Se quedan exactamente igual
                     fondosRetenidos: Math.max(0, nuevosRetenidos),
                     fondosDisponibles: nuevosDisponibles
-                });
+                });s
 
                 cerrarModal('modal-delete-cat');
                 await recargarPantalla();
