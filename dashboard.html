@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetFlow - Dashboard</title>
     <style>
+        /* LOADER GLOBAL */
+        #global-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         :root {
             --bg-color: #F4F6F9;
             --text-main: #2C3E50;
@@ -142,6 +154,12 @@
 </head>
 <body>
 
+    <!-- LOADER INICIAL -->
+    <div id="global-loader">
+        <div class="spinner"></div>
+        <div style="margin-top:15px; font-weight:bold; color:var(--text-main);">Cargando Dashboard...</div>
+    </div>
+    
     <!-- SIDEBAR (MENÚ LATERAL) -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
     <aside class="sidebar" id="sidebar">
@@ -358,6 +376,13 @@
         // FECHA HEADER (Ej: Nov 2026)
         const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const fechaActual = new Date();
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (link.getAttribute('href') && link.getAttribute('href') !== '#' && !link.getAttribute('onclick')) {
+                    document.getElementById('global-loader').style.display = 'flex';
+                }
+            });
+        });
         document.getElementById('header-date').textContent = `${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
 
         // MENU LATERAL
@@ -536,6 +561,9 @@
 
             // 4. Preparar desglose para modal "Retenidos"
             prepararDesgloseRetenidos(categorias, huchas, fondos);
+
+            document.getElementById('global-loader').style.display = 'none';
+            
         }
 
         async function fetchColeccion(nombreCol) {
