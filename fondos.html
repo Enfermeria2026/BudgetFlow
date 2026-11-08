@@ -943,7 +943,7 @@
 
             if(!nom) { err.textContent="Rellena el título del fondo."; err.style.display='block'; return; }
             if(fec) { let d=new Date(fec); let hoy=new Date(); hoy.setHours(0,0,0,0); if(d<=hoy){ err.textContent="La fecha no puede ser igual o anterior a hoy."; err.style.display='block'; return; } }
-            if(obj && obj < (fOriginal.guardado||0)) { err.textContent=`El objetivo no puede ser inferior al dinero acumulado (${fOriginal.guardado.toFixed(2)}€).`; err.style.display='block'; return; }
+            if(obj && obj < (fOriginal.guardado||0) && obj !== (fOriginal.objetivo||null)) { err.textContent=`El nuevo objetivo no puede ser inferior al dinero acumulado (${(fOriginal.guardado||0).toFixed(2)}€).`; err.style.display='block'; return; }
 
             btn.disabled=true; err.style.display='none';
             try {
