@@ -1,7 +1,4 @@
 # BudgetFlow
-Pendiente:
-- Filtros de categorías
-- Iniciar pantalla de gastos imprevistos.
 - Iniciar pantalla de huchas
 - Iniciar pantalla de fondos
 - Iniciar pantalla de TIENDA + MISIONES
