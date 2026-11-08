@@ -706,8 +706,8 @@
             let totalGastos = 0;   let htmlGastos = "";
 
             // --- 1. INGRESOS DEL MES ---
-            // (Filtramos tipo 'ingreso' excluyendo devoluciones de categorías para tener ingresos reales)
-            const ingresosMes = movs.filter(m => m.tipo === 'ingreso' && m.subtipo !== 'devolución_cat' && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
+            // (Filtramos ingresos y excluimos las devoluciones internas de fondos/huchas para no inflar los números)
+            const ingresosMes = movs.filter(m => m.tipo === 'ingreso' && !m.subtipo?.includes('devolución') && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
             
             if (ingresosMes.length === 0) {
                 htmlIngresos = "<div style='text-align:center; padding:10px; font-size:12px; color:#7F8C8D;'>No has registrado ingresos este mes.</div>";
@@ -718,48 +718,49 @@
                 });
             }
 
-            // --- 2. GASTOS DEL MES ---
-            
-            // A. Presupuestos (Categorías)
-            htmlGastos += `<div style="font-weight:bold; margin-top:5px; color:var(--text-main);">Por Categorías:</div>`;
-            if (cats.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin categorías</div>`;
-            cats.forEach(c => {
-                let gastadoC = Number(c.gastado) || 0;
-                totalGastos += gastadoC;
-                htmlGastos += `<div class="breakdown-item"><span>${c.icono || '🏠'} ${c.nombre}</span> <b>-${gastadoC.toFixed(2)}€</b></div>`;
-            });
+            // --- 2. GASTOS DEL MES (MAGIA NUEVA) ---
+            // Buscamos TODOS los movimientos de gasto del mes, para que no se pierda nada aunque borres un fondo
+            const todosGastos = movs.filter(m => m.tipo === 'gasto' && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
 
-            // B. Imprevistos
-            const imprevistosMes = movs.filter(m => m.tipo === 'gasto' && m.subtipo === 'imprevisto' && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
-            let sumaImprevistos = 0;
-            imprevistosMes.forEach(m => sumaImprevistos += m.importe);
-            totalGastos += sumaImprevistos;
-            
-            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Imprevistos:</div>`;
-            htmlGastos += `<div class="breakdown-item"><span>Gastos Imprevistos</span> <b>-${sumaImprevistos.toFixed(2)}€</b></div>`;
+            // Filtramos el dinero que solo se mueve internamente (aportaciones a fondos/huchas)
+            const gastosReales = todosGastos.filter(m => m.subtipo !== 'fondo' && m.subtipo !== 'hucha' && m.subtipo !== 'reubicacion');
 
-            // C. Huchas
-            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Desde Huchas:</div>`;
-            if (huchs.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin huchas</div>`;
-            huchs.forEach(h => {
-                // Busca gastos cuyo ID o concepto apunten a la hucha actual
-                let gastosH = movs.filter(m => m.tipo === 'gasto' && (m.huchaId === h.id || m.origenId === h.id || (m.subtipo === 'hucha' && m.concepto.includes(h.nombre))) && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
-                let sumaH = 0; gastosH.forEach(g => sumaH += g.importe);
-                totalGastos += sumaH;
-                htmlGastos += `<div class="breakdown-item"><span>${h.icono || '🐖'} ${h.nombre}</span> <b>-${sumaH.toFixed(2)}€</b></div>`;
-            });
+            // Agrupamos los gastos por el tipo que sean
+            let gCategorias = gastosReales.filter(m => m.categoriaId || m.subtipo === 'categoria' || m.subtipo === 'categoría');
+            let gImprevistos = gastosReales.filter(m => m.subtipo === 'imprevisto');
+            let gHuchas = gastosReales.filter(m => m.huchaId || m.subtipo === 'hucha_gasto_real' || m.subtipo === 'gasto_hucha');
+            let gFondos = gastosReales.filter(m => m.fondoId || m.subtipo === 'fondo_gasto_real' || m.subtipo === 'gasto_fondo');
+            let gOtros = gastosReales.filter(m => !gCategorias.includes(m) && !gImprevistos.includes(m) && !gHuchas.includes(m) && !gFondos.includes(m));
 
-            // D. Fondos Reservados
-            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Desde Fondos:</div>`;
-            if (fonds.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin fondos</div>`;
-            fonds.forEach(f => {
-                let gastosF = movs.filter(m => m.tipo === 'gasto' && (m.fondoId === f.id || m.origenId === f.id || (m.subtipo === 'fondo' && m.concepto.includes(f.nombre))) && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
-                let sumaF = 0; gastosF.forEach(g => sumaF += g.importe);
-                totalGastos += sumaF;
-                htmlGastos += `<div class="breakdown-item"><span>${f.icono || '🏦'} ${f.nombre}</span> <b>-${sumaF.toFixed(2)}€</b></div>`;
-            });
+            // Función para generar cada bloque con su Total y sus conceptos detallados
+            const generarBloque = (titulo, icono, arrayGastos) => {
+                if (arrayGastos.length === 0) return "";
+                let suma = 0; let listaItems = "";
+                arrayGastos.forEach(g => {
+                    suma += g.importe;
+                    listaItems += `<div class="breakdown-item" style="padding-left:15px; border-bottom:none; padding-top:2px; padding-bottom:2px; font-size:12px; color:#7F8C8D;"><span>- ${g.concepto}</span> <b>${g.importe.toFixed(2)}€</b></div>`;
+                });
+                totalGastos += suma;
+                return `
+                    <div style="font-weight:bold; margin-top:10px; color:var(--text-main); display:flex; justify-content:space-between; border-bottom: 1px solid #eee; padding-bottom:4px; margin-bottom:4px;">
+                        <span>${icono} ${titulo}</span> <span>-${suma.toFixed(2)}€</span>
+                    </div>
+                    ${listaItems}
+                `;
+            };
 
-            // --- 3. PINTAR RESULTADOS ---
+            // Pintamos los bloques
+            htmlGastos += generarBloque("Gastos en Categorías", "🏠", gCategorias);
+            htmlGastos += generarBloque("Gastos Imprevistos", "🧾", gImprevistos);
+            htmlGastos += generarBloque("Gastos de Huchas", "🐖", gHuchas);
+            htmlGastos += generarBloque("Gastos de Fondos", "🏦", gFondos);
+            htmlGastos += generarBloque("Otros Gastos", "💸", gOtros);
+
+            if (totalGastos === 0) {
+                htmlGastos = "<div style='text-align:center; padding:10px; font-size:12px; color:#7F8C8D;'>No has registrado gastos este mes.</div>";
+            }
+
+            // --- 3. PINTAR RESULTADOS EN LA PANTALLA ---
             const uiIng = document.getElementById('ui-ingresos-mes');
             const uiGas = document.getElementById('ui-gastos-mes');
             if (uiIng) uiIng.textContent = totalIngresos.toFixed(2) + " €";
