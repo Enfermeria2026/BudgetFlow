@@ -423,27 +423,52 @@
             btn.classList.add('spin');
             setTimeout(() => { btn.classList.remove('spin'); document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }, 300);
         };
+        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
         window.cerrarModal = function(id, limpiarError=false) { 
             document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; 
             document.querySelectorAll('p[id^="err-"]').forEach(el => el.style.display = 'none');
         };
+        window.cerrarAlertError = function() { document.getElementById('modal-alert-error').style.display = 'none'; };
         window.selOpc = function(el, cont) { document.getElementById(cont).querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); };
+
+        async function fetchColeccion(nombreCol) {
+            const arr = [];
+            const qs = await getDocs(collection(db, "usuarios", uidActual, nombreCol));
+            qs.forEach((doc) => { arr.push({ id: doc.id, ...doc.data() }); });
+            return arr;
+        }
+
+        function prepararDesgloseRetenidos(cats, huchs, fonds) {
+            const div = document.getElementById('lista-retenidos');
+            let html = ""; let total = 0;
+            if(cats.length > 0) html += `<div style="font-weight:bold; margin-top:5px; color:var(--text-main);">Presupuestos:</div>`;
+            cats.forEach(c => { html += `<div class="breakdown-item"><span>${c.icono} ${c.nombre}</span> <b>${c.presupuestoMaximo.toFixed(2)}€</b></div>`; total += c.presupuestoMaximo; });
+            if(huchs.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Huchas:</div>`;
+            huchs.forEach(h => { html += `<div class="breakdown-item"><span>${h.icono} ${h.nombre}</span> <b>${h.guardado.toFixed(2)}€</b></div>`; total += h.guardado; });
+            if(fonds.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Fondos:</div>`;
+            fonds.forEach(f => { html += `<div class="breakdown-item"><span>${f.icono} ${f.nombre}</span> <b>${f.guardado.toFixed(2)}€</b></div>`; total += f.guardado; });
+            if (total === 0) html = "<div style='text-align:center; padding:10px;'>No hay fondos retenidos actualmente.</div>";
+            div.innerHTML = html;
+        }
 
         // RECARGAR PANTALLA COMPLETA
         async function recargarPantalla() {
-            const userDoc = await getDoc(doc(db, "usuarios", uidActual));
+            const userDocPromise = getDoc(doc(db, "usuarios", uidActual));
+            const catsPromise = fetchColeccion("categorias");
+            const huchsPromise = fetchColeccion("huchas");
+            const fondsPromise = fetchColeccion("fondos_reservados");
+
+            const userDoc = await userDocPromise;
             datosUsuario = userDoc.data();
             document.getElementById('ui-totales').textContent = (datosUsuario.fondosTotales || 0).toFixed(2) + " €";
             document.getElementById('ui-disponibles').textContent = (datosUsuario.fondosDisponibles || 0).toFixed(2) + " €";
             document.getElementById('ui-retenidos').textContent = (datosUsuario.fondosRetenidos || 0).toFixed(2) + " €";
 
-            colCategorias = [];
-            const qs = await getDocs(collection(db, "usuarios", uidActual, "categorias"));
-            qs.forEach((d) => colCategorias.push({ id: d.id, ...d.data() }));
-            
+            const [cats, huchs, fonds] = await Promise.all([catsPromise, huchsPromise, fondsPromise]);
+            colCategorias = cats;
             renderizarCategorias();
+            prepararDesgloseRetenidos(cats, huchs, fonds);
             
-            // Ocultar Loader al terminar
             document.getElementById('global-loader').style.display = 'none';
         }
 
