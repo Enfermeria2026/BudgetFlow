@@ -70,12 +70,12 @@
         .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
 
-        /* ZONA FIJA SUPERIOR (Altura fija calculada para albergar el panel y los botones) */
+        /* ZONA FIJA SUPERIOR (Se adapta automáticamente al contenido) */
         .fixed-top-section {
-            position: fixed; top: 60px; left: 0; width: 100%; height: 175px;
+            position: fixed; top: 60px; left: 0; width: 100%; height: auto; min-height: 250px;
             background-color: var(--bg-color); z-index: 50;
             display: flex; flex-direction: column; align-items: center; gap: 12px;
-            padding: 15px 15px 10px 15px; box-sizing: border-box;
+            padding: 15px 15px 15px 15px; box-sizing: border-box;
         }
 
         /* PANEL FINANCIERO */
@@ -97,9 +97,9 @@
         .btn-ingreso { background-color: var(--color-disponibles); color: white; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); }
         .btn-finalizar { background-color: transparent; color: var(--text-main); border: 2px solid var(--text-main); }
 
-        /* CONTENEDOR CON SCROLL (Empieza exactamente debajo de la zona fija y termina antes de la barra inferior) */
+        /* CONTENEDOR CON SCROLL (Empieza más abajo para dejar espacio al nuevo panel) */
         .scrollable-cards-container {
-            position: fixed; top: 270px; bottom: 70px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 340px; bottom: 70px; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 500px;
             overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
             display: flex; flex-direction: column; gap: 20px;
@@ -296,7 +296,7 @@
         <div class="modal-content" style="border-top: 5px solid var(--color-disponibles);">
             <h3 class="modal-title" style="color: var(--color-disponibles);">Ingresos del Mes</h3>
             <div class="breakdown-list" id="lista-ingresos-mes" style="max-height: 50vh; overflow-y: auto;">Cargando...</div>
-            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-disponibles);" onclick="cerrarInfo('modal-ingresos-mes')">Cerrar</button></div>
+            <button class="btn-cerrar-modal" style="background-color: var(--color-disponibles);" onclick="cerrarInfo('modal-ingresos-mes')">Cerrar</button>
         </div>
     </div>
 
@@ -304,7 +304,7 @@
         <div class="modal-content" style="border-top: 5px solid var(--color-retenidos);">
             <h3 class="modal-title" style="color: var(--color-retenidos);">Gastos del Mes</h3>
             <div class="breakdown-list" id="lista-gastos-mes" style="max-height: 50vh; overflow-y: auto;">Cargando...</div>
-            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-retenidos);" onclick="cerrarInfo('modal-gastos-mes')">Cerrar</button></div>
+            <button class="btn-cerrar-modal" style="background-color: var(--color-retenidos);" onclick="cerrarInfo('modal-gastos-mes')">Cerrar</button>
         </div>
     </div>
     <div class="modal-overlay" id="modal-totales">
