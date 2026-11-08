@@ -13,8 +13,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-top: 70px; padding-bottom: 90px;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
         
         button, a, .info-icon, .action-btn, .fab-btn, .action-mini-btn { -webkit-tap-highlight-color: transparent; }
@@ -62,78 +61,16 @@
         .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
 
-        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
-        .nav-item.active { color: var(--color-disponibles); }
-        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
-        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        /* ZONA FIJA SUPERIOR (Panel, Título y Filtros) */
+        /* ZONA FIJA SUPERIOR (Panel, Título y Filtros) -> Altura exacta de 215px */
         .fixed-top-section {
-            position: fixed; top: 60px; left: 0; width: 100%;
+            position: fixed; top: 60px; left: 0; width: 100%; height: 215px;
             background-color: var(--bg-color); z-index: 50;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
             padding: 15px 15px 10px 15px; box-sizing: border-box;
         }
-
-       body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
-        }
-
-        /* ZONA FIJA SUPERIOR */
-        .fixed-top-section {
-            margin-top: 60px; flex-shrink: 0; background-color: var(--bg-color); z-index: 50;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-            padding: 15px 15px 10px 15px; box-sizing: border-box; width: 100%;
-        }
-
-        /* CONTENEDOR CON SCROLL AUTOMÁTICO (Sin cortes) */
-        .page-content {
-            flex-grow: 1; width: 100%; max-width: 500px; 
-            overflow-y: auto; padding: 0 15px 90px 15px; box-sizing: border-box; 
-            display: flex; flex-direction: column; gap: 15px;
-        }
-
-        /* FILA DE CATEGORÍA (Casilla + Tarjeta) */
-        .categoria-row { display: flex; align-items: center; gap: 12px; width: 100%; }
-        .categoria-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--color-retenidos); flex-shrink: 0; }
-
-        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE (Borrar X categorías) */
-        .delete-action-bar {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 460px; background: var(--text-main); color: white;
-            padding: 12px 20px; border-radius: 30px; display: none; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 95; font-size: 14px; font-weight: bold; box-sizing: border-box;
-        }
-        .btn-borrar-multi { background: var(--color-retenidos); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
-
         .financial-panel {
             background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
-        }
-
-        .filter-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; }
-        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin: 0; }
-        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-
-        /* PANEL FINANCIERO */
-        .financial-panel {
-            background-color: var(--card-bg); border-radius: 16px; padding: 20px 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center;
         }
         .fin-block { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
         .info-icon-wrapper { margin-bottom: 2px; }
@@ -141,17 +78,28 @@
         .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
         .fin-amount { font-size: 18px; font-weight: bold; }
 
-        /* CABECERA SECCIÓN Y FILTROS */
-        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px;}
-        .filter-row { display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin: 0; }
+        .filter-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; }
         .totals-mini-card { background: #fff; padding: 10px 12px; border-radius: 8px; border: 1px solid #E5E7E9; font-size: 12px; font-weight: bold; color: var(--text-main); }
         .filter-btn { background: #E5E7E9; border: none; padding: 10px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* TARJETAS CATEGORÍAS */
-        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
+        /* CONTENEDOR CON SCROLL (Empieza exactamente en 285px para dejar libre el bloque superior sin cortes) */
+        .page-content {
+            position: fixed; top: 285px; bottom: 70px; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px;
+            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+
+        /* FILA DE CATEGORÍA (Casilla + Tarjeta) */
+        .categoria-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+        .categoria-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--color-retenidos); flex-shrink: 0; }
+
         .item-card {
             background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
             display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+            flex: 1; box-sizing: border-box;
         }
         .card-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
         .card-details { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
@@ -163,10 +111,9 @@
         .action-mini-btn {
             width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--text-main);
             background: transparent; color: var(--text-main); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 14px; font-weight: bold; padding: 0; transition: 0.2s;
+            cursor: pointer; padding: 0; transition: 0.2s;
         }
         .action-mini-btn:hover { background: #F4F6F9; }
-        .btn-svg { width: 14px; height: 14px; }
 
         .card-progress-row { display: flex; align-items: center; gap: 10px; }
         .card-progress-bg { flex: 1; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; }
@@ -175,6 +122,15 @@
         
         .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); }
         .text-excedido { color: var(--color-retenidos); margin-left: 5px; }
+
+        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE (Borrar X categorías) */
+        .delete-action-bar {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 460px; background: var(--text-main); color: white;
+            padding: 12px 20px; border-radius: 30px; display: none; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 95; font-size: 14px; font-weight: bold; box-sizing: border-box;
+        }
+        .btn-borrar-multi { background: var(--color-retenidos); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
         /* BOTÓN FLOTANTE GIGANTE */
         .fab-btn {
@@ -185,6 +141,17 @@
             transition: transform 0.3s ease;
         }
         .fab-btn.spin { transform: rotate(90deg); }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
 
         /* MODALES */
         .modal-overlay {
@@ -198,7 +165,6 @@
         .modal-title { font-size: 18px; font-weight: bold; margin: 0; text-align: center; }
         .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         label { font-size: 13px; font-weight: bold; color: var(--text-main); }
-        .info-text { font-size: 12px; font-style: italic; color: #7F8C8D; margin: -5px 0 0 0; }
         input, select { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
         
         .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 5px; }
@@ -209,9 +175,6 @@
         .btn-cancel { flex: 1; padding: 15px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
         .btn-confirm { flex: 1; padding: 15px; border: none; background: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
         .btn-confirm:disabled { background: #BDC3C7; }
-
-        .modal-alert { background: #FDEDEC; border: 1px solid #E74C3C; border-radius: 8px; padding: 15px; color: #C0392B; font-size: 14px; display: none; }
-        
         .breakdown-list { text-align: left; font-size: 13px; color: #555; background: #F9F9F9; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ddd; }
         .breakdown-item:last-child { border-bottom: none; }
@@ -230,17 +193,17 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
         <ul class="sidebar-menu">
-            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
-            <li><a href="presupuestos.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
-            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span> Gastos imprevistos</a></li>
-            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span> Fondos reservados</a></li>
-            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
-            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Historial mensual</a></li>
-            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Exportar datos</a></li>
-            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configuración</a></li>
-            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span> Centro de ayuda</a></li>
-            <li><a href="info.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span> Información de la app</a></li>
-            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Cerrar sesión</a></li>
+            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></span> Centro de ayuda</a></li>
+            <li><a href="info.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></span> Información de la app</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg></span> Cerrar sesión</a></li>
         </ul>
     </aside>
 
@@ -280,14 +243,14 @@
                 <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
                 <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
                     <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
-                    <div id="filt-pct-mayor" onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
-                    <div id="filt-pct-menor" onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
-                    <div id="filt-az" onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
-                    <div id="filt-za" onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
-                    <div id="filt-mayor-gasto" onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
-                    <div id="filt-menor-gasto" onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
-                    <div id="filt-mayor-presupuesto" onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
-                    <div id="filt-menor-presupuesto" onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
+                    <div id="filt-pct-mayor" onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
+                    <div id="filt-pct-menor" onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
+                    <div id="filt-az" onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
+                    <div id="filt-za" onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
+                    <div id="filt-mayor-gasto" onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
+                    <div id="filt-menor-gasto" onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
+                    <div id="filt-mayor-presupuesto" onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
+                    <div id="filt-menor-presupuesto" onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
                 </div>
             </div>
         </div>
@@ -511,20 +474,18 @@
             else{ sb.classList.add('open'); ov.style.display = 'block'; } 
         };
 
-        // --- PEGA ESTO JUSTO AQUÍ DEBAJO ---
         window.toggleMenuFiltros = function() {
             const drop = document.getElementById('dropdown-filtros');
             drop.style.display = (drop.style.display === 'block') ? 'none' : 'block';
         };
 
-        // Cerrar el desplegable si se hace clic fuera
         window.addEventListener('click', function(e) {
             if (!e.target.closest('.filter-btn') && !e.target.closest('#dropdown-filtros')) {
                 const drop = document.getElementById('dropdown-filtros');
                 if (drop) drop.style.display = 'none';
             }
         });
-        // ------------------------------------
+
         window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
 
         // MODALES
@@ -582,10 +543,7 @@
                 const [cats, huchs, fonds] = await Promise.all([catsPromise, huchsPromise, fondsPromise]);
                 colCategorias = cats;
                 
-                // --- AQUÍ ESTÁ LA LLAMADA ---
                 actualizarDistintivoFiltros(); 
-                // ---------------------------
-
                 renderizarCategorias();
                 prepararDesgloseRetenidos(cats, huchs, fonds);
             } catch (error) {
@@ -606,7 +564,6 @@
         };
 
         function actualizarDistintivoFiltros() {
-            // Limpiar estilos y marcas anteriores
             const opciones = ['pct-mayor', 'pct-menor', 'az', 'za', 'mayor-gasto', 'menor-gasto', 'mayor-presupuesto', 'menor-presupuesto'];
             opciones.forEach(op => {
                 const el = document.getElementById('filt-' + op);
@@ -618,7 +575,6 @@
                 }
             });
 
-            // Marcar el activo actual
             const activoEl = document.getElementById('filt-' + criterioOrdenActual);
             if (activoEl) {
                 activoEl.style.fontWeight = 'bold';
@@ -690,7 +646,7 @@
                 container.innerHTML += `
                     <div class="categoria-row">
                         <input type="checkbox" class="categoria-checkbox" value="${cat.id}" onchange="actualizarSeleccionBorrarCat()">
-                        <div class="item-card" style="flex:1;">
+                        <div class="item-card">
                             <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
                             <div class="card-details">
                                 <div class="card-header-row">
@@ -758,7 +714,6 @@
             }
         };
 
-        
         // LÓGICA: CREAR CATEGORÍA
         window.crearCategoriaBD = async function() {
             const btn = document.getElementById('btn-submit-cat');
