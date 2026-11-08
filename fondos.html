@@ -120,9 +120,11 @@
         .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
         .card-percent { font-size: 13px; font-weight: bold; }
         
-        .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); }
-        .fecha-prevista { font-size: 10px; color: #7F8C8D; position: absolute; bottom: 12px; right: 15px; font-weight: bold; }
-        .text-superado { color: var(--color-disponibles); margin-left: 5px; font-weight: bold; font-size: 11px;}
+        .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); display: flex; flex-direction: column; gap: 3px; }
+        .fecha-prevista { font-size: 11px; color: #7F8C8D; font-weight: bold; white-space: nowrap; text-align: right; }
+        .text-superado { color: var(--color-disponibles); font-weight: bold; font-size: 11px; }
+        .card-footer-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 2px; width: 100%; }
+        
 
         /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE */
         .delete-action-bar {
@@ -703,11 +705,11 @@
                 let pct = hasObj ? Math.min(100, Math.floor((guardado / objetivo) * 100)) : 0;
                 let colorBar = (pct < 50) ? '#E74C3C' : (pct < 80 ? '#F4D03F' : '#27AE60');
                 
-                let amountsHtml = `${guardado.toFixed(2)}€`;
+                let amountsHtml = `<span>${guardado.toFixed(2)}€</span>`;
                 if (hasObj) {
-                    amountsHtml = `${guardado.toFixed(2)}€ / ${objetivo.toFixed(2)}€`;
+                    amountsHtml = `<span>${guardado.toFixed(2)}€ / ${objetivo.toFixed(2)}€</span>`;
                     if (guardado > objetivo) {
-                        amountsHtml += ` <span class="text-superado">Superado en ${(guardado - objetivo).toFixed(2)}€</span>`;
+                        amountsHtml += `<div class="text-superado">Superado en ${(guardado - objetivo).toFixed(2)}€</div>`;
                     }
                 }
 
@@ -753,8 +755,10 @@
                                     </div>
                                 </div>
                                 ${progressHtml}
-                                <div class="card-amounts">${amountsHtml}</div>
-                                ${fechaHtml}
+                                <div class="card-footer-row">
+                                    <div class="card-amounts">${amountsHtml}</div>
+                                    ${fechaHtml}
+                                </div>
                             </div>
                         </div>
                     </div>
