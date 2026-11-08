@@ -193,8 +193,6 @@
         
         .expand-btn { background: #E5E7E9; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: var(--text-main); transition: 0.2s; }
         .expand-btn:hover { background: #D5D8DC; }
-
-        
     </style>
 </head>
 <body>
@@ -344,6 +342,20 @@
         </div>
     </div>
 
+    <!-- MODAL SELECTOR DE ICONOS AVANZADO -->
+    <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3 class="modal-title" style="color: var(--text-main);">Selecciona un Icono</h3>
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="buscador-iconos" placeholder="🔍 Buscar icono..." oninput="filtrarIconos(this.value)" style="padding: 10px; font-size: 13px;">
+            </div>
+            <div id="contenedor-lista-iconos" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <div class="btn-row" style="margin-top: 15px;">
+                <button class="btn-cancel" onclick="cerrarModal('modal-selector-iconos')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- MODAL ALERT ERROR -->
     <div class="modal-overlay" id="modal-alert-error" style="z-index: 10005;">
         <div class="modal-content" style="border-top: 5px solid var(--color-retenidos);">
@@ -359,19 +371,10 @@
             <h3 class="modal-title">Nueva Categoría</h3>
             <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="cat-nombre"></div>
             <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div class="icon-selector" id="cat-iconos">
-                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🏠</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🚗</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🛒</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💼</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🧳</div>
-                </div>
+                <div id="cat-selector-iconos-avanzado"></div>
             </div>
             <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div class="color-selector" id="cat-colores">
-                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'cat-colores')" data-color="#58D68D"></div>
-                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'cat-colores')" data-color="#5DADE2"></div>
-                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'cat-colores')" data-color="#F4D03F"></div>
-                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'cat-colores')" data-color="#E74C3C"></div>
-                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'cat-colores')" data-color="#EB984E"></div>
-                </div>
+                <div id="cat-selector-colores-avanzado"></div>
             </div>
             <div class="field-wrapper">
                 <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
@@ -429,24 +432,11 @@
             
             <div class="field-wrapper">
                 <label>Icono <span style="color:var(--color-retenidos)">*</span></label>
-                <div class="icon-selector" id="edit-cat-iconos">
-                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🏠</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🚗</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🛒</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">💼</div>
-                    <div class="opt-btn" onclick="selOpc(this, 'edit-cat-iconos')">🧳</div>
-                </div>
+                <div id="edit-cat-selector-iconos-avanzado"></div>
             </div>
-
             <div class="field-wrapper">
                 <label>Color <span style="color:var(--color-retenidos)">*</span></label>
-                <div class="color-selector" id="edit-cat-colores">
-                    <div class="opt-btn" style="background:#58D68D;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#58D68D"></div>
-                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#5DADE2"></div>
-                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#F4D03F"></div>
-                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#E74C3C"></div>
-                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'edit-cat-colores')" data-color="#EB984E"></div>
-                </div>
+                <div id="edit-cat-selector-colores-avanzado"></div>
             </div>
 
             <div class="field-wrapper">
@@ -606,6 +596,7 @@
                 btn.classList.remove('spin'); 
                 document.getElementById(id).style.display = 'flex'; 
                 document.body.style.overflow = 'hidden'; 
+                if (id === 'modal-crear-cat') renderizarSelectoresAvanzados('cat', '#58D68D', '🏠');
             }, 300);
         };
         window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
@@ -861,7 +852,7 @@
 
             btn.disabled = true; err.style.display = 'none';
             try {
-                const nuevaCat = { nombre: nom, presupuestoMaximo: pre, gastado: 0, icono: document.querySelector('#cat-iconos .selected').textContent, color: document.querySelector('#cat-colores .selected').getAttribute('data-color') };
+                const nuevaCat = { nombre: nom, presupuestoMaximo: pre, gastado: 0, icono: iconoActualSeleccionado, color: colorActualSeleccionado };
                 await addDoc(collection(db, "usuarios", uidActual, "categorias"), nuevaCat);
                 await updateDoc(doc(db, "usuarios", uidActual), { fondosDisponibles: (datosUsuario.fondosDisponibles - pre), fondosRetenidos: (datosUsuario.fondosRetenidos + pre) });
                 document.getElementById('cat-nombre').value = ""; document.getElementById('cat-presupuesto').value = "";
@@ -1295,23 +1286,7 @@
             document.getElementById('edit-cat-nombre').value = cat.nombre || '';
             document.getElementById('edit-cat-max').value = cat.presupuestoMaximo || 0;
             
-            // Marcar icono actual
-            document.querySelectorAll('#edit-cat-iconos .opt-btn').forEach(btn => {
-                if (btn.textContent.trim() === cat.icono) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-
-            // Marcar color actual
-            document.querySelectorAll('#edit-cat-colores .opt-btn').forEach(btn => {
-                if (btn.getAttribute('data-color') === cat.color) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
+            renderizarSelectoresAvanzados('edit-cat', cat.color, cat.icono);
 
             const gastadoActual = Number(cat.gastado) || 0;
             document.getElementById('info-gasto-actual').textContent = `Gastado hasta ahora: ${gastadoActual.toFixed(2)}€ (El máximo no puede ser inferior al gasto)`;
@@ -1330,9 +1305,6 @@
             const idCat = document.getElementById('edit-cat-id').value;
             const nuevoNombre = document.getElementById('edit-cat-nombre').value.trim();
             const nuevoMax = parseFloat(document.getElementById('edit-cat-max').value);
-            
-            const iconoSel = document.querySelector('#edit-cat-iconos .selected');
-            const colorSel = document.querySelector('#edit-cat-colores .selected');
 
             const catOriginal = colCategorias.find(c => c.id === idCat);
             if (!catOriginal) return;
@@ -1340,7 +1312,7 @@
             const gastadoActual = Number(catOriginal.gastado) || 0;
             const maxAntiguo = Number(catOriginal.presupuestoMaximo) || 0;
 
-            if (!nuevoNombre || isNaN(nuevoMax) || nuevoMax < 0 || !iconoSel || !colorSel) {
+            if (!nuevoNombre || isNaN(nuevoMax) || nuevoMax < 0) {
                 if (err) { err.textContent = "Rellena todos los campos obligatorios correctamente."; err.style.display = 'block'; }
                 return;
             }
@@ -1398,8 +1370,8 @@
                 // Actualizar la categoría en Firestore (nombre, icono, color y nuevo presupuesto máximo)
                 await updateDoc(doc(db, "usuarios", uidActual, "categorias", idCat), {
                     nombre: nuevoNombre,
-                    icono: iconoSel.textContent,
-                    color: colorSel.getAttribute('data-color'),
+                    icono: iconoActualSeleccionado,
+                    color: colorActualSeleccionado,
                     presupuestoMaximo: nuevoMax
                 });
 
@@ -1419,107 +1391,65 @@
             }
         };
 
-        // --- CATÁLOGO COMPLETO DE ICONOS Y COLORES ---
+        let colorActualSeleccionado = "#58D68D";
+        let iconoActualSeleccionado = "🏠";
+        let prefijoFormularioActual = "cat"; 
+
         const CATALOGO_COLORES = [
-            { id: "granate", hex: "#800020", desbloqueado: false },
-            { id: "rojo", hex: "#E74C3C", desbloqueado: true },
-            { id: "coral", hex: "#FF6F61", desbloqueado: false },
-            { id: "frambuesa", hex: "#C71585", desbloqueado: false },
-            { id: "naranja", hex: "#EB984E", desbloqueado: true },
-            { id: "dorado", hex: "#D4AC0D", desbloqueado: true },
-            { id: "melon", hex: "#FFB347", desbloqueado: false },
-            { id: "calabaza", hex: "#D35400", desbloqueado: false },
-            { id: "amarillo", hex: "#F4D03F", desbloqueado: true },
-            { id: "oro", hex: "#FFD700", desbloqueado: false },
-            { id: "limon", hex: "#CCFF00", desbloqueado: false },
-            { id: "crema", hex: "#FFFDD0", desbloqueado: false },
-            { id: "verde", hex: "#58D68D", desbloqueado: true },
-            { id: "esmeralda", hex: "#2ECC71", desbloqueado: false },
-            { id: "verde_botella", hex: "#006600", desbloqueado: false },
-            { id: "oliva", hex: "#808000", desbloqueado: false },
-            { id: "menta", hex: "#AAF0D1", desbloqueado: false },
-            { id: "turquesa", hex: "#40E0D0", desbloqueado: false },
-            { id: "pistacho", hex: "#93C572", desbloqueado: false },
-            { id: "azul", hex: "#5DADE2", desbloqueado: true },
-            { id: "azul_marino", hex: "#000080", desbloqueado: false },
-            { id: "celeste", hex: "#B0E0E6", desbloqueado: false },
-            { id: "violeta", hex: "#8A2BE2", desbloqueado: false },
-            { id: "purpura", hex: "#6A0DAD", desbloqueado: false },
-            { id: "morado", hex: "#4B0082", desbloqueado: false },
-            { id: "lila", hex: "#C8A2C8", desbloqueado: false },
-            { id: "rosa", hex: "#FFC0CB", desbloqueado: false },
-            { id: "magenta", hex: "#FF00FF", desbloqueado: false },
-            { id: "fucsia", hex: "#FF00FF", desbloqueado: false },
-            { id: "salmon", hex: "#FA8072", desbloqueado: false },
-            { id: "marron", hex: "#8B4513", desbloqueado: false },
-            { id: "beige", hex: "#F5F5DC", desbloqueado: false },
-            { id: "cafe", hex: "#6F4E37", desbloqueado: false },
-            { id: "chocolate", hex: "#D2691E", desbloqueado: false },
-            { id: "caoba", hex: "#C04000", desbloqueado: false },
-            { id: "gris", hex: "#7F8C8D", desbloqueado: true }
+            { id: "granate", hex: "#800020", desbloqueado: false }, { id: "rojo", hex: "#E74C3C", desbloqueado: true },
+            { id: "coral", hex: "#FF6F61", desbloqueado: false }, { id: "frambuesa", hex: "#C71585", desbloqueado: false },
+            { id: "naranja", hex: "#EB984E", desbloqueado: true }, { id: "dorado", hex: "#D4AC0D", desbloqueado: true },
+            { id: "melon", hex: "#FFB347", desbloqueado: false }, { id: "calabaza", hex: "#D35400", desbloqueado: false },
+            { id: "amarillo", hex: "#F4D03F", desbloqueado: true }, { id: "oro", hex: "#FFD700", desbloqueado: false },
+            { id: "limon", hex: "#CCFF00", desbloqueado: false }, { id: "crema", hex: "#FFFDD0", desbloqueado: false },
+            { id: "verde", hex: "#58D68D", desbloqueado: true }, { id: "esmeralda", hex: "#2ECC71", desbloqueado: false },
+            { id: "verde_botella", hex: "#006600", desbloqueado: false }, { id: "oliva", hex: "#808000", desbloqueado: false },
+            { id: "menta", hex: "#AAF0D1", desbloqueado: false }, { id: "turquesa", hex: "#40E0D0", desbloqueado: false },
+            { id: "pistacho", hex: "#93C572", desbloqueado: false }, { id: "azul", hex: "#5DADE2", desbloqueado: true },
+            { id: "azul_marino", hex: "#000080", desbloqueado: false }, { id: "celeste", hex: "#B0E0E6", desbloqueado: false },
+            { id: "violeta", hex: "#8A2BE2", desbloqueado: false }, { id: "purpura", hex: "#6A0DAD", desbloqueado: false },
+            { id: "morado", hex: "#4B0082", desbloqueado: false }, { id: "lila", hex: "#C8A2C8", desbloqueado: false },
+            { id: "rosa", hex: "#FFC0CB", desbloqueado: false }, { id: "magenta", hex: "#FF00FF", desbloqueado: false },
+            { id: "fucsia", hex: "#FF00FF", desbloqueado: false }, { id: "salmon", hex: "#FA8072", desbloqueado: false },
+            { id: "marron", hex: "#8B4513", desbloqueado: false }, { id: "beige", hex: "#F5F5DC", desbloqueado: false },
+            { id: "cafe", hex: "#6F4E37", desbloqueado: false }, { id: "chocolate", hex: "#D2691E", desbloqueado: false },
+            { id: "caoba", hex: "#C04000", desbloqueado: false }, { id: "gris", hex: "#7F8C8D", desbloqueado: true }
         ];
 
         const CATALOGO_ICONOS = {
             comunes: [
-                { emoji: "🏠", desbloqueado: true }, { emoji: "🚗", desbloqueado: true }, 
-                { emoji: "🛒", desbloqueado: true }, { emoji: "💼", desbloqueado: true }, 
-                { emoji: "🧳", desbloqueado: true }, { emoji: "🐶", desbloqueado: false }, 
-                { emoji: "🐱", desbloqueado: false }, { emoji: "🌸", desbloqueado: false }, 
-                { emoji: "☀️", desbloqueado: false }, { emoji: "⭐", desbloqueado: false }, 
-                { emoji: "🍼", desbloqueado: false }, { emoji: "⚽", desbloqueado: false }, 
-                { emoji: "💅", desbloqueado: false }, { emoji: "✂️", desbloqueado: false }, 
-                { emoji: "👄", desbloqueado: false }, { emoji: "⏰", desbloqueado: false }, 
-                { emoji: "💧", desbloqueado: false }, { emoji: "💡", desbloqueado: false }, 
-                { emoji: "🔒", desbloqueado: false }, { emoji: "🔑", desbloqueado: false }, 
-                { emoji: "⛺", desbloqueado: false }, { emoji: "🪵", desbloqueado: false }, 
-                { emoji: "🪑", desbloqueado: false }, { emoji: "👕", desbloqueado: false }, 
-                { emoji: "👖", desbloqueado: false }, { emoji: "🐚", desbloqueado: false }, 
-                { emoji: "📦", desbloqueado: false }, { emoji: "🎲", desbloqueado: false }
+                { emoji: "🏠", desbloqueado: true }, { emoji: "🚗", desbloqueado: true }, { emoji: "🛒", desbloqueado: true }, { emoji: "💼", desbloqueado: true }, 
+                { emoji: "🧳", desbloqueado: true }, { emoji: "🐶", desbloqueado: false }, { emoji: "🐱", desbloqueado: false }, { emoji: "🌸", desbloqueado: false }, 
+                { emoji: "☀️", desbloqueado: false }, { emoji: "⭐", desbloqueado: false }, { emoji: "🍼", desbloqueado: false }, { emoji: "⚽", desbloqueado: false }, 
+                { emoji: "💅", desbloqueado: false }, { emoji: "✂️", desbloqueado: false }, { emoji: "👄", desbloqueado: false }, { emoji: "⏰", desbloqueado: false }, 
+                { emoji: "💧", desbloqueado: false }, { emoji: "💡", desbloqueado: false }, { emoji: "🔒", desbloqueado: false }, { emoji: "🔑", desbloqueado: false }, 
+                { emoji: "⛺", desbloqueado: false }, { emoji: "🪵", desbloqueado: false }, { emoji: "🪑", desbloqueado: false }, { emoji: "👕", desbloqueado: false }, 
+                { emoji: "👖", desbloqueado: false }, { emoji: "🐚", desbloqueado: false }, { emoji: "📦", desbloqueado: false }, { emoji: "🎲", desbloqueado: false }
             ],
             raros: [
-                { emoji: "🐰", desbloqueado: false }, { emoji: "🐎", desbloqueado: false }, 
-                { emoji: "🎂", desbloqueado: false }, { emoji: "🍔", desbloqueado: false }, 
-                { emoji: "🥳", desbloqueado: false }, { emoji: "📞", desbloqueado: false }, 
-                { emoji: "❤️", desbloqueado: false }, { emoji: "💊", desbloqueado: false }, 
-                { emoji: "✉️", desbloqueado: false }, { emoji: "📌", desbloqueado: false }, 
-                { emoji: "👁️", desbloqueado: false }, { emoji: "📢", desbloqueado: false }, 
-                { emoji: "📺", desbloqueado: false }, { emoji: "🛏️", desbloqueado: false }, 
-                { emoji: "🧥", desbloqueado: false }, { emoji: "👟", desbloqueado: false }, 
-                { emoji: "👠", desbloqueado: false }, { emoji: "🎤", desbloqueado: false }, 
-                { emoji: "🎨", desbloqueado: false }, { emoji: "🍿", desbloqueado: false }, 
+                { emoji: "🐰", desbloqueado: false }, { emoji: "🐎", desbloqueado: false }, { emoji: "🎂", desbloqueado: false }, { emoji: "🍔", desbloqueado: false }, 
+                { emoji: "🥳", desbloqueado: false }, { emoji: "📞", desbloqueado: false }, { emoji: "❤️", desbloqueado: false }, { emoji: "💊", desbloqueado: false }, 
+                { emoji: "✉️", desbloqueado: false }, { emoji: "📌", desbloqueado: false }, { emoji: "👁️", desbloqueado: false }, { emoji: "📢", desbloqueado: false }, 
+                { emoji: "📺", desbloqueado: false }, { emoji: "🛏️", desbloqueado: false }, { emoji: "🧥", desbloqueado: false }, { emoji: "👟", desbloqueado: false }, 
+                { emoji: "👠", desbloqueado: false }, { emoji: "🎤", desbloqueado: false }, { emoji: "🎨", desbloqueado: false }, { emoji: "🍿", desbloqueado: false }, 
                 { emoji: "🎳", desbloqueado: false }, { emoji: "🎸", desbloqueado: false }
             ],
             epicos: [
-                { emoji: "🏆", desbloqueado: false }, { emoji: "🎮", desbloqueado: false }, 
-                { emoji: "🎹", desbloqueado: false }, { emoji: "🚲", desbloqueado: false }, 
-                { emoji: "🚆", desbloqueado: false }, { emoji: "💻", desbloqueado: false }, 
-                { emoji: "💍", desbloqueado: false }, { emoji: "📅", desbloqueado: false }, 
-                { emoji: "📖", desbloqueado: false }, { emoji: "📍", desbloqueado: false }, 
-                { emoji: "📶", desbloqueado: false }, { emoji: "🎵", desbloqueado: false }, 
-                { emoji: "👓", desbloqueado: false }, { emoji: "🦷", desbloqueado: false }, 
-                { emoji: "🧾", desbloqueado: false }
+                { emoji: "🏆", desbloqueado: false }, { emoji: "🎮", desbloqueado: false }, { emoji: "🎹", desbloqueado: false }, { emoji: "🚲", desbloqueado: false }, 
+                { emoji: "🚆", desbloqueado: false }, { emoji: "💻", desbloqueado: false }, { emoji: "💍", desbloqueado: false }, { emoji: "📅", desbloqueado: false }, 
+                { emoji: "📖", desbloqueado: false }, { emoji: "📍", desbloqueado: false }, { emoji: "📶", desbloqueado: false }, { emoji: "🎵", desbloqueado: false }, 
+                { emoji: "👓", desbloqueado: false }, { emoji: "🦷", desbloqueado: false }, { emoji: "🧾", desbloqueado: false }
             ],
             legendarios: [
-                { emoji: "✈️", desbloqueado: false }, { emoji: "🍷", desbloqueado: false }, 
-                { emoji: "🚢", desbloqueado: false }, { emoji: "🏖️", desbloqueado: false }, 
-                { emoji: "🎓", desbloqueado: false }, { emoji: "⚖️", desbloqueado: false }, 
-                { emoji: "🎬", desbloqueado: false }, { emoji: "🏋️", desbloqueado: false }, 
-                { emoji: "🎧", desbloqueado: false }, { emoji: "📻", desbloqueado: false }, 
-                { emoji: "🌊", desbloqueado: false }, { emoji: "🚀", desbloqueado: false }
+                { emoji: "✈️", desbloqueado: false }, { emoji: "🍷", desbloqueado: false }, { emoji: "🚢", desbloqueado: false }, { emoji: "🏖️", desbloqueado: false }, 
+                { emoji: "🎓", desbloqueado: false }, { emoji: "⚖️", desbloqueado: false }, { emoji: "🎬", desbloqueado: false }, { emoji: "🏋️", desbloqueado: false }, 
+                { emoji: "🎧", desbloqueado: false }, { emoji: "📻", desbloqueado: false }, { emoji: "🌊", desbloqueado: false }, { emoji: "🚀", desbloqueado: false }
             ]
         };
 
-        let colorActualSeleccionado = "#58D68D";
-        let iconoActualSeleccionado = "🏠";
-        let prefijoFormularioActual = "cat"; // "cat" para crear, "edit-cat" para editar
-
         window.seleccionarColorGlobal = function(hex, desbloqueado) {
-            if (!desbloqueado) {
-                alert("Este color está bloqueado. ¡Desbloquéalo completando logros!");
-                return;
-            }
+            if (!desbloqueado) { alert("Este color está bloqueado. ¡Desbloquéalo completando logros!"); return; }
             colorActualSeleccionado = hex;
-            // Actualizar UI visual
             document.querySelectorAll(`.${prefijoFormularioActual}-color-item`).forEach(el => {
                 el.style.border = (el.getAttribute('data-hex') === hex) ? '3px solid var(--text-main)' : '2px solid transparent';
             });
@@ -1527,10 +1457,7 @@
         };
 
         window.seleccionarIconoGlobal = function(emoji, desbloqueado) {
-            if (!desbloqueado) {
-                alert("Este icono está bloqueado. ¡Sigue avanzando en BudgetFlow para conseguirlo!");
-                return;
-            }
+            if (!desbloqueado) { alert("Este icono está bloqueado. ¡Sigue avanzando en BudgetFlow para conseguirlo!"); return; }
             iconoActualSeleccionado = emoji;
             document.getElementById(`${prefijoFormularioActual}-preview-icono`).textContent = emoji;
             cerrarModal('modal-selector-iconos');
@@ -1545,7 +1472,6 @@
         function renderizarModalIconos(filtro) {
             const contenedor = document.getElementById('contenedor-lista-iconos');
             let html = "";
-
             Object.keys(CATALOGO_ICONOS).forEach(categoria => {
                 let iconosFiltrados = CATALOGO_ICONOS[categoria].filter(i => filtro === '' || i.emoji.includes(filtro));
                 if (iconosFiltrados.length > 0) {
@@ -1561,32 +1487,27 @@
             contenedor.innerHTML = html;
         }
 
-        window.filtrarIconos = function(texto) {
-            renderizarModalIconos(texto.trim());
-        };
+        window.filtrarIconos = function(texto) { renderizarModalIconos(texto.trim()); };
 
         window.renderizarSelectoresAvanzados = function(prefijo, colorInicial, iconoInicial) {
             prefijoFormularioActual = prefijo;
             colorActualSeleccionado = colorInicial || "#58D68D";
             iconoActualSeleccionado = iconoInicial || "🏠";
 
-            // Renderizar vista previa y paleta de colores
             const contColor = document.getElementById(`${prefijo}-selector-colores-avanzado`);
             if (contColor) {
                 let htmlColores = `<div style="display:flex; align-items:center; gap:10px;">
-                    <div id="${prefijo}-preview-color" style="width:40px; height:40px; border-radius:50%; background:${colorActualSeleccionado}; border:2px solid #ccc;"></div>
+                    <div id="${prefijo}-preview-color" style="width:40px; height:40px; border-radius:50%; background:${colorActualSeleccionado}; border:2px solid #ccc; flex-shrink:0;"></div>
                     <div class="color-grid-container" style="flex:1;">`;
-                
                 CATALOGO_COLORES.forEach(c => {
                     let claseL = c.desbloqueado ? '' : 'locked';
                     let sel = c.hex === colorActualSeleccionado ? 'selected' : '';
-                    htmlColores += `<div class="color-opt-item ${sel} ${claseL}" data-hex="${c.hex}" style="background:${c.hex};" onclick="seleccionarColorGlobal('${c.hex}', ${c.desbloqueado})"></div>`;
+                    htmlColores += `<div class="color-opt-item ${prefijo}-color-item ${sel} ${claseL}" data-hex="${c.hex}" style="background:${c.hex};" onclick="seleccionarColorGlobal('${c.hex}', ${c.desbloqueado})"></div>`;
                 });
                 htmlColores += `</div></div>`;
                 contColor.innerHTML = htmlColores;
             }
 
-            // Renderizar vista previa de icono y botón de despliegue con flecha
             const contIcono = document.getElementById(`${prefijo}-selector-iconos-avanzado`);
             if (contIcono) {
                 contIcono.innerHTML = `
@@ -1597,7 +1518,6 @@
                 `;
             }
         };
-        
     </script>
 </body>
 </html>
