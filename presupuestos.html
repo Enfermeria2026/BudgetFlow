@@ -1116,7 +1116,6 @@
             if (btn) { btn.disabled = true; btn.textContent = "ELIMINANDO..."; }
 
             try {
-                // 1. Calcular el remanente real no gastado (Máximo - Gastado) de las categorías borradas
                 let sumaRemanentesBorrados = 0;
 
                 idsCategoriasABorrar.forEach(id => {
@@ -1128,25 +1127,20 @@
                     }
                 });
 
-                // REGLA BASE (Paso 1 común para ambos casos):
-                // El remanente no gastado se resta de retenidos y se suma a disponibles.
                 let nuevosRetenidos = (datosUsuario.fondosRetenidos || 0) - sumaRemanentesBorrados;
                 let nuevosDisponibles = (datosUsuario.fondosDisponibles || 0) + sumaRemanentesBorrados;
-                let nuevosTotales = datosUsuario.fondosTotales || 0; // Los totales nunca se mueven
+                let nuevosTotales = datosUsuario.fondosTotales || 0;
 
                 let acumuladoresGastosDestino = {};
                 reubicaciones.forEach(r => {
                     if (r.idDestino === 'imprevisto') {
-                        // CASO IMPREVISTO: Tu regla estricta. 
-                        // Únicamente se restó el remanente del retenido y se dio a los disponibles (ya hecho arriba). 
-                        // No se aplica ningún segundo paso de traspaso.
+                        // Imprevisto: No requiere segundo paso de traspaso en retenidos/disponibles
                     } else {
-                        // CASO TRASPASO A OTRA CATEGORÍA: Tu regla de los dos pasos.
-                        // Se retira adicionalmente la cantidad traspasada (el gasto) de retenidos y se da a disponibles.
+                        // Traspaso a otra categoría: Segundo paso exigido por tu regla
                         nuevosRetenidos -= r.importe;
                         nuevosDisponibles += r.importe;
 
-                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastos[r.idDestino] || 0) + r.importe;
+                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastosDestino[r.idDestino] || 0) + r.importe;
                     }
                 });
 
