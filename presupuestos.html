@@ -225,14 +225,14 @@
     <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
     <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
         <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
-        <div onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
-        <div onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
-        <div onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
-        <div onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
-        <div onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
-        <div onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
-        <div onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
-        <div onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
+        <div id="filt-pct-mayor" onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
+        <div id="filt-pct-menor" onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
+        <div id="filt-az" onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
+        <div id="filt-za" onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
+        <div id="filt-mayor-gasto" onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
+        <div id="filt-menor-gasto" onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
+        <div id="filt-mayor-presupuesto" onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
+        <div id="filt-menor-presupuesto" onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
     </div>
 </div>
 </div>
@@ -519,24 +519,53 @@
 
                 const [cats, huchs, fonds] = await Promise.all([catsPromise, huchsPromise, fondsPromise]);
                 colCategorias = cats;
+                
+                // --- AQUÍ ESTÁ LA LLAMADA ---
+                actualizarDistintivoFiltros(); 
+                // ---------------------------
+
                 renderizarCategorias();
                 prepararDesgloseRetenidos(cats, huchs, fonds);
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
             } finally {
-                // Se asegura de ocultar el loader pase lo que pase
                 const loader = document.getElementById('global-loader');
                 if (loader) loader.style.display = 'none';
             }
         }
 
-        let criterioOrdenActual = 'az'; // Criterio por defecto
+        let criterioOrdenActual = 'pct-mayor'; // Criterio por defecto
 
         window.ordenarCategorias = function(criterio) {
             criterioOrdenActual = criterio;
             document.getElementById('dropdown-filtros').style.display = 'none';
+            actualizarDistintivoFiltros();
             renderizarCategorias();
         };
+
+        function actualizarDistintivoFiltros() {
+            // Limpiar estilos y marcas anteriores
+            const opciones = ['pct-mayor', 'pct-menor', 'az', 'za', 'mayor-gasto', 'menor-gasto', 'mayor-presupuesto', 'menor-presupuesto'];
+            opciones.forEach(op => {
+                const el = document.getElementById('filt-' + op);
+                if (el) {
+                    el.style.fontWeight = 'normal';
+                    el.style.color = 'var(--text-main)';
+                    const check = el.querySelector('.check-activo');
+                    if (check) check.remove();
+                }
+            });
+
+            // Marcar el activo actual
+            const activoEl = document.getElementById('filt-' + criterioOrdenActual);
+            if (activoEl) {
+                activoEl.style.fontWeight = 'bold';
+                activoEl.style.color = 'var(--color-disponibles)';
+                if (!activoEl.querySelector('.check-activo')) {
+                    activoEl.insertAdjacentHTML('beforeend', '<span class="check-activo" style="margin-left:auto; font-weight:bold;">✓</span>');
+                }
+            }
+        }
 
         // RENDERIZAR TARJETAS (Con ordenación inteligente por % real y exceso)
         function renderizarCategorias() {
