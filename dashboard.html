@@ -216,6 +216,22 @@
             </div>
         </div>
 
+        <!-- MINI PANEL DE FLUJO MENSUAL -->
+        <div style="display: flex; width: 100%; max-width: 500px; background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); box-sizing: border-box;">
+            <div style="flex:1; text-align:center; border-right: 1px solid #eee;">
+                <div style="font-size:11px; font-weight:bold; color:#7F8C8D; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:5px;">
+                    <span class="info-icon" onclick="abrirInfo('modal-ingresos-mes')" style="width:14px; height:14px; font-size:9px;">i</span> Ingresos Mes
+                </div>
+                <div id="ui-ingresos-mes" style="font-size:15px; font-weight:bold; color:var(--color-disponibles);">0.00 €</div>
+            </div>
+            <div style="flex:1; text-align:center;">
+                <div style="font-size:11px; font-weight:bold; color:#7F8C8D; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:5px;">
+                    <span class="info-icon" onclick="abrirInfo('modal-gastos-mes')" style="width:14px; height:14px; font-size:9px;">i</span> Gastos Mes
+                </div>
+                <div id="ui-gastos-mes" style="font-size:15px; font-weight:bold; color:var(--color-retenidos);">0.00 €</div>
+            </div>
+        </div>
+
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons-row">
             <button class="btn-action btn-ingreso" onclick="abrirModal('modal-ingreso')">Añadir ingreso</button>
@@ -276,6 +292,21 @@
     </nav>
 
     <!-- MODALES DE INFORMACIÓN -->
+    <div class="modal-overlay" id="modal-ingresos-mes" style="z-index: 10000;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-disponibles);">
+            <h3 class="modal-title" style="color: var(--color-disponibles);">Ingresos del Mes</h3>
+            <div class="breakdown-list" id="lista-ingresos-mes" style="max-height: 50vh; overflow-y: auto;">Cargando...</div>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-disponibles);" onclick="cerrarInfo('modal-ingresos-mes')">Cerrar</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-gastos-mes" style="z-index: 10000;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-retenidos);">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Gastos del Mes</h3>
+            <div class="breakdown-list" id="lista-gastos-mes" style="max-height: 50vh; overflow-y: auto;">Cargando...</div>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-retenidos);" onclick="cerrarInfo('modal-gastos-mes')">Cerrar</button></div>
+        </div>
+    </div>
     <div class="modal-overlay" id="modal-totales">
         <div class="modal-content">
             <h3 class="modal-title" style="color: var(--color-totales);">Fondos Totales</h3>
@@ -539,6 +570,7 @@
             const categoriasPromise = fetchColeccion("categorias");
             const huchasPromise = fetchColeccion("huchas");
             const fondosPromise = fetchColeccion("fondos_reservados");
+            const movimientosPromise = fetchColeccion("movimientos"); // <-- 1. Pedimos los movimientos
 
             const userDoc = await userDocPromise;
             if (userDoc.exists()) {
@@ -548,13 +580,17 @@
                 document.getElementById('ui-retenidos').textContent = (data.fondosRetenidos || 0).toFixed(2) + " €";
             }
 
-            const [categorias, huchas, fondos] = await Promise.all([categoriasPromise, huchasPromise, fondosPromise]);
+            // 2. Esperamos a que bajen los movimientos también
+            const [categorias, huchas, fondos, movimientos] = await Promise.all([categoriasPromise, huchasPromise, fondosPromise, movimientosPromise]);
 
             renderizarGrid("grid-categorias", categorias, "cat", "presupuestos.html", "Ver todas las<br>categorías");
             renderizarGrid("grid-huchas", huchas, "huc", "huchas.html", "Ver todas las<br>huchas");
             renderizarGrid("grid-fondos", fondos, "fon", "fondos.html", "Ver todos los<br>fondos");
 
             prepararDesgloseRetenidos(categorias, huchas, fondos);
+            
+            // 3. Activamos el mini-panel
+            calcularYRenderizarIngresosGastos(movimientos, categorias, huchas, fondos);
 
             document.getElementById('global-loader').style.display = 'none';
         }
@@ -660,6 +696,81 @@
             }
             div.innerHTML = html;
         }
+
+    window.calcularYRenderizarIngresosGastos = function(movs, cats, huchs, fonds) {
+            const fechaActual = new Date();
+            const mesActual = fechaActual.getMonth();
+            const anioActual = fechaActual.getFullYear();
+
+            let totalIngresos = 0; let htmlIngresos = "";
+            let totalGastos = 0;   let htmlGastos = "";
+
+            // --- 1. INGRESOS DEL MES ---
+            // (Filtramos tipo 'ingreso' excluyendo devoluciones de categorías para tener ingresos reales)
+            const ingresosMes = movs.filter(m => m.tipo === 'ingreso' && m.subtipo !== 'devolución_cat' && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
+            
+            if (ingresosMes.length === 0) {
+                htmlIngresos = "<div style='text-align:center; padding:10px; font-size:12px; color:#7F8C8D;'>No has registrado ingresos este mes.</div>";
+            } else {
+                ingresosMes.forEach(ing => {
+                    totalIngresos += ing.importe;
+                    htmlIngresos += `<div class="breakdown-item"><span>${ing.concepto}</span> <b style="color:var(--color-disponibles)">+${ing.importe.toFixed(2)}€</b></div>`;
+                });
+            }
+
+            // --- 2. GASTOS DEL MES ---
+            
+            // A. Presupuestos (Categorías)
+            htmlGastos += `<div style="font-weight:bold; margin-top:5px; color:var(--text-main);">Por Categorías:</div>`;
+            if (cats.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin categorías</div>`;
+            cats.forEach(c => {
+                let gastadoC = Number(c.gastado) || 0;
+                totalGastos += gastadoC;
+                htmlGastos += `<div class="breakdown-item"><span>${c.icono || '🏠'} ${c.nombre}</span> <b>-${gastadoC.toFixed(2)}€</b></div>`;
+            });
+
+            // B. Imprevistos
+            const imprevistosMes = movs.filter(m => m.tipo === 'gasto' && m.subtipo === 'imprevisto' && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
+            let sumaImprevistos = 0;
+            imprevistosMes.forEach(m => sumaImprevistos += m.importe);
+            totalGastos += sumaImprevistos;
+            
+            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Imprevistos:</div>`;
+            htmlGastos += `<div class="breakdown-item"><span>Gastos Imprevistos</span> <b>-${sumaImprevistos.toFixed(2)}€</b></div>`;
+
+            // C. Huchas
+            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Desde Huchas:</div>`;
+            if (huchs.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin huchas</div>`;
+            huchs.forEach(h => {
+                // Busca gastos cuyo ID o concepto apunten a la hucha actual
+                let gastosH = movs.filter(m => m.tipo === 'gasto' && (m.huchaId === h.id || m.origenId === h.id || (m.subtipo === 'hucha' && m.concepto.includes(h.nombre))) && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
+                let sumaH = 0; gastosH.forEach(g => sumaH += g.importe);
+                totalGastos += sumaH;
+                htmlGastos += `<div class="breakdown-item"><span>${h.icono || '🐖'} ${h.nombre}</span> <b>-${sumaH.toFixed(2)}€</b></div>`;
+            });
+
+            // D. Fondos Reservados
+            htmlGastos += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Desde Fondos:</div>`;
+            if (fonds.length === 0) htmlGastos += `<div style="font-size:12px; color:#7F8C8D; margin-left:10px;">Sin fondos</div>`;
+            fonds.forEach(f => {
+                let gastosF = movs.filter(m => m.tipo === 'gasto' && (m.fondoId === f.id || m.origenId === f.id || (m.subtipo === 'fondo' && m.concepto.includes(f.nombre))) && new Date(m.fecha).getMonth() === mesActual && new Date(m.fecha).getFullYear() === anioActual);
+                let sumaF = 0; gastosF.forEach(g => sumaF += g.importe);
+                totalGastos += sumaF;
+                htmlGastos += `<div class="breakdown-item"><span>${f.icono || '🏦'} ${f.nombre}</span> <b>-${sumaF.toFixed(2)}€</b></div>`;
+            });
+
+            // --- 3. PINTAR RESULTADOS ---
+            const uiIng = document.getElementById('ui-ingresos-mes');
+            const uiGas = document.getElementById('ui-gastos-mes');
+            if (uiIng) uiIng.textContent = totalIngresos.toFixed(2) + " €";
+            if (uiGas) uiGas.textContent = totalGastos.toFixed(2) + " €";
+
+            const divIng = document.getElementById('lista-ingresos-mes');
+            const divGas = document.getElementById('lista-gastos-mes');
+            if (divIng) divIng.innerHTML = htmlIngresos;
+            if (divGas) divGas.innerHTML = htmlGastos;
+        };
+        
     </script>
 </body>
 </html>
