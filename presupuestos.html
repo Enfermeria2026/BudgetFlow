@@ -299,6 +299,62 @@
         </div>
     </div>
 
+    <!-- MODAL ELIMINAR CATEGORÍA (Con Reubicación) -->
+    <div class="modal-overlay" id="modal-delete-cat">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Eliminar Categoría</h3>
+            <p id="del-cat-name" style="text-align:center; font-weight:bold; margin-top:5px; margin-bottom:15px; font-size:18px;"></p>
+            
+            <!-- Bloque si NO hay gastos -->
+            <div id="del-no-gastos" style="display:none; text-align:center; font-size:14px; color:#555;">
+                Esta categoría no tiene gastos registrados. Al eliminarla, su presupuesto protegido volverá a tus Fondos Disponibles.
+            </div>
+
+            <!-- Bloque si SÍ hay gastos -->
+            <div id="del-con-gastos" style="display:none; flex-direction:column; gap:15px;">
+                <div style="background:#FDEDEC; color:#C0392B; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
+                    Tiene <span id="del-gastado-val"></span>€ gastados.<br>¿Qué hacemos con este gasto histórico?
+                </div>
+                
+                <div class="field-wrapper">
+                    <label>Destino del gasto</label>
+                    <select id="del-destino-tipo" onchange="cambiarDestinoEliminar()" style="background:#fff;">
+                        <option value="imprevisto">Convertir todo en Gasto Imprevisto</option>
+                        <option value="categoria" id="opt-cat-unica" style="display:none;">Sumarlo a otra categoría</option>
+                        <option value="dividir" id="opt-cat-dividir" style="display:none;">Dividir el gasto</option>
+                    </select>
+                </div>
+
+                <!-- Opcion A: Imprevisto -->
+                <div id="del-bloque-imprevisto" class="field-wrapper">
+                    <label>Concepto del imprevisto <span style="color:var(--color-retenidos)">*</span></label>
+                    <input type="text" id="del-concepto-imprevisto" placeholder="Ej: Gastos reubicados">
+                </div>
+
+                <!-- Opcion B: Categoría única -->
+                <div id="del-bloque-categoria" class="field-wrapper" style="display:none;">
+                    <label>Selecciona la categoría destino <span style="color:var(--color-retenidos)">*</span></label>
+                    <select id="del-categoria-destino" style="background:#fff;"></select>
+                </div>
+
+                <!-- Opcion C: Dividir -->
+                <div id="del-bloque-dividir" style="display:none; flex-direction:column; gap:10px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee;">
+                    <div style="font-size:12px; font-weight:bold; color:var(--text-main); margin-bottom:5px;">Reparte los fondos exactos:</div>
+                    <div id="del-dividir-lista" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    <div style="text-align:right; font-weight:bold; font-size:14px; margin-top:5px; padding-top:10px; border-top:1px dashed #ccc;" id="del-dividir-restante">
+                        Faltan por asignar: 0.00€
+                    </div>
+                </div>
+            </div>
+
+            <p id="err-delete" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-delete-cat')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-retenidos);" id="btn-submit-delete" onclick="procesarEliminar()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
@@ -515,6 +571,177 @@
             } catch(e) { err.textContent="Error al retirar gasto."; err.style.display='block'; }
             finally { btn.disabled = false; }
         };
+
+        // LÓGICA: ELIMINAR CATEGORÍA Y REUBICAR
+        window.abrirEliminar = function(catId) {
+            categoriaSeleccionada = colCategorias.find(c => c.id === catId);
+            document.getElementById('del-cat-name').textContent = categoriaSeleccionada.icono + " " + categoriaSeleccionada.nombre;
+            const gAct = categoriaSeleccionada.gastado || 0;
+            
+            if (gAct === 0) {
+                document.getElementById('del-no-gastos').style.display = 'block';
+                document.getElementById('del-con-gastos').style.display = 'none';
+            } else {
+                document.getElementById('del-no-gastos').style.display = 'none';
+                document.getElementById('del-con-gastos').style.display = 'flex';
+                document.getElementById('del-gastado-val').textContent = gAct.toFixed(2);
+                
+                const otrasCats = colCategorias.filter(c => c.id !== catId);
+                if (otrasCats.length > 0) {
+                    document.getElementById('opt-cat-unica').style.display = 'block';
+                    document.getElementById('opt-cat-dividir').style.display = 'block';
+                    
+                    // Llenar select de categoría única
+                    let selHTML = "";
+                    otrasCats.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre}</option>`);
+                    document.getElementById('del-categoria-destino').innerHTML = selHTML;
+                    
+                    // Llenar lista interactiva para dividir
+                    let divHTML = "";
+                    otrasCats.forEach(c => {
+                        divHTML += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                            <span style="font-size:13px; font-weight:bold;">${c.icono} ${c.nombre}</span>
+                            <input type="number" class="input-dividir" data-id="${c.id}" data-nombre="${c.nombre}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
+                        </div>`;
+                    });
+                    divHTML += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:5px; padding-top:10px; border-top:1px solid #ddd;">
+                            <span style="font-size:13px; font-weight:bold;">🧾 Imprevisto</span>
+                            <input type="number" class="input-dividir" data-id="imprevisto" data-nombre="Gasto Imprevisto" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:10px; text-align:right;" oninput="calcularRestanteDividir()">
+                        </div>
+                        <div id="dividir-concepto-container" style="display:none; margin-top:5px;">
+                            <input type="text" id="del-dividir-concepto" placeholder="Concepto del imprevisto..." style="padding:10px; font-size:13px; width:100%; box-sizing:border-box;">
+                        </div>
+                    `;
+                    document.getElementById('del-dividir-lista').innerHTML = divHTML;
+                } else {
+                    document.getElementById('opt-cat-unica').style.display = 'none';
+                    document.getElementById('opt-cat-dividir').style.display = 'none';
+                }
+                document.getElementById('del-destino-tipo').value = 'imprevisto';
+                cambiarDestinoEliminar();
+            }
+            abrirModal('modal-delete-cat');
+        };
+
+        window.cambiarDestinoEliminar = function() {
+            const val = document.getElementById('del-destino-tipo').value;
+            document.getElementById('del-bloque-imprevisto').style.display = (val === 'imprevisto') ? 'flex' : 'none';
+            document.getElementById('del-bloque-categoria').style.display = (val === 'categoria') ? 'flex' : 'none';
+            document.getElementById('del-bloque-dividir').style.display = (val === 'dividir') ? 'flex' : 'none';
+            if(val === 'dividir') calcularRestanteDividir();
+        };
+
+        window.calcularRestanteDividir = function() {
+            const total = categoriaSeleccionada.gastado;
+            let suma = 0; let impVal = 0;
+            document.querySelectorAll('.input-dividir').forEach(inp => {
+                const v = parseFloat(inp.value) || 0; suma += v;
+                if(inp.getAttribute('data-id') === 'imprevisto') impVal = v;
+            });
+            
+            const rest = total - suma;
+            const restDiv = document.getElementById('del-dividir-restante');
+            restDiv.textContent = `Faltan por asignar: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
+            restDiv.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
+            
+            document.getElementById('dividir-concepto-container').style.display = (impVal > 0) ? 'block' : 'none';
+        };
+
+        // Función Helper para simular matemáticamente un gasto
+        function simularGastoReubicado(vars, importe, catDestinoId) {
+            if (catDestinoId === 'imprevisto') {
+                vars.totales -= importe; vars.disponibles -= importe;
+            } else {
+                vars.totales -= importe;
+                const catDestino = colCategorias.find(c => c.id === catDestinoId);
+                const rem = catDestino.presupuestoMaximo - (catDestino.gastado + (vars.gastosAcumulados[catDestinoId] || 0));
+                
+                if (rem >= importe) { vars.retenidos -= importe; }
+                else if (rem > 0) { vars.retenidos -= rem; vars.disponibles -= (importe - rem); }
+                else { vars.disponibles -= importe; }
+                
+                vars.gastosAcumulados[catDestinoId] = (vars.gastosAcumulados[catDestinoId] || 0) + importe;
+            }
+        }
+
+        window.procesarEliminar = async function() {
+            const btn = document.getElementById('btn-submit-delete');
+            const err = document.getElementById('err-delete');
+            const gAct = categoriaSeleccionada.gastado || 0;
+            const tipoDes = document.getElementById('del-destino-tipo').value;
+            
+            let reubicaciones = []; // [{ idDestino, importe, concepto }]
+
+            if (gAct > 0) {
+                if (tipoDes === 'imprevisto') {
+                    const con = document.getElementById('del-concepto-imprevisto').value.trim();
+                    if(!con) { err.textContent = "Indica un concepto para el imprevisto."; err.style.display='block'; return; }
+                    reubicaciones.push({ idDestino: 'imprevisto', importe: gAct, concepto: con });
+                } else if (tipoDes === 'categoria') {
+                    const idCat = document.getElementById('del-categoria-destino').value;
+                    reubicaciones.push({ idDestino: idCat, importe: gAct, concepto: `Reubicado de ${categoriaSeleccionada.nombre}` });
+                } else if (tipoDes === 'dividir') {
+                    let suma = 0; let errorConcepto = false;
+                    document.querySelectorAll('.input-dividir').forEach(inp => {
+                        const v = parseFloat(inp.value) || 0;
+                        if (v > 0) {
+                            suma += v;
+                            const id = inp.getAttribute('data-id');
+                            let con = `Reubicado de ${categoriaSeleccionada.nombre}`;
+                            if (id === 'imprevisto') {
+                                const conImp = document.getElementById('del-dividir-concepto').value.trim();
+                                if(!conImp) errorConcepto = true; else con = conImp;
+                            }
+                            reubicaciones.push({ idDestino: id, importe: v, concepto: con });
+                        }
+                    });
+                    if (errorConcepto) { err.textContent = "Indica un concepto para el imprevisto asignado."; err.style.display='block'; return; }
+                    if (Math.abs(gAct - suma) > 0.01) { err.textContent = "El reparto no cuadra con el total gastado. Revisa los importes."; err.style.display='block'; return; }
+                }
+            }
+
+            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
+            try {
+                import { deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+                
+                // 1. Deshacer financieramente la categoría eliminada
+                const pMax = categoriaSeleccionada.presupuestoMaximo;
+                let v_tot = datosUsuario.fondosTotales + gAct;
+                let v_ret = datosUsuario.fondosRetenidos - (pMax - Math.min(pMax, gAct));
+                let v_dis = datosUsuario.fondosDisponibles + (pMax + Math.max(0, gAct - pMax));
+                
+                let vars = { totales: v_tot, retenidos: v_ret, disponibles: v_dis, gastosAcumulados: {} };
+
+                // 2. Simular reubicaciones (Nuevos gastos)
+                reubicaciones.forEach(r => simularGastoReubicado(vars, r.importe, r.idDestino));
+
+                // 3. Ejecutar en Firebase
+                // Borrar documento
+                await deleteDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id));
+                // Actualizar saldos usuario
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosTotales: vars.totales, fondosRetenidos: vars.retenidos, fondosDisponibles: vars.disponibles
+                });
+                // Actualizar categorías destino e historial
+                for (let r of reubicaciones) {
+                    if (r.idDestino === 'imprevisto') {
+                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "imprevisto", concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
+                    } else {
+                        const targetCat = colCategorias.find(c => c.id === r.idDestino);
+                        const nuevoGasto = targetCat.gastado + (vars.gastosAcumulados[r.idDestino] || 0); // Ojo, usamos el acumulado real
+                        await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGasto });
+                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString() });
+                        // Solo sumamos para la siguiente iteracion del bucle por si manda 2 veces a la misma
+                        targetCat.gastado = nuevoGasto; vars.gastosAcumulados[r.idDestino] = 0; 
+                    }
+                }
+                cerrarModal('modal-delete-cat'); await recargarPantalla();
+            } catch(e) { console.error(e); err.textContent="Error al eliminar. Reintenta."; err.style.display='block'; }
+            finally { btn.disabled = false; btn.textContent = "ELIMINAR"; }
+        };
+        
     </script>
 </body>
 </html>
