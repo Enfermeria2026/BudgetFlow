@@ -997,7 +997,6 @@
             const noGastosDiv = document.getElementById('del-no-gastos');
             const sinGastosModo = noGastosDiv && noGastosDiv.style.display === 'block';
 
-            // Si las categorías no tienen gastos, el flujo es directo sin reubicación
             if (!sinGastosModo && sumaGastadoGlobalBorrar > 0) {
                 const radioCheck = document.querySelector('input[name="destino-borrado"]:checked');
                 const opcion = radioCheck ? radioCheck.value : 'imprevisto';
@@ -1123,7 +1122,7 @@
                     await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
                 }
 
-                // Procesar reubicaciones (movimientos y actualización de categorías destino)
+                // Procesar reubicaciones
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
@@ -1161,7 +1160,8 @@
             } catch (e) {
                 console.error("Error detallado al eliminar:", e);
                 if (err) { 
-                    err.textContent = "Error al eliminar las categorías. Revisa la consola."; 
+                    // AQUÍ VERÁS EL ERROR REAL EN PANTALLA
+                    err.textContent = "Error: " + e.message; 
                     err.style.display = 'block'; 
                 }
             } finally {
