@@ -644,7 +644,7 @@
             finally { document.getElementById('global-loader').style.display = 'none'; }
         }
 
-        let criterioOrdenActual = 'az'; 
+        let criterioOrdenActual = 'mayor'; 
 
         window.ordenarFondos = function(criterio) {
             criterioOrdenActual = criterio;
@@ -653,7 +653,7 @@
         };
 
         function actualizarDistintivoFiltros() {
-            const opciones = ['az', 'za', 'mayor', 'menor', 'fecha'];
+            const opciones = ['mayor', 'menor', 'az', 'za', 'fecha'];
             opciones.forEach(op => {
                 const el = document.getElementById('filt-' + op);
                 if (el) {
