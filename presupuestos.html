@@ -1490,16 +1490,17 @@
         window.seleccionarValorGlobal = function(tipo, valor) {
             if (tipo === 'iconos') { iconoActualSeleccionado = valor; } 
             else { colorActualSeleccionado = valor; }
-            cerrarModal(`modal-selector-${tipo}`);
+            
+            // 1. Actualizamos el formulario que hay por debajo
             renderizarSelectoresInline(prefijoFormularioActual);
+            
+            // 2. Refrescamos el catálogo abierto para que el círculo negro se mueva al nuevo icono/color
+            renderizarAcordeon(tipo, tipo === 'iconos' ? CATALOGO_ICONOS : CATALOGO_COLORES, valor);
+            
+            // Eliminamos el cerrarModal() para que la ventana NO te expulse,
+            // solo se cerrará cuando pulses el botón de "Cerrar" manualmente.
         };
 
-        window.seleccionarValorGlobal = function(tipo, valor) {
-            if (tipo === 'iconos') { iconoActualSeleccionado = valor; } 
-            else { colorActualSeleccionado = valor; }
-            cerrarModal(`modal-selector-${tipo}`);
-            renderizarSelectoresInline(prefijoFormularioActual);
-        };
 
         window.renderizarSelectoresInline = function(prefijo) {
             prefijoFormularioActual = prefijo;
