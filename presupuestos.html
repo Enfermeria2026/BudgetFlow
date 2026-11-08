@@ -73,8 +73,38 @@
         .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
 
-        /* CONTENIDO PRINCIPAL */
-        .page-content { width: 100%; max-width: 500px; padding: 0 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ZONA FIJA SUPERIOR (Panel, Título y Filtros) */
+        .fixed-top-section {
+            position: fixed; top: 60px; left: 0; width: 100%;
+            background-color: var(--bg-color); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            padding: 15px 15px 10px 15px; box-sizing: border-box;
+        }
+
+        /* CONTENEDOR CON SCROLL (Únicamente para las tarjetas) */
+        .page-content {
+            width: 100%; max-width: 500px; 
+            position: absolute; top: 295px; bottom: 80px; 
+            left: 50%; transform: translateX(-50%);
+            overflow-y: auto; padding: 0 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .financial-panel {
+            background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
+        }
+
+        .filter-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; }
+        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin: 0; }
+        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
 
         /* PANEL FINANCIERO */
         .financial-panel {
@@ -196,7 +226,8 @@
         <div class="header-date" id="header-date">Mes Año</div>
     </header>
 
-    <main class="page-content">
+    <!-- ZONA FIJA SUPERIOR (No se mueve con el scroll) -->
+    <div class="fixed-top-section">
         <!-- PANEL DE VARIABLES -->
         <div class="financial-panel">
             <div class="fin-block" style="color: var(--color-totales);">
@@ -222,23 +253,24 @@
         <div class="filter-row">
             <div class="totals-mini-card" id="ui-resumen-gastos">Total: 0.00€ / 0.00€</div>
             <div style="position: relative; display: inline-block;">
-    <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
-    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
-        <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
-        <div id="filt-pct-mayor" onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
-        <div id="filt-pct-menor" onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
-        <div id="filt-az" onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
-        <div id="filt-za" onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
-        <div id="filt-mayor-gasto" onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
-        <div id="filt-menor-gasto" onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
-        <div id="filt-mayor-presupuesto" onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
-        <div id="filt-menor-presupuesto" onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
-    </div>
-</div>
-</div>
+                <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
+                <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
+                    <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
+                    <div id="filt-pct-mayor" onclick="ordenarCategorias('pct-mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg> % de gasto (Mayor a menor)</div>
+                    <div id="filt-pct-menor" onclick="ordenarCategorias('pct-menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg> % de gasto (Menor a mayor)</div>
+                    <div id="filt-az" onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
+                    <div id="filt-za" onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
+                    <div id="filt-mayor-gasto" onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor gasto real</div>
+                    <div id="filt-menor-gasto" onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor gasto real</div>
+                    <div id="filt-mayor-presupuesto" onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Mayor presupuesto</div>
+                    <div id="filt-menor-presupuesto" onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Menor presupuesto</div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- CONTENEDOR DE TARJETAS -->
+    <!-- ZONA CON SCROLL (Únicamente las tarjetas) -->
+    <main class="page-content">
         <div class="items-list" id="contenedor-categorias"></div>
     </main>
 
