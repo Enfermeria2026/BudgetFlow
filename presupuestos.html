@@ -1113,7 +1113,7 @@
                     if (r.idDestino === 'imprevisto') {
                         nuevosDisponibles -= r.importe;
                     } else {
-                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastos[r.idDestino] || 0) + r.importe;
+                        acumuladoresGastosDestino[r.idDestino] = (acumuladoresGastosDestino[r.idDestino] || 0) + r.importe;
                     }
                 });
 
@@ -1160,7 +1160,6 @@
             } catch (e) {
                 console.error("Error detallado al eliminar:", e);
                 if (err) { 
-                    // AQUÍ VERÁS EL ERROR REAL EN PANTALLA
                     err.textContent = "Error: " + e.message; 
                     err.style.display = 'block'; 
                 }
