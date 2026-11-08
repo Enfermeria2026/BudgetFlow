@@ -819,7 +819,7 @@
             finally { btn.disabled = false; }
         };
 
-        // LÓGICA: ELIMINAR CATEGORÍA Y REUBICAR
+        // LÓGICA: ELIMINAR CATEGORÍA Y REUBICAR (Corregido para mostrar siempre todas las opciones)
         window.abrirEliminar = function(catId) {
             categoriaSeleccionada = colCategorias.find(c => c.id === catId);
             document.getElementById('del-cat-name').textContent = categoriaSeleccionada.icono + " " + categoriaSeleccionada.nombre;
@@ -833,13 +833,15 @@
                 document.getElementById('del-con-gastos').style.display = 'flex';
                 document.getElementById('del-gastado-val').textContent = gAct.toFixed(2);
                 
+                // Filtrar las demás categorías disponibles
                 const otrasCats = colCategorias.filter(c => c.id !== catId);
+                
                 if (otrasCats.length > 0) {
                     document.getElementById('opt-cat-unica').style.display = 'block';
                     document.getElementById('opt-cat-dividir').style.display = 'block';
                     
                     let selHTML = "";
-                    otrasCats.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre}</option>`);
+                    otrasCats.forEach(c => selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Máx: ${c.presupuestoMaximo.toFixed(2)}€)</option>`);
                     document.getElementById('del-categoria-destino').innerHTML = selHTML;
                     
                     let divHTML = "";
