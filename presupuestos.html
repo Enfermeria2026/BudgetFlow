@@ -223,15 +223,16 @@
             <div class="totals-mini-card" id="ui-resumen-gastos">Total: 0.00€ / 0.00€</div>
             <div style="position: relative; display: inline-block;">
     <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
-    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 220px; overflow: hidden;">
+    <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 240px; overflow: hidden;">
         <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar categorías por:</div>
-        <div onclick="ordenarCategorias('az')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🔤 Alfabéticamente (A - Z)</div>
-        <div onclick="ordenarCategorias('za')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🔤 Alfabéticamente (Z - A)</div>
-        <div onclick="ordenarCategorias('mayor-gasto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">📈 Mayor gasto</div>
-        <div onclick="ordenarCategorias('menor-gasto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">📉 Menor gasto</div>
-        <div onclick="ordenarCategorias('mayor-presupuesto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">💰 Mayor presupuesto</div>
-        <div onclick="ordenarCategorias('menor-presupuesto')" style="padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">🪙 Menor presupuesto</div>
+        <div onclick="ordenarCategorias('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
+        <div onclick="ordenarCategorias('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
+        <div onclick="ordenarCategorias('mayor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg> Mayor gasto real</div>
+        <div onclick="ordenarCategorias('menor-gasto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#'" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg> Menor gasto real</div>
+        <div onclick="ordenarCategorias('mayor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor presupuesto</div>
+        <div onclick="ordenarCategorias('menor-presupuesto')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor presupuesto</div>
     </div>
+</div>
 </div>
         </div>
 
@@ -535,7 +536,7 @@
             renderizarCategorias();
         };
 
-        // RENDERIZAR TARJETAS (Con lógica de ordenación y diseño circular)
+        // RENDERIZAR TARJETAS (Con lógica de ordenación numérica y alfabética corregida)
         function renderizarCategorias() {
             const container = document.getElementById('contenedor-categorias');
             container.innerHTML = "";
@@ -547,29 +548,38 @@
                 return; 
             }
             
-            // APLICAR ORDENACIÓN ANTES DE PINTAR
+            // APLICAR ORDENACIÓN ESTRICTA
             colCategorias.sort((a, b) => {
                 if (criterioOrdenActual === 'az') {
                     return a.nombre.localeCompare(b.nombre);
                 } else if (criterioOrdenActual === 'za') {
                     return b.nombre.localeCompare(a.nombre);
                 } else if (criterioOrdenActual === 'mayor-gasto') {
-                    return (b.gastado || 0) - (a.gastado || 0);
+                    let gastA = Number(a.gastado) || 0;
+                    let gastB = Number(b.gastado) || 0;
+                    return gastB - gastA; // De mayor a menor gasto
                 } else if (criterioOrdenActual === 'menor-gasto') {
-                    return (a.gastado || 0) - (b.gastado || 0);
+                    let gastA = Number(a.gastado) || 0;
+                    let gastB = Number(b.gastado) || 0;
+                    return gastA - gastB; // De menor a mayor gasto
                 } else if (criterioOrdenActual === 'mayor-presupuesto') {
-                    return b.presupuestoMaximo - a.presupuestoMaximo;
+                    let presA = Number(a.presupuestoMaximo) || 0;
+                    let presB = Number(b.presupuestoMaximo) || 0;
+                    return presB - presA; // De mayor a menor presupuesto
                 } else if (criterioOrdenActual === 'menor-presupuesto') {
-                    return a.presupuestoMaximo - b.presupuestoMaximo;
+                    let presA = Number(a.presupuestoMaximo) || 0;
+                    let presB = Number(b.presupuestoMaximo) || 0;
+                    return presA - presB; // De menor a mayor presupuesto
                 }
                 return 0;
             });
 
             colCategorias.forEach(cat => {
-                let max = cat.presupuestoMaximo; let gast = cat.gastado || 0;
+                let max = Number(cat.presupuestoMaximo) || 0; 
+                let gast = Number(cat.gastado) || 0;
                 sumaGastos += gast; sumaMaximos += max;
 
-                let pct = Math.min(100, Math.round((gast / max) * 100));
+                let pct = max > 0 ? Math.min(100, Math.round((gast / max) * 100)) : 0;
                 let colorBar = (pct < 50) ? '#27AE60' : (pct < 80 ? '#F4D03F' : '#E74C3C');
 
                 let textoExceso = "";
