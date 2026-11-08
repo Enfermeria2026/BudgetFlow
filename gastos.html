@@ -433,7 +433,8 @@
             actualizarSeleccionBorrar();
         }
 
-        // CREAR GASTO IMPREVISTO
+
+        // CREAR GASTO IMPREVISTO (Con validación de fecha máxima)
         window.crearGastoImprevistoBD = async function() {
             const btn = document.getElementById('btn-submit-gasto');
             const con = document.getElementById('gasto-concepto').value.trim();
@@ -443,6 +444,16 @@
 
             if (!con || isNaN(imp) || imp <= 0 || !fec) {
                 err.textContent = "Rellena todos los campos obligatorios (*) correctamente.";
+                err.style.display = 'block'; return;
+            }
+
+            // Validar que la fecha no sea posterior a hoy
+            const fechaSeleccionada = new Date(fec);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // Ignorar horas para comparar solo el día
+
+            if (fechaSeleccionada > hoy) {
+                err.textContent = "No puedes registrar un gasto con una fecha posterior a la actual.";
                 err.style.display = 'block'; return;
             }
 
@@ -465,6 +476,7 @@
 
                 document.getElementById('gasto-concepto').value = "";
                 document.getElementById('gasto-importe').value = "";
+                document.getElementById('gasto-fecha').valueAsDate = new Date(); // Resetear a hoy
                 cerrarModal('modal-crear-gasto');
                 await recargarPantalla();
             } catch (e) {
@@ -473,6 +485,7 @@
                 btn.disabled = false;
             }
         };
+        
 
         // GESTIÓN DE SELECCIÓN Y BORRADO MÚLTIPLE
         window.actualizarSeleccionBorrar = function() {
