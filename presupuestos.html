@@ -852,6 +852,8 @@
             const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
             idsCategoriasABorrar = Array.from(checkboxes).map(chk => chk.value);
             
+            if (idsCategoriasABorrar.length === 0) return;
+
             sumaGastadoGlobalBorrar = 0;
             idsCategoriasABorrar.forEach(id => {
                 const cat = colCategorias.find(c => c.id === id);
@@ -861,11 +863,33 @@
             confirmandoExcesos = false;
             const avisoBox = document.getElementById('aviso-excesos-box');
             if (avisoBox) avisoBox.style.display = 'none';
-            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
-
-            document.getElementById('modal-delete-cat').style.display = 'flex';
-            document.getElementById('del-cat-name').textContent = `${idsCategoriasABorrar.length} categoría(s) seleccionada(s)`;
             
+            const btnSubmit = document.getElementById('btn-submit-delete');
+            if (btnSubmit) btnSubmit.textContent = "ELIMINAR";
+
+            const modal = document.getElementById('modal-delete-cat');
+            if (modal) modal.style.display = 'flex';
+            
+            const nameEl = document.getElementById('del-cat-name');
+            if (nameEl) nameEl.textContent = `${idsCategoriasABorrar.length} categoría(s) seleccionada(s)`;
+            
+            const noGastosDiv = document.getElementById('del-no-gastos');
+            const conGastosDiv = document.getElementById('del-con-gastos');
+
+            // SI NO TIENEN GASTOS: Ventana simple de confirmación
+            if (sumaGastadoGlobalBorrar === 0) {
+                if (noGastosDiv) noGastosDiv.style.display = 'block';
+                if (conGastosDiv) conGastosDiv.style.display = 'none';
+                return;
+            }
+
+            // SI TIENEN GASTOS: Mostrar opciones de reubicación
+            if (noGastosDiv) noGastosDiv.style.display = 'none';
+            if (conGastosDiv) conGastosDiv.style.display = 'flex';
+            
+            const gastadoValEl = document.getElementById('del-gastado-val');
+            if (gastadoValEl) gastadoValEl.textContent = sumaGastadoGlobalBorrar.toFixed(2);
+
             const categoriasRestantes = colCategorias.filter(c => !idsCategoriasABorrar.includes(c.id));
             const hayRestantes = categoriasRestantes.length > 0;
 
@@ -884,56 +908,61 @@
             } else {
                 if (radioCat) { radioCat.disabled = false; labelCat.style.color = 'var(--text-main)'; }
                 if (radioDiv) { radioDiv.disabled = false; labelDiv.style.color = 'var(--text-main)'; }
+
+                // Rellenar desplegable de otra categoría
+                let selHTML = "";
+                categoriasRestantes.forEach(c => {
+                    let gastC = Number(c.gastado) || 0;
+                    let maxC = Number(c.presupuestoMaximo) || 0;
+                    selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€)</option>`;
+                });
+                const selDestino = document.getElementById('del-categoria-destino');
+                if (selDestino) selDestino.innerHTML = selHTML;
+
+                // Rellenar lista de reparto
+                let divHTML = "";
+                categoriasRestantes.forEach(c => {
+                    let gastC = Number(c.gastado) || 0;
+                    let maxC = Number(c.presupuestoMaximo) || 0;
+                    divHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; padding:8px; border:1px solid #e5e7e9; border-radius:6px;">
+                        <div style="font-size:12px; font-weight:bold; color:var(--text-main);">
+                            ${c.icono} ${c.nombre}<br>
+                            <span style="font-weight:normal; font-size:11px; color:#7F8C8D;">Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€</span>
+                        </div>
+                        <input type="number" class="input-repartir-cat" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:8px; text-align:right;" oninput="calcularRestanteReparto()">
+                    </div>`;
+                });
+                const listaRepartir = document.getElementById('repartir-lista-categorias');
+                if (listaRepartir) listaRepartir.innerHTML = divHTML;
+                
+                const impInp = document.getElementById('repartir-imp-imprevisto');
+                if (impInp) impInp.value = "";
+                const conInp = document.getElementById('repartir-con-imprevisto');
+                if (conInp) conInp.value = "";
             }
-
-            if (sumaGastadoGlobalBorrar === 0 && idsCategoriasABorrar.every(id => (colCategorias.find(c=>c.id===id).presupuestoMaximo || 0) === 0)) {
-                document.getElementById('del-no-gastos').style.display = 'block';
-                document.getElementById('del-con-gastos').style.display = 'none';
-            } else {
-                document.getElementById('del-no-gastos').style.display = 'none';
-                document.getElementById('del-con-gastos').style.display = 'flex';
-                document.getElementById('del-gastado-val').textContent = sumaGastadoGlobalBorrar.toFixed(2);
-
-                if (hayRestantes) {
-                    let selHTML = "";
-                    categoriasRestantes.forEach(c => {
-                        let gastC = Number(c.gastado) || 0;
-                        let maxC = Number(c.presupuestoMaximo) || 0;
-                        selHTML += `<option value="${c.id}">${c.icono} ${c.nombre} (Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€)</option>`;
-                    });
-                    document.getElementById('del-categoria-destino').innerHTML = selHTML;
-
-                    let divHTML = "";
-                    categoriasRestantes.forEach(c => {
-                        let gastC = Number(c.gastado) || 0;
-                        let maxC = Number(c.presupuestoMaximo) || 0;
-                        divHTML += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; padding:8px; border:1px solid #e5e7e9; border-radius:6px;">
-                            <div style="font-size:12px; font-weight:bold; color:var(--text-main);">
-                                ${c.icono} ${c.nombre}<br>
-                                <span style="font-weight:normal; font-size:11px; color:#7F8C8D;">Gastado: ${gastC.toFixed(2)}€ / Máx: ${maxC.toFixed(2)}€</span>
-                            </div>
-                            <input type="number" class="input-repartir-cat" data-id="${c.id}" placeholder="0.00" min="0" step="0.01" style="width:90px; padding:8px; text-align:right;" oninput="calcularRestanteReparto()">
-                        </div>`;
-                    });
-                    document.getElementById('repartir-lista-categorias').innerHTML = divHTML;
-                    document.getElementById('repartir-imp-imprevisto').value = "";
-                    document.getElementById('repartir-con-imprevisto').value = "";
-                }
-                cambiarOpcionDestino();
-            }
+            cambiarOpcionDestino();
         };
 
         window.cambiarOpcionDestino = function() {
             confirmandoExcesos = false;
             const avisoBox = document.getElementById('aviso-excesos-box');
             if (avisoBox) avisoBox.style.display = 'none';
-            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
+            const btnSubmit = document.getElementById('btn-submit-delete');
+            if (btnSubmit) btnSubmit.textContent = "ELIMINAR";
 
-            const opcion = document.querySelector('input[name="destino-borrado"]:checked').value;
-            document.getElementById('bloque-opc-imprevisto').style.display = (opcion === 'imprevisto') ? 'flex' : 'none';
-            document.getElementById('bloque-opc-categoria').style.display = (opcion === 'categoria') ? 'flex' : 'none';
-            document.getElementById('bloque-opc-repartir').style.display = (opcion === 'repartir') ? 'flex' : 'none';
+            const radioCheck = document.querySelector('input[name="destino-borrado"]:checked');
+            if (!radioCheck) return;
+
+            const opcion = radioCheck.value;
+            const blqImp = document.getElementById('bloque-opc-imprevisto');
+            const blqCat = document.getElementById('bloque-opc-categoria');
+            const blqRep = document.getElementById('bloque-opc-repartir');
+
+            if (blqImp) blqImp.style.display = (opcion === 'imprevisto') ? 'flex' : 'none';
+            if (blqCat) blqCat.style.display = (opcion === 'categoria') ? 'flex' : 'none';
+            if (blqRep) blqRep.style.display = (opcion === 'repartir') ? 'flex' : 'none';
+            
             if (opcion === 'repartir') calcularRestanteReparto();
         };
 
@@ -941,43 +970,66 @@
             confirmandoExcesos = false;
             const avisoBox = document.getElementById('aviso-excesos-box');
             if (avisoBox) avisoBox.style.display = 'none';
-            document.getElementById('btn-submit-delete').textContent = "ELIMINAR";
+            const btnSubmit = document.getElementById('btn-submit-delete');
+            if (btnSubmit) btnSubmit.textContent = "ELIMINAR";
 
-            let suma = parseFloat(document.getElementById('repartir-imp-imprevisto').value) || 0;
+            const impInp = document.getElementById('repartir-imp-imprevisto');
+            let suma = impInp && impInp.value ? parseFloat(impInp.value) || 0 : 0;
+            
             document.querySelectorAll('.input-repartir-cat').forEach(inp => {
-                suma += parseFloat(inp.value) || 0;
+                suma += inp.value ? parseFloat(inp.value) || 0 : 0;
             });
 
             const rest = sumaGastadoGlobalBorrar - suma;
             const restDiv = document.getElementById('repartir-restante');
-            restDiv.textContent = `Faltan por asignar: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
-            restDiv.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
+            if (restDiv) {
+                restDiv.textContent = `Faltan por asignar: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
+                restDiv.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
+            }
         };
 
         window.procesarEliminarMultiples = async function() {
             const btn = document.getElementById('btn-submit-delete');
             const err = document.getElementById('err-delete');
-            const opcion = document.querySelector('input[name="destino-borrado"]:checked').value;
+            if (err) err.style.display = 'none';
 
             let reubicaciones = [];
+            const noGastosDiv = document.getElementById('del-no-gastos');
+            const sinGastosModo = noGastosDiv && noGastosDiv.style.display === 'block';
 
-            if (sumaGastadoGlobalBorrar > 0) {
+            // Si las categorías no tienen gastos, el flujo es directo sin reubicación
+            if (!sinGastosModo && sumaGastadoGlobalBorrar > 0) {
+                const radioCheck = document.querySelector('input[name="destino-borrado"]:checked');
+                const opcion = radioCheck ? radioCheck.value : 'imprevisto';
+
                 if (opcion === 'imprevisto') {
-                    const con = document.getElementById('del-concepto-imprevisto').value.trim();
-                    if (!con) { err.textContent = "Indica un concepto para el gasto imprevisto."; err.style.display = 'block'; return; }
+                    const conInp = document.getElementById('del-concepto-imprevisto');
+                    const con = conInp ? conInp.value.trim() : '';
+                    if (!con) { 
+                        if (err) { err.textContent = "Indica un concepto para el gasto imprevisto."; err.style.display = 'block'; }
+                        return; 
+                    }
                     reubicaciones.push({ idDestino: 'imprevisto', importe: sumaGastadoGlobalBorrar, concepto: con });
                 } else if (opcion === 'categoria') {
-                    const idCat = document.getElementById('del-categoria-destino').value;
-                    if (!idCat) { err.textContent = "Selecciona una categoría destino."; err.style.display = 'block'; return; }
+                    const catSel = document.getElementById('del-categoria-destino');
+                    const idCat = catSel ? catSel.value : '';
+                    if (!idCat) { 
+                        if (err) { err.textContent = "Selecciona una categoría destino."; err.style.display = 'block'; }
+                        return; 
+                    }
                     reubicaciones.push({ idDestino: idCat, importe: sumaGastadoGlobalBorrar, concepto: `Reubicado de categorías eliminadas` });
                 } else if (opcion === 'repartir') {
                     let sumaReparto = 0;
-                    const impImprevistoInput = document.getElementById('repartir-imp-imprevisto').value;
-                    const impImprevisto = impImprevistoInput ? parseFloat(impImprevistoInput) || 0 : 0;
-                    const conImprevisto = document.getElementById('repartir-con-imprevisto').value.trim();
+                    const impInp = document.getElementById('repartir-imp-imprevisto');
+                    const impImprevisto = impInp && impInp.value ? parseFloat(impInp.value) || 0 : 0;
+                    const conInp = document.getElementById('repartir-con-imprevisto');
+                    const conImprevisto = conInp ? conInp.value.trim() : '';
 
                     if (impImprevisto > 0) {
-                        if (!conImprevisto) { err.textContent = "Indica un concepto para la parte de gasto imprevisto."; err.style.display = 'block'; return; }
+                        if (!conImprevisto) { 
+                            if (err) { err.textContent = "Indica un concepto para la parte de gasto imprevisto."; err.style.display = 'block'; }
+                            return; 
+                        }
                         sumaReparto += impImprevisto;
                         reubicaciones.push({ idDestino: 'imprevisto', importe: impImprevisto, concepto: conImprevisto });
                     }
@@ -992,13 +1044,16 @@
                     });
 
                     if (Math.abs(sumaGastadoGlobalBorrar - sumaReparto) > 0.01) {
-                        err.textContent = "El reparto no cuadra exactamente con el total gastado de las categorías eliminadas.";
-                        err.style.display = 'block'; return;
+                        if (err) { 
+                            err.textContent = "El reparto no cuadra exactamente con el total gastado de las categorías eliminadas."; 
+                            err.style.display = 'block'; 
+                        }
+                        return;
                     }
                 }
             }
 
-            // --- FASE DE DOBLE VERIFICACIÓN DE EXCEDENTES ---
+            // --- DOBLE VERIFICACIÓN DE EXCESOS ---
             if (!confirmandoExcesos && reubicaciones.length > 0) {
                 let excesosDetectados = [];
                 let simuladorGastos = {};
@@ -1006,16 +1061,18 @@
                 reubicaciones.forEach(r => {
                     if (r.idDestino !== 'imprevisto') {
                         const cat = colCategorias.find(c => c.id === r.idDestino);
-                        simuladorGastos[r.idDestino] = (simuladorGastos[r.idDestino] || 0) + r.importe;
-                        const totalPrevisto = (cat.gastado || 0) + simuladorGastos[r.idDestino];
-                        if (totalPrevisto > cat.presupuestoMaximo) {
-                            if (!excesosDetectados.some(e => e.id === cat.id)) {
-                                excesosDetectados.push({
-                                    id: cat.id,
-                                    nombre: `${cat.icono} ${cat.nombre}`,
-                                    previsto: totalPrevisto,
-                                    maximo: cat.presupuestoMaximo
-                                });
+                        if (cat) {
+                            simuladorGastos[r.idDestino] = (simuladorGastos[r.idDestino] || 0) + r.importe;
+                            const totalPrevisto = (cat.gastado || 0) + simuladorGastos[r.idDestino];
+                            if (totalPrevisto > cat.presupuestoMaximo) {
+                                if (!excesosDetectados.some(e => e.id === cat.id)) {
+                                    excesosDetectados.push({
+                                        id: cat.id,
+                                        nombre: `${cat.icono} ${cat.nombre}`,
+                                        previsto: totalPrevisto,
+                                        maximo: cat.presupuestoMaximo
+                                    });
+                                }
                             }
                         }
                     }
@@ -1026,15 +1083,19 @@
                     excesosDetectados.forEach(e => {
                         htmlExcesos += `<li><b>${e.nombre}</b>: Llegará a ${e.previsto.toFixed(2)}€ (Su máximo es ${e.maximo.toFixed(2)}€)</li>`;
                     });
-                    document.getElementById('lista-excesos-aviso').innerHTML = htmlExcesos;
-                    document.getElementById('aviso-excesos-box').style.display = 'block';
-                    btn.textContent = "SÍ, BORRAR Y TRASPASAR";
+                    const listaExcesosEl = document.getElementById('lista-excesos-aviso');
+                    if (listaExcesosEl) listaExcesosEl.innerHTML = htmlExcesos;
+                    
+                    const avisoBox = document.getElementById('aviso-excesos-box');
+                    if (avisoBox) avisoBox.style.display = 'block';
+                    
+                    if (btn) btn.textContent = "SÍ, BORRAR Y TRASPASAR";
                     confirmandoExcesos = true;
                     return;
                 }
             }
 
-            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
+            if (btn) { btn.disabled = true; btn.textContent = "ELIMINANDO..."; }
 
             try {
                 let sumaPresupuestosMaximosBorrados = 0;
@@ -1057,10 +1118,12 @@
                     }
                 });
 
+                // Borrar categorías de Firestore
                 for (let id of idsCategoriasABorrar) {
                     await deleteDoc(doc(db, "usuarios", uidActual, "categorias", id));
                 }
 
+                // Procesar reubicaciones (movimientos y actualización de categorías destino)
                 for (let r of reubicaciones) {
                     if (r.idDestino === 'imprevisto') {
                         await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
@@ -1068,23 +1131,26 @@
                         });
                     } else {
                         const targetCat = colCategorias.find(c => c.id === r.idDestino);
-                        const gastoAdicional = acumuladoresGastosDestino[r.idDestino] || 0;
-                        const nuevoGastadoTotal = (targetCat.gastado || 0) + gastoAdicional;
-                        const presupuestoMaxDestino = targetCat.presupuestoMaximo || 0;
+                        if (targetCat) {
+                            const gastoAdicional = acumuladoresGastosDestino[r.idDestino] || 0;
+                            const nuevoGastadoTotal = (targetCat.gastado || 0) + gastoAdicional;
+                            const presupuestoMaxDestino = targetCat.presupuestoMaximo || 0;
 
-                        if (nuevoGastadoTotal > presupuestoMaxDestino) {
-                            const exceso = nuevoGastadoTotal - Math.max(presupuestoMaxDestino, targetCat.gastado || 0);
-                            nuevosDisponibles -= exceso;
+                            if (nuevoGastadoTotal > presupuestoMaxDestino) {
+                                const exceso = nuevoGastadoTotal - Math.max(presupuestoMaxDestino, targetCat.gastado || 0);
+                                nuevosDisponibles -= exceso;
+                            }
+
+                            await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGastadoTotal });
+                            await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
+                                tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString()
+                            });
+                            acumuladoresGastosDestino[r.idDestino] = 0;
                         }
-
-                        await updateDoc(doc(db, "usuarios", uidActual, "categorias", r.idDestino), { gastado: nuevoGastadoTotal });
-                        await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
-                            tipo: "gasto", subtipo: "categoría", categoriaId: r.idDestino, concepto: r.concepto, importe: r.importe, fecha: new Date().toISOString()
-                        });
-                        acumuladoresGastosDestino[r.idDestino] = 0;
                     }
                 }
 
+                // Actualizar saldos finales del usuario en Firestore
                 await updateDoc(doc(db, "usuarios", uidActual), {
                     fondosRetenidos: Math.max(0, nuevosRetenidos),
                     fondosDisponibles: nuevosDisponibles
@@ -1093,11 +1159,13 @@
                 cerrarModal('modal-delete-cat');
                 await recargarPantalla();
             } catch (e) {
-                console.error(e);
-                err.textContent = "Error al eliminar las categorías.";
-                err.style.display = 'block';
+                console.error("Error detallado al eliminar:", e);
+                if (err) { 
+                    err.textContent = "Error al eliminar las categorías. Revisa la consola."; 
+                    err.style.display = 'block'; 
+                }
             } finally {
-                btn.disabled = false; btn.textContent = "ELIMINAR";
+                if (btn) { btn.disabled = false; btn.textContent = "ELIMINAR"; }
             }
         };
     </script>
