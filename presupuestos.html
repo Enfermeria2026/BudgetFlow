@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Presupuestos</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9; --text-main: #2C3E50;
+            --color-totales: #D4AC0D; --color-disponibles: #27AE60; --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF; --nav-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            padding-top: 70px; padding-bottom: 90px;
+        }
+        
+        button, a, .info-icon, .action-btn, .fab-btn { -webkit-tap-highlight-color: transparent; }
+
+        /* HEADER FIJO SUPERIOR */
+        .top-header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--bg-color); z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; box-sizing: border-box;
+        }
+        .menu-btn { font-size: 28px; cursor: pointer; border: none; background: none; color: var(--text-main); padding: 0; }
+        .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
+        .header-logo img { width: 40px; height: auto; }
+        .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); }
+
+        /* MENÚ LATERAL (SIDEBAR) */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .sidebar {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+            background-color: var(--card-bg); z-index: 1000; transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column;
+        }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #E5E7E9; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
+        .sidebar-header img { width: 40px; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a {
+            display: flex; align-items: center; gap: 15px; padding: 15px 20px;
+            text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
+        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
+
+        /* CONTENIDO PRINCIPAL */
+        .page-content { width: 100%; max-width: 500px; padding: 0 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
+
+        /* PANEL FINANCIERO */
+        .financial-panel {
+            background-color: var(--card-bg); border-radius: 16px; padding: 20px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center;
+        }
+        .fin-block { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+        .info-icon-wrapper { margin-bottom: 2px; }
+        .fin-title { font-size: 12px; font-weight: bold; text-align: center; line-height: 1.3; }
+        .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+        .fin-amount { font-size: 18px; font-weight: bold; }
+
+        /* CABECERA SECCIÓN Y FILTROS */
+        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px;}
+        .filter-btn-wrapper { display: flex; justify-content: flex-end; }
+        .filter-btn { background: #E5E7E9; border: none; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* TARJETAS CATEGORÍAS */
+        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
+        .item-card {
+            background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
+            display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+        }
+        .card-top { display: flex; gap: 15px; align-items: center; }
+        .card-icon { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; flex-shrink: 0; }
+        .card-details { flex: 1; }
+        .card-title { font-size: 16px; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
+        .card-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .card-progress-bg { flex: 1; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; }
+        .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        .card-percent { font-size: 13px; font-weight: bold; }
+        .card-amounts { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        
+        /* BOTONERA DE LA TARJETA (+, -, Ojo, Papelera) */
+        .card-actions { display: flex; justify-content: space-between; border-top: 1px solid #F4F6F9; padding-top: 12px; }
+        .action-btn { background: #F8F9F9; border: 1px solid #D5D8DC; border-radius: 8px; width: 40px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+        .action-btn:hover { background: #E5E7E9; }
+        .action-btn.btn-plus { color: var(--color-disponibles); font-weight: bold; font-size: 20px;}
+        .action-btn.btn-minus { color: var(--color-totales); font-weight: bold; font-size: 24px; line-height: 0;}
+        .action-btn.btn-trash { color: var(--color-retenidos); }
+
+        /* BOTÓN FLOTANTE GIGANTE (FAB) */
+        .fab-btn {
+            position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px;
+            background-color: var(--color-disponibles); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 32px;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); border: none; cursor: pointer; z-index: 90;
+            transition: transform 0.3s ease;
+        }
+        .fab-btn.spin { transform: rotate(90deg); }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6);
+            display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 400px;
+            max-height: 85vh; overflow-y: auto; box-sizing: border-box; text-align: left; display: flex; flex-direction: column; gap: 15px;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; margin: 0; text-align: center; }
+        .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        label { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        .info-text { font-size: 12px; font-style: italic; color: #7F8C8D; margin: -5px 0 0 0; }
+        input, select { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
+        
+        .icon-selector, .color-selector { display: flex; gap: 10px; justify-content: space-between; margin-top: 5px; }
+        .opt-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #D5D8DC; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        .opt-btn.selected { border-color: var(--color-disponibles); box-shadow: 0 0 0 2px var(--color-disponibles); }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 15px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
+        .btn-confirm { flex: 1; padding: 15px; border: none; background: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-confirm:disabled { background: #BDC3C7; }
+
+        .modal-alert { background: #FDEDEC; border: 1px solid #E74C3C; border-radius: 8px; padding: 15px; color: #C0392B; font-size: 14px; display: none; }
+        
+        .breakdown-list { text-align: left; font-size: 13px; color: #555; background: #F9F9F9; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
+        .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ddd; }
+        .breakdown-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR Y HEADER IGUAL QUE DASHBOARD -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span> Centro de ayuda</a></li>
+            <li><a href="info.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span> Información de la app</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Cerrar sesión</a></li>
+        </ul>
+    </aside>
+
+    <header class="top-header">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> <span style="color:#000;">Budget</span><span style="color:var(--color-disponibles);">Flow</span></div>
+        <div class="header-date" id="header-date">Mes Año</div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="page-content">
+        <!-- PANEL DE VARIABLES -->
+        <div class="financial-panel">
+            <div class="fin-block" style="color: var(--color-totales);">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
+                <div class="fin-title">Fondos<br>Totales</div>
+                <div class="fin-amount" id="ui-totales">0.00 €</div>
+            </div>
+            <div class="fin-block" style="color: var(--color-disponibles); border-left: 1px solid #eee; border-right: 1px solid #eee;">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-disponibles')">i</span></div>
+                <div class="fin-title">Fondos<br>Disponibles</div>
+                <div class="fin-amount" id="ui-disponibles">0.00 €</div>
+            </div>
+            <div class="fin-block" style="color: var(--color-retenidos);">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-retenidos')">i</span></div>
+                <div class="fin-title">Fondos<br>Retenidos</div>
+                <div class="fin-amount" id="ui-retenidos">0.00 €</div>
+            </div>
+        </div>
+
+        <div class="page-title">PRESUPUESTOS - CATEGORÍAS</div>
+        <div class="filter-btn-wrapper">
+            <button class="filter-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
+        </div>
+
+        <!-- CONTENEDOR DE TARJETAS -->
+        <div class="items-list" id="contenedor-categorias">
+            <div style="text-align:center; color:#7F8C8D; margin-top:20px;">Cargando categorías...</div>
+        </div>
+    </main>
+
+    <!-- BOTÓN FLOTANTE GIGANTE -->
+    <button class="fab-btn" id="btn-fab" onclick="animarYabrirModal('modal-crear-cat', this)">+</button>
+
+    <!-- BARRA NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <a href="huchas.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span>Fondos</a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>Presupuestos</a>
+        <a href="gastos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span>Gastos</a>
+    </nav>
+
+    <!-- MODALES INFORMATIVOS -->
+    <div class="modal-overlay" id="modal-totales">
+        <div class="modal-content"><h3 class="modal-title" style="color: var(--color-totales);">Fondos Totales</h3><p style="color:#555;font-size:14px;">Es el total de dinero disponible más el retenido.</p><div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-totales')">Entendido</button></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-disponibles">
+        <div class="modal-content"><h3 class="modal-title" style="color: var(--color-disponibles);">Fondos Disponibles</h3><p style="color:#555;font-size:14px;">Dinero libre no asignado a ningún presupuesto.</p><div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-disponibles')">Entendido</button></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-retenidos">
+        <div class="modal-content"><h3 class="modal-title" style="color: var(--color-retenidos);">Fondos Retenidos</h3><p style="color:#555;font-size:14px;">Dinero asignado a presupuestos y huchas.</p><div class="breakdown-list" id="lista-retenidos">Cargando...</div><div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-retenidos')">Entendido</button></div></div>
+    </div>
+
+    <!-- MODAL ALERT (Para fondos insuficientes) -->
+    <div class="modal-overlay" id="modal-alert-error" style="z-index: 10005;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-retenidos);">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Movimiento Rechazado</h3>
+            <p id="alert-msg" style="color:#555;font-size:14px; text-align:center;"></p>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-retenidos);" onclick="cerrarAlertError()">Aceptar y volver</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR CATEGORÍA -->
+    <div class="modal-overlay" id="modal-crear-cat">
+        <div class="modal-content">
+            <h3 class="modal-title">Nueva Categoría</h3>
+            <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="cat-nombre"></div>
+            <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="icon-selector" id="cat-iconos">
+                    <div class="opt-btn selected" onclick="selOpc(this, 'cat-iconos')">🏠</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🚗</div>
+                    <div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🛒</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">💼</div><div class="opt-btn" onclick="selOpc(this, 'cat-iconos')">🧳</div>
+                </div>
+            </div>
+            <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="color-selector" id="cat-colores">
+                    <div class="opt-btn selected" style="background:#58D68D;" onclick="selOpc(this, 'cat-colores')" data-color="#58D68D"></div>
+                    <div class="opt-btn" style="background:#5DADE2;" onclick="selOpc(this, 'cat-colores')" data-color="#5DADE2"></div>
+                    <div class="opt-btn" style="background:#F4D03F;" onclick="selOpc(this, 'cat-colores')" data-color="#F4D03F"></div>
+                    <div class="opt-btn" style="background:#E74C3C;" onclick="selOpc(this, 'cat-colores')" data-color="#E74C3C"></div>
+                    <div class="opt-btn" style="background:#EB984E;" onclick="selOpc(this, 'cat-colores')" data-color="#EB984E"></div>
+                </div>
+            </div>
+            <div class="field-wrapper">
+                <label>Presupuesto Máximo <span style="color:var(--color-retenidos)">*</span></label>
+                <p class="info-text">El dinero que asignes aquí pasará a estar RETENIDO porque la app considera que debes destinarlo únicamente a este gasto. Si sobra al final de mes, volverá a disponibles.</p>
+                <input type="number" id="cat-presupuesto" placeholder="0.00" min="0.01" step="0.01">
+            </div>
+            <p id="err-crear-cat" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-crear-cat', true)">Cancelar</button>
+                <button class="btn-confirm" id="btn-submit-cat" onclick="crearCategoriaBD()">CREAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AÑADIR GASTO (+) -->
+    <div class="modal-overlay" id="modal-add-gasto">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-disponibles);">Añadir Gasto</h3>
+            <p id="info-gasto-cat" style="text-align:center; font-weight:bold; color:var(--text-main); margin-bottom:0;"></p>
+            <div class="field-wrapper"><label>Concepto del gasto <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="gasto-concepto" placeholder="Ej: Compra semanal"></div>
+            <div class="field-wrapper"><label>Importe <span style="color:var(--color-retenidos)">*</span></label><input type="number" id="gasto-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <p id="err-gasto" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-add-gasto')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-disponibles);" id="btn-submit-gasto" onclick="procesarGasto()">AÑADIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RETIRAR GASTO (-) -->
+    <div class="modal-overlay" id="modal-remove-gasto">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-totales);">Retirar Gasto</h3>
+            <p style="font-size:13px; color:#555; text-align:center;">Utiliza esta función para deshacer un gasto añadido por error o reflejar una devolución en esta categoría.</p>
+            <div class="field-wrapper"><label>Motivo del retiro <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="retiro-concepto" placeholder="Ej: Devolución ropa"></div>
+            <div class="field-wrapper"><label>Importe a retirar <span style="color:var(--color-retenidos)">*</span></label><input type="number" id="retiro-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <p id="err-retiro" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-remove-gasto')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-totales);" id="btn-submit-retiro" onclick="procesarRetiro()">RETIRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        const fechaActual = new Date(); document.getElementById('header-date').textContent = `${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
+
+        // Variables Globales
+        let uidActual = null; let datosUsuario = null; let colCategorias = []; 
+        let categoriaSeleccionada = null; // Para saber qué categoría estamos editando (+ o -)
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) { uidActual = user.uid; await recargarPantalla(); } 
+            else { window.location.href = 'index.html'; }
+        });
+
+        window.toggleMenu = function() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display = 'none'; }else{ sb.classList.add('open'); ov.style.display = 'block'; } };
+        window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
+
+        // MODALES
+        window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
+        window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; };
+        window.animarYabrirModal = function(id, btn) {
+            btn.classList.add('spin');
+            setTimeout(() => { btn.classList.remove('spin'); document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }, 300);
+        };
+        window.cerrarModal = function(id, limpiarError=false) { 
+            document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; 
+            document.querySelectorAll('p[id^="err-"]').forEach(el => el.style.display = 'none');
+        };
+        window.cerrarAlertError = function() { document.getElementById('modal-alert-error').style.display = 'none'; };
+        window.selOpc = function(el, cont) { document.getElementById(cont).querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); };
+
+        // RECARGAR PANTALLA COMPLETA
+        async function recargarPantalla() {
+            // Cargar Variables de Usuario
+            const userDoc = await getDoc(doc(db, "usuarios", uidActual));
+            datosUsuario = userDoc.data();
+            document.getElementById('ui-totales').textContent = (datosUsuario.fondosTotales || 0).toFixed(2) + " €";
+            document.getElementById('ui-disponibles').textContent = (datosUsuario.fondosDisponibles || 0).toFixed(2) + " €";
+            document.getElementById('ui-retenidos').textContent = (datosUsuario.fondosRetenidos || 0).toFixed(2) + " €";
+
+            // Cargar Categorías
+            colCategorias = [];
+            const qs = await getDocs(collection(db, "usuarios", uidActual, "categorias"));
+            qs.forEach((d) => colCategorias.push({ id: d.id, ...d.data() }));
+            renderizarCategorias();
+        }
+
+        function renderizarCategorias() {
+            const container = document.getElementById('contenedor-categorias');
+            container.innerHTML = "";
+            if(colCategorias.length === 0) { container.innerHTML = "<div style='text-align:center;color:#7F8C8D;'>No tienes ninguna categoría creada. Pulsa el botón + para empezar.</div>"; return; }
+            
+            colCategorias.forEach(cat => {
+                let max = cat.presupuestoMaximo; let gast = cat.gastado || 0;
+                let pct = Math.min(100, Math.round((gast / max) * 100));
+                let colorBar = (pct < 50) ? '#27AE60' : (pct < 80 ? '#F4D03F' : '#E74C3C');
+
+                container.innerHTML += `
+                    <div class="item-card">
+                        <div class="card-top">
+                            <div class="card-icon" style="background-color:${cat.color}20; color:${cat.color};">${cat.icono}</div>
+                            <div class="card-details">
+                                <div class="card-title">${cat.nombre}</div>
+                                <div class="card-progress-row">
+                                    <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pct}%; background:${colorBar};"></div></div>
+                                    <div class="card-percent" style="color:${colorBar};">${pct}%</div>
+                                </div>
+                                <div class="card-amounts">${gast.toFixed(2)}€ / ${max.toFixed(2)}€</div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn btn-plus" onclick="abrirGasto('${cat.id}', '${cat.nombre}')">+</button>
+                            <button class="action-btn btn-minus" onclick="abrirRetiro('${cat.id}', '${cat.nombre}')">-</button>
+                            <button class="action-btn btn-eye" onclick="alert('Historial modal en desarrollo')">👁️</button>
+                            <button class="action-btn btn-trash" onclick="alert('Reubicación modal pendiente')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // LÓGICA: CREAR CATEGORÍA
+        window.crearCategoriaBD = async function() {
+            const btn = document.getElementById('btn-submit-cat');
+            const nom = document.getElementById('cat-nombre').value.trim();
+            const pre = parseFloat(document.getElementById('cat-presupuesto').value);
+            const err = document.getElementById('err-crear-cat');
+
+            if(!nom || isNaN(pre) || pre <= 0) { err.textContent="Rellena título y presupuesto válidos."; err.style.display='block'; return; }
+            if(pre > (datosUsuario.fondosDisponibles || 0)) { err.textContent="El presupuesto supera tus Fondos Disponibles."; err.style.display='block'; return; }
+
+            btn.disabled = true; err.style.display = 'none';
+            try {
+                const nuevaCat = { nombre: nom, presupuestoMaximo: pre, gastado: 0, icono: document.querySelector('#cat-iconos .selected').textContent, color: document.querySelector('#cat-colores .selected').getAttribute('data-color') };
+                await addDoc(collection(db, "usuarios", uidActual, "categorias"), nuevaCat);
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosDisponibles: (datosUsuario.fondosDisponibles - pre),
+                    fondosRetenidos: (datosUsuario.fondosRetenidos + pre)
+                });
+                document.getElementById('cat-nombre').value = ""; document.getElementById('cat-presupuesto').value = "";
+                cerrarModal('modal-crear-cat'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al crear categoría."; err.style.display='block'; }
+            finally { btn.disabled = false; }
+        };
+
+        // LÓGICA: AÑADIR GASTO (+)
+        window.abrirGasto = function(catId, catName) {
+            categoriaSeleccionada = colCategorias.find(c => c.id === catId);
+            document.getElementById('info-gasto-cat').textContent = `En categoría: ${catName}`;
+            document.getElementById('gasto-concepto').value = ""; document.getElementById('gasto-importe').value = "";
+            document.getElementById('modal-add-gasto').style.display = 'flex'; document.body.style.overflow = 'hidden';
+        };
+
+        window.procesarGasto = async function() {
+            const btn = document.getElementById('btn-submit-gasto');
+            const con = document.getElementById('gasto-concepto').value.trim();
+            const imp = parseFloat(document.getElementById('gasto-importe').value);
+            const err = document.getElementById('err-gasto');
+
+            if(!con || isNaN(imp) || imp <= 0) { err.textContent="Rellena un concepto e importe mayor a 0."; err.style.display='block'; return; }
+
+            const pMax = categoriaSeleccionada.presupuestoMaximo;
+            const gAct = categoriaSeleccionada.gastado;
+            const remanente = pMax - gAct; 
+            
+            let aRestarRetenido = 0; let aRestarDisponible = 0;
+
+            if (remanente >= imp) {
+                // Hay margen suficiente en el presupuesto
+                aRestarRetenido = imp;
+            } else if (remanente > 0 && imp > remanente) {
+                // Agotamos el presupuesto y tocamos disponible
+                aRestarRetenido = remanente;
+                aRestarDisponible = imp - remanente;
+            } else if (remanente <= 0) {
+                // Ya estaba excedida, todo va a disponible
+                aRestarDisponible = imp;
+            }
+
+            // VALIDACIÓN: ¿Hay suficientes fondos disponibles para cubrir el excedente?
+            if (aRestarDisponible > datosUsuario.fondosDisponibles) {
+                document.getElementById('alert-msg').innerHTML = `No tienes suficientes <b>Fondos Disponibles</b> para cubrir el excedente de este gasto.<br><br>Te faltan ${(aRestarDisponible - datosUsuario.fondosDisponibles).toFixed(2)}€ libres.`;
+                document.getElementById('modal-alert-error').style.display = 'flex';
+                return; // Cortamos ejecución aquí, el alert tiene el botón de volver al mini-form.
+            }
+
+            btn.disabled = true; err.style.display = 'none';
+            try {
+                // Guardar en Firestore
+                await updateDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id), { gastado: gAct + imp });
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "categoría", categoriaId: categoriaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosTotales: datosUsuario.fondosTotales - imp,
+                    fondosRetenidos: datosUsuario.fondosRetenidos - aRestarRetenido,
+                    fondosDisponibles: datosUsuario.fondosDisponibles - aRestarDisponible
+                });
+                cerrarModal('modal-add-gasto'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al guardar el gasto."; err.style.display='block'; }
+            finally { btn.disabled = false; }
+        };
+
+        // LÓGICA: RETIRAR GASTO (-)
+        window.abrirRetiro = function(catId, catName) {
+            categoriaSeleccionada = colCategorias.find(c => c.id === catId);
+            document.getElementById('retiro-concepto').value = ""; document.getElementById('retiro-importe').value = "";
+            document.getElementById('modal-remove-gasto').style.display = 'flex'; document.body.style.overflow = 'hidden';
+        };
+
+        window.procesarRetiro = async function() {
+            const btn = document.getElementById('btn-submit-retiro');
+            const con = document.getElementById('retiro-concepto').value.trim();
+            const imp = parseFloat(document.getElementById('retiro-importe').value);
+            const err = document.getElementById('err-retiro');
+
+            if(!con || isNaN(imp) || imp <= 0) { err.textContent="Rellena un motivo e importe mayor a 0."; err.style.display='block'; return; }
+            
+            const pMax = categoriaSeleccionada.presupuestoMaximo;
+            const gAct = categoriaSeleccionada.gastado;
+            const excesoActual = gAct - pMax; 
+
+            if(imp > gAct) { err.textContent="No puedes retirar más de lo que hay gastado (" + gAct.toFixed(2) + "€)."; err.style.display='block'; return; }
+
+            let aSumarDisponible = 0; let aSumarRetenido = 0;
+
+            if (excesoActual >= imp) {
+                // Todo el retiro repone el exceso, va a disponible
+                aSumarDisponible = imp;
+            } else if (excesoActual > 0 && imp > excesoActual) {
+                // Repone el exceso a disponible y el resto va a retenido
+                aSumarDisponible = excesoActual;
+                aSumarRetenido = imp - excesoActual;
+            } else if (excesoActual <= 0) {
+                // No había exceso, todo vuelve a retenido (presupuesto intacto)
+                aSumarRetenido = imp;
+            }
+
+            btn.disabled = true; err.style.display = 'none';
+            try {
+                await updateDoc(doc(db, "usuarios", uidActual, "categorias", categoriaSeleccionada.id), { gastado: gAct - imp });
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "ingreso", subtipo: "devolución_cat", categoriaId: categoriaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
+                await updateDoc(doc(db, "usuarios", uidActual), {
+                    fondosTotales: datosUsuario.fondosTotales + imp,
+                    fondosRetenidos: datosUsuario.fondosRetenidos + aSumarRetenido,
+                    fondosDisponibles: datosUsuario.fondosDisponibles + aSumarDisponible
+                });
+                cerrarModal('modal-remove-gasto'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al retirar gasto."; err.style.display='block'; }
+            finally { btn.disabled = false; }
+        };
+    </script>
+</body>
+</html>
