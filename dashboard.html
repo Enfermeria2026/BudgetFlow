@@ -501,6 +501,7 @@
             errDiv.style.display = 'none';
 
             try {
+                // 1. Guardar el movimiento en la colección
                 await addDoc(collection(db, "usuarios", uidActual, "movimientos"), {
                     tipo: "ingreso",
                     subtipo: tipo,
@@ -516,21 +517,30 @@
                     fecha: new Date().toISOString()
                 });
 
+                // 2. Traer los datos del usuario para actualizar los totales
                 const userRef = doc(db, "usuarios", uidActual);
                 const userDoc = await getDoc(userRef);
                 const data = userDoc.data();
                 
                 const nuevosTotales = (data.fondosTotales || 0) + importeNeto;
                 const nuevosDisponibles = (data.fondosDisponibles || 0) + importeNeto;
+                
+                // --- LÓGICA DE TIENDA: 5 monedas por cada 10€ netos ingresados ---
+                let monedasGanadas = Math.floor(importeNeto / 10) * 5;
+                let nuevasMonedas = (data.monedas || 0) + monedasGanadas;
 
+                // 3. Actualizar Firestore
                 await updateDoc(userRef, {
                     fondosTotales: nuevosTotales,
-                    fondosDisponibles: nuevosDisponibles
+                    fondosDisponibles: nuevosDisponibles,
+                    monedas: nuevasMonedas
                 });
 
+                // 4. Actualizar la Interfaz Visual (Textos)
                 document.getElementById('ui-totales').textContent = nuevosTotales.toFixed(2) + " €";
                 document.getElementById('ui-disponibles').textContent = nuevosDisponibles.toFixed(2) + " €";
 
+                // 5. Limpiar los campos del formulario
                 document.getElementById('ing-importe').value = "";
                 document.getElementById('ing-bruto').value = "";
                 document.getElementById('ing-tipo').value = "";
@@ -543,6 +553,18 @@
                 document.getElementById('ing-otras-ret').value = "";
                 
                 cerrarModal('modal-ingreso');
+                
+                // Recargar gráficos o lo que tengas en el dashboard
+                if (typeof cargarDatosDashboard === "function") {
+                    await cargarDatosDashboard();
+                }
+
+                // 6. Lanzar felicitación si ha ganado monedas
+                if (monedasGanadas > 0) {
+                    document.getElementById('feli-monedas-ganadas').textContent = monedasGanadas;
+                    document.getElementById('feli-monedas-total').textContent = nuevasMonedas;
+                    abrirModal('modal-felicitacion-monedas');
+                }
                 
             } catch (error) {
                 console.error("Error:", error);
@@ -771,7 +793,23 @@
             if (divIng) divIng.innerHTML = htmlIngresos;
             if (divGas) divGas.innerHTML = htmlGastos;
         };
-        
+        <!-- MODAL FELICITACIÓN MONEDAS -->
+    <div class="modal-overlay" id="modal-felicitacion-monedas" style="z-index: 25000;">
+        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 5px;">🪙</div>
+            <h3 class="modal-title" style="color: #F1C40F;">¡Felicidades!</h3>
+            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold;">
+                Has conseguido <span id="feli-monedas-ganadas" style="color:#F1C40F; font-size:18px;"></span> monedas de BudgetFlow por tu ingreso.
+            </p>
+            <p style="color:#7F8C8D; font-size:13px; margin-bottom:0;">¡Úsalas para comprar en la tienda!</p>
+            <div style="background:#F4F6F9; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; font-size:14px;">
+                Total acumulado: 🪙 <span id="feli-monedas-total"></span>
+            </div>
+            <div class="btn-row">
+                <button class="btn-confirm" style="background:#F1C40F; color:var(--text-main);" onclick="cerrarModal('modal-felicitacion-monedas')">¡Genial!</button>
+            </div>
+        </div>
+    </div>
     </script>
 </body>
 </html>
