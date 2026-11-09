@@ -621,16 +621,17 @@
 
         function generarContenidoCaja() {
             gachaResults = [];
-            // Calidad de la caja
+            // 1. Calidad de la caja
             let r = Math.random();
-            let rarezaStr = "Comunes", color = "#3498DB", minMon=10, maxMon=15;
-            if(r > 0.60 && r <= 0.85) { rarezaStr = "Raros"; color = "#27AE60"; minMon=16; maxMon=20; }
-            else if(r > 0.85 && r <= 0.95) { rarezaStr = "Épicos"; color = "#E74C3C"; minMon=21; maxMon=30; }
-            else if(r > 0.95) { rarezaStr = "Legendarios"; color = "#F1C40F"; minMon=31; maxMon=40; }
+            let rarezaStr = "Comunes", color = "#3498DB", minMon=10, maxMon=15, probCup = 0.10;
+            
+            if(r > 0.60 && r <= 0.85) { rarezaStr = "Raros"; color = "#27AE60"; minMon=16; maxMon=20; probCup = 0.20; }
+            else if(r > 0.85 && r <= 0.95) { rarezaStr = "Épicos"; color = "#E74C3C"; minMon=21; maxMon=30; probCup = 0.35; }
+            else if(r > 0.95) { rarezaStr = "Legendarios"; color = "#F1C40F"; minMon=31; maxMon=40; probCup = 0.50; }
             
             gachaResults.push({ type: 'quality', color: color, text: rarezaStr.replace('s','').toUpperCase() });
 
-            // Probabilidades de Items (Monedas, Icono, Color)
+            // 2. Helpers para Iconos y Colores
             const getIconoFromGacha = (startRarity) => {
                 let rList = ["Comunes", "Raros", "Épicos", "Legendarios"];
                 let idx = rList.indexOf(startRarity);
@@ -638,7 +639,6 @@
                     let disp = itemsBloqueados.iconos[rList[i]];
                     if(disp.length > 0) {
                         let elegido = disp[Math.floor(Math.random() * disp.length)];
-                        // Fake remove for next items in same box
                         disp.splice(disp.indexOf(elegido), 1); 
                         return elegido.id;
                     }
@@ -655,10 +655,11 @@
                 return null;
             };
 
+            // 3. Generar los 3 items base
             const probItems = [
-                { mon: 0.80, icn: 0.90 }, // Item 1: 80% mon, 10% icn, 10% col
-                { mon: 0.70, icn: 0.85 }, // Item 2: 70% mon, 15% icn, 15% col
-                { mon: 0.50, icn: 0.75 }  // Item 3: 50% mon, 25% icn, 25% col
+                { mon: 0.80, icn: 0.90 },
+                { mon: 0.70, icn: 0.85 },
+                { mon: 0.50, icn: 0.75 }
             ];
 
             probItems.forEach(p => {
@@ -674,6 +675,18 @@
                     else gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) });
                 }
             });
+
+            // 4. ¿Hay cuarto ítem (Cupón)?
+            if (Math.random() < probCup) {
+                const todosLosCupones = Object.keys(CUPONES_VALIDOS); // ["PROM4362", "PROM3713", ...]
+                // Filtramos los que el usuario AÚN NO TIENE en su array de `misCupones`
+                const cuponesDisponibles = todosLosCupones.filter(c => !misCupones.some(mio => mio.codigo === c));
+                
+                if (cuponesDisponibles.length > 0) {
+                    let elegido = cuponesDisponibles[Math.floor(Math.random() * cuponesDisponibles.length)];
+                    gachaResults.push({ type: 'cupon', val: elegido });
+                }
+            }
         }
 
         async function progresarGacha() {
@@ -681,29 +694,19 @@
             const txt = document.getElementById('gacha-text'); const glow = document.getElementById('gacha-glow');
             
             gachaState++;
-            if (gachaState === 1) {
-                // Revelar rareza
-                box.style.display = 'none';
-                glow.style.display = 'block'; glow.style.background = gachaResults[0].color;
-                item.style.display = 'block'; item.textContent = '✨'; item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
-                txt.textContent = `Calidad: ${gachaResults[0].text}`;
-            } else if (gachaState >= 2 && gachaState <= 4) {
-                // Revelar items 1, 2, 3
-                let it = gachaResults[gachaState-1];
-                item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
-                if(it.type === 'monedas') { item.textContent = '🪙'; txt.textContent = `+${it.val} Monedas`; }
-                else if(it.type === 'icono') { item.textContent = it.val; txt.textContent = "¡Nuevo Icono!"; }
-                else { item.textContent = ''; item.style.background = it.val; item.style.width='80px'; item.style.height='80px'; item.style.borderRadius='50%'; txt.textContent = "¡Nuevo Color!"; }
-            } else if (gachaState === 5) {
-                // Resumen y guardado
+            
+            // Si el estado actual coincide con la longitud de los resultados, toca mostrar el resumen
+            if (gachaState === gachaResults.length) {
                 item.style.display = 'none'; txt.style.display = 'none'; glow.style.display = 'none';
                 document.getElementById('gacha-summary').style.display = 'flex';
                 
-                let sumHtml = ""; let totMon = 0; let nIcos = []; let nCols = [];
-                for(let i=1; i<=3; i++) {
+                let sumHtml = ""; let totMon = 0; let nIcos = []; let nCols = []; let nCup = null;
+                
+                for(let i=1; i<gachaResults.length; i++) {
                     let r = gachaResults[i];
                     if(r.type==='monedas') { totMon+=r.val; sumHtml += `<div>🪙 +${r.val}</div>`; }
                     else if(r.type==='icono') { nIcos.push(r.val); sumHtml += `<div>⭐ ${r.val}</div>`; }
+                    else if(r.type==='cupon') { nCup = r.val; sumHtml += `<div style="color:var(--color-gemas); font-size:16px;">🎟️ Cupón: ${r.val}</div>`; }
                     else { nCols.push(r.val); sumHtml += `<div>🎨 <span style="display:inline-block;width:15px;height:15px;background:${r.val};border-radius:50%;vertical-align:middle;"></span></div>`; }
                 }
                 document.getElementById('gacha-summary-list').innerHTML = sumHtml;
@@ -713,15 +716,33 @@
                 if(totMon > 0) { datosUsuario.monedas += totMon; upd.monedas = datosUsuario.monedas; }
                 if(nIcos.length > 0) { misIconos = [...misIconos, ...nIcos]; upd.iconosDesbloqueados = misIconos; }
                 if(nCols.length > 0) { misColores = [...misColores, ...nCols]; upd.coloresDesbloqueados = misColores; }
+                if(nCup) { misCupones.push({codigo: nCup, usado: false}); upd.cupones = misCupones; }
                 
                 if(Object.keys(upd).length > 0) {
                     await updateDoc(doc(db, "usuarios", uidActual), upd);
-                    if(nIcos.length > 0 || nCols.length > 0) localStorage.setItem('showLibroBadge', 'true');
+                    if(nIcos.length > 0 || nCols.length > 0 || nCup) localStorage.setItem('showLibroBadge', 'true');
                 }
-            } else if (gachaState === 6) {
-                // Cerrar
+            } 
+            // Si el estado es mayor a la longitud, cerramos y recargamos
+            else if (gachaState > gachaResults.length) {
                 document.getElementById('gacha-overlay').onclick = null;
-                window.location.reload(); // Recargar para actualizar catálogos limpios
+                window.location.reload(); 
+            } 
+            // Si es el primer click (Revelar calidad caja)
+            else if (gachaState === 1) {
+                box.style.display = 'none';
+                glow.style.display = 'block'; glow.style.background = gachaResults[0].color;
+                item.style.display = 'block'; item.textContent = '✨'; item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
+                txt.textContent = `Calidad: ${gachaResults[0].text}`;
+            } 
+            // Clicks intermedios (Revelar ítems)
+            else {
+                let it = gachaResults[gachaState-1];
+                item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
+                if(it.type === 'monedas') { item.textContent = '🪙'; txt.textContent = `+${it.val} Monedas`; item.style.background = 'transparent'; item.style.width='auto'; item.style.height='auto'; }
+                else if(it.type === 'icono') { item.textContent = it.val; txt.textContent = "¡Nuevo Icono!"; item.style.background = 'transparent'; item.style.width='auto'; item.style.height='auto'; }
+                else if(it.type === 'cupon') { item.textContent = '🎟️'; txt.textContent = "¡CUPÓN DESCUENTO!"; item.style.background = 'transparent'; item.style.width='auto'; item.style.height='auto'; txt.style.color = 'var(--color-gemas)'; }
+                else { item.textContent = ''; item.style.background = it.val; item.style.width='80px'; item.style.height='80px'; item.style.borderRadius='50%'; item.style.margin = "0 auto"; txt.textContent = "¡Nuevo Color!"; }
             }
         }
 
