@@ -880,8 +880,16 @@
             const rest = sumaGuardadoGlobal - suma;
             const rd = document.getElementById('repartir-restante-fon');
             if (rd) {
-                rd.textContent = `Faltan por repartir: ${Math.abs(rest).toFixed(2)}€ ${rest < 0 ? '(Te has pasado)' : ''}`;
-                rd.style.color = (Math.abs(rest) < 0.01) ? 'var(--color-disponibles)' : 'var(--color-retenidos)';
+                if (Math.abs(rest) < 0.01) {
+                    rd.textContent = "Has repartido todo exactamente.";
+                    rd.style.color = 'var(--color-disponibles)';
+                } else if (rest > 0) {
+                    rd.textContent = `Faltan por repartir: ${rest.toFixed(2)}€`;
+                    rd.style.color = 'var(--text-main)';
+                } else {
+                    rd.textContent = `Has repartido ${Math.abs(rest).toFixed(2)}€ de más.`;
+                    rd.style.color = 'var(--color-retenidos)';
+                }
             }
         };
 
