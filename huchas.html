@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Huchas de Ahorro</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9; --text-main: #2C3E50;
+            --color-totales: #D4AC0D; --color-disponibles: #27AE60; --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF; --nav-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        button, a, .info-icon, .action-btn, .fab-btn, .action-mini-btn, .inline-opt-btn, .modal-opt-item, .acordeon-header { -webkit-tap-highlight-color: transparent; outline: none; }
+
+        /* LOADER GLOBAL */
+        #global-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* HEADER FIJO SUPERIOR */
+        .top-header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--bg-color); z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; box-sizing: border-box;
+        }
+        .menu-btn { font-size: 28px; cursor: pointer; border: none; background: none; color: var(--text-main); padding: 0; }
+        .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
+        .header-logo img { width: 40px; height: auto; }
+        .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); }
+
+        /* MENÚ LATERAL (SIDEBAR) */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .sidebar {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+            background-color: var(--card-bg); z-index: 1000; transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column;
+        }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #E5E7E9; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
+        .sidebar-header img { width: 40px; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a {
+            display: flex; align-items: center; gap: 15px; padding: 15px 20px;
+            text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
+        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
+
+        /* ZONA FIJA SUPERIOR */
+        .fixed-top-section {
+            position: fixed; top: 60px; left: 0; width: 100%; height: 215px;
+            background-color: var(--bg-color); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            padding: 15px 15px 10px 15px; box-sizing: border-box;
+        }
+        .financial-panel {
+            background-color: var(--card-bg); border-radius: 16px; padding: 15px 10px; width: 100%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box;
+        }
+        .fin-block { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+        .info-icon-wrapper { margin-bottom: 2px; }
+        .fin-title { font-size: 12px; font-weight: bold; text-align: center; line-height: 1.3; }
+        .info-icon { background: #E5E7E9; color: #555; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+        .fin-amount { font-size: 18px; font-weight: bold; }
+
+        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin: 0; }
+        .filter-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; }
+        .totals-mini-card { background: #fff; padding: 10px 12px; border-radius: 8px; border: 1px solid #E5E7E9; font-size: 12px; font-weight: bold; color: var(--text-main); }
+        .filter-btn { background: #E5E7E9; border: none; padding: 10px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* CONTENEDOR CON SCROLL */
+        .page-content {
+            position: fixed; top: 285px; bottom: 70px; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px;
+            overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .items-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+
+        /* FILA DE HUCHA */
+        .categoria-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+        .categoria-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--color-retenidos); flex-shrink: 0; }
+
+        .item-card {
+            background: #FFFFFF; border: 1px solid #E5E7E9; border-radius: 12px; padding: 15px; 
+            display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+            flex: 1; box-sizing: border-box; position: relative;
+        }
+        .card-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
+        .card-details { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+        
+        .card-header-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .card-title { font-size: 15px; font-weight: bold; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        
+        .card-action-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .action-mini-btn {
+            width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--text-main);
+            background: transparent; color: var(--text-main); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0; transition: 0.2s; font-weight: bold; font-size: 16px;
+        }
+        .action-mini-btn:hover { background: #F4F6F9; }
+
+        .card-progress-row { display: flex; align-items: center; gap: 10px; }
+        .card-progress-bg { flex: 1; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; }
+        .card-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        .card-percent { font-size: 13px; font-weight: bold; }
+        
+        .card-amounts { font-size: 12px; font-weight: bold; color: var(--text-main); display: flex; flex-direction: column; gap: 3px; }
+        .fecha-prevista { font-size: 11px; color: #7F8C8D; font-weight: bold; white-space: nowrap; text-align: right; }
+        .text-superado { color: var(--color-disponibles); font-weight: bold; font-size: 11px; }
+        .card-footer-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 2px; width: 100%; }
+
+        /* BARRA INFERIOR DE ACCIÓN MÚLTIPLE */
+        .delete-action-bar {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 460px; background: var(--text-main); color: white;
+            padding: 12px 20px; border-radius: 30px; display: none; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 95; font-size: 14px; font-weight: bold; box-sizing: border-box;
+        }
+        .btn-borrar-multi { background: var(--color-retenidos); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        /* BOTÓN FLOTANTE GIGANTE */
+        .fab-btn {
+            position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px;
+            background-color: var(--color-disponibles); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 32px;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); border: none; cursor: pointer; z-index: 90;
+            transition: transform 0.3s ease;
+        }
+        .fab-btn.spin { transform: rotate(90deg); }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR FIJA */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6);
+            display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 400px;
+            max-height: 85vh; overflow-y: auto; box-sizing: border-box; text-align: left; display: flex; flex-direction: column; gap: 15px;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; margin: 0; text-align: center; }
+        .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        label { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        input, select { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 15px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
+        .btn-confirm { flex: 1; padding: 15px; border: none; background: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-confirm:disabled { background: #BDC3C7; }
+        .breakdown-list { text-align: left; font-size: 13px; color: #555; background: #F9F9F9; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
+        .breakdown-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ddd; }
+        .breakdown-item:last-child { border-bottom: none; }
+
+        /* ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
+        .inline-selector { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between; align-items: center; margin-top: 2px; overflow-x: auto; padding: 10px 4px; width: 100%; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none; }
+        .inline-selector::-webkit-scrollbar { display: none; }
+        .inline-opt-btn { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
+        .inline-opt-btn.color-btn { border-color: transparent; }
+        .inline-opt-btn.selected { border-color: #000 !important; box-shadow: 0 0 0 1.5px #000; transform: scale(1.12); }
+        .inline-opt-btn.btn-mas { background: #F4F6F9; color: var(--text-main); font-weight: bold; border: 2px solid #D5D8DC; }
+
+        .modal-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px; justify-items: center; }
+        .modal-opt-item { width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .modal-opt-item.color-item { border: 2px solid #E5E7E9; }
+        .modal-opt-item.selected { border-color: #000 !important; box-shadow: 0 0 0 1.5px #000; transform: scale(1.05); background: #fff; }
+        .modal-opt-item.locked { filter: grayscale(100%); opacity: 0.35; cursor: not-allowed; }
+
+        .acordeon-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--text-main); background: #F4F6F9; padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 1px solid #E5E7E9; }
+        .acordeon-content { display: none; padding: 5px; }
+        .acordeon-content.open { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader">
+        <div class="spinner"></div>
+        <div style="margin-top:15px; font-weight:bold; color:var(--text-main);">Cargando Huchas...</div>
+    </div>
+
+    <!-- SIDEBAR Y HEADER -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></span> Centro de ayuda</a></li>
+            <li><a href="info.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></span> Información de la app</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg></span> Cerrar sesión</a></li>
+        </ul>
+    </aside>
+
+    <header class="top-header">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> <span style="color:#000;">Budget</span><span style="color:var(--color-disponibles);">Flow</span></div>
+        <div class="header-date" id="header-date">Mes Año</div>
+    </header>
+
+    <!-- ZONA FIJA SUPERIOR -->
+    <div class="fixed-top-section">
+        <div class="financial-panel">
+            <div class="fin-block" style="color: var(--color-totales);">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-totales')">i</span></div>
+                <div class="fin-title">Fondos<br>Totales</div>
+                <div class="fin-amount" id="ui-totales">0.00 €</div>
+            </div>
+            <div class="fin-block" style="color: var(--color-disponibles); border-left: 1px solid #eee; border-right: 1px solid #eee;">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-disponibles')">i</span></div>
+                <div class="fin-title">Fondos<br>Disponibles</div>
+                <div class="fin-amount" id="ui-disponibles">0.00 €</div>
+            </div>
+            <div class="fin-block" style="color: var(--color-retenidos);">
+                <div class="info-icon-wrapper"><span class="info-icon" onclick="abrirInfo('modal-retenidos')">i</span></div>
+                <div class="fin-title">Fondos<br>Retenidos</div>
+                <div class="fin-amount" id="ui-retenidos">0.00 €</div>
+            </div>
+        </div>
+
+        <div class="page-title">HUCHAS DE AHORRO</div>
+        
+        <div class="filter-row">
+            <div class="totals-mini-card" id="ui-resumen-huchas">Total: 0.00€</div>
+            <div style="position: relative; display: inline-block;">
+                <button class="filter-btn" onclick="toggleMenuFiltros()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filtros</button>
+                <div id="dropdown-filtros" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #D5D8DC; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 50; width: 250px; overflow: hidden;">
+                    <div style="padding: 10px 15px; font-size: 12px; font-weight: bold; background: #F4F6F9; border-bottom: 1px solid #eee;">Ordenar huchas por:</div>
+                    <div id="filt-mayor" onclick="ordenarHuchas('mayor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Mayor cantidad aportada</div>
+                    <div id="filt-menor" onclick="ordenarHuchas('menor')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Menor cantidad aportada</div>
+                    <div id="filt-az" onclick="ordenarHuchas('az')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/></svg> Alfabéticamente (A - Z)</div>
+                    <div id="filt-za" onclick="ordenarHuchas('za')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #f4f4f4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h6M4 12h10M4 18h16"/></svg> Alfabéticamente (Z - A)</div>
+                    <div id="filt-fecha" onclick="ordenarHuchas('fecha')" style="display:flex; align-items:center; gap:10px; padding: 10px 15px; font-size: 13px; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Fecha más próxima</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="page-content">
+        <div class="items-list" id="contenedor-huchas"></div>
+    </main>
+
+    <button class="fab-btn" id="btn-fab" onclick="animarYabrirModal('modal-crear-huc', this)">+</button>
+
+    <div class="delete-action-bar" id="delete-bar-huc">
+        <span id="delete-counter-huc">0 seleccionados</span>
+        <button class="btn-borrar-multi" onclick="abrirModalBorrarMulti()">Borrar huchas</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="huchas.html" class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span>Fondos</a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>Presupuestos</a>
+        <a href="gastos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span>Gastos</a>
+    </nav>
+
+    <!-- MODALES INFORMATIVOS -->
+    <div class="modal-overlay" id="modal-totales">
+        <div class="modal-content"><h3 class="modal-title" style="color: var(--color-totales);">Fondos Totales</h3><p style="color:#555;font-size:14px;">Es el total de dinero disponible más el retenido.</p><div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-totales')">Entendido</button></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-disponibles">
+        <div class="modal-content"><h3 class="modal-title" style="color: var(--color-disponibles);">Fondos Disponibles</h3><p style="color:#555;font-size:14px;">Dinero libre no asignado a ningún presupuesto, hucha o fondo.</p><div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-disponibles')">Entendido</button></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-retenidos">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Fondos Retenidos</h3>
+            <p style="color:#555;font-size:14px;">Es el dinero que sigue siendo tuyo, pero que está asignado a tus presupuestos, huchas o fondos reservados.</p>
+            <div class="breakdown-list" id="lista-retenidos">Cargando desglose...</div>
+            <div class="btn-row"><button class="btn-confirm" onclick="cerrarInfo('modal-retenidos')">Entendido</button></div>
+        </div>
+    </div>
+
+    <!-- MODALES CATÁLOGO DE ICONOS Y COLORES -->
+    <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Iconos</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-iconos"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-cancel" onclick="cerrarModal('modal-selector-iconos')">Cerrar</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modal-selector-colores" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Colores</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-colores"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-cancel" onclick="cerrarModal('modal-selector-colores')">Cerrar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERTA BLOQUEADO -->
+    <div class="modal-overlay" id="modal-alerta-bloqueado" style="z-index: 12000;">
+        <div class="modal-content" style="border-top: 5px solid var(--text-main); max-width: 320px;">
+            <h3 class="modal-title" style="color: var(--text-main);">🔒 Bloqueado</h3>
+            <p id="bloqueado-msg" style="color:#555;font-size:14px; text-align:center; margin-top:15px;"></p>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--text-main);" onclick="cerrarModal('modal-alerta-bloqueado')">Entendido</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERT ERROR ESTÁNDAR -->
+    <div class="modal-overlay" id="modal-alert-error" style="z-index: 10005;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-retenidos);">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Operación Rechazada</h3>
+            <p id="alert-msg" style="color:#555;font-size:14px; text-align:center;"></p>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-retenidos);" onclick="cerrarModal('modal-alert-error')">Aceptar y volver</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL FELICITACIÓN OBJETIVO -->
+    <div class="modal-overlay" id="modal-objetivo-logrado" style="z-index: 10005;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-disponibles);">
+            <h3 class="modal-title" style="color: var(--color-disponibles);">¡Objetivo Cumplido! 🎉</h3>
+            <p style="color:#555;font-size:14px; text-align:center;">¡Enhorabuena! Has alcanzado el objetivo de ahorro configurado para esta hucha. Gran trabajo.</p>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-disponibles);" onclick="cerrarModal('modal-objetivo-logrado')">Aceptar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR HUCHA -->
+    <div class="modal-overlay" id="modal-crear-huc">
+        <div class="modal-content">
+            <h3 class="modal-title">Nueva Hucha</h3>
+            <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="huc-nombre"></div>
+            <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="inline-selector" id="huc-iconos-inline"></div>
+            </div>
+            <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="inline-selector" id="huc-colores-inline"></div>
+            </div>
+            <div class="field-wrapper">
+                <label>Aporte inicial (Opcional)</label>
+                <input type="number" id="huc-aporte" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="field-wrapper">
+                <label>Objetivo (Opcional)</label>
+                <input type="number" id="huc-objetivo" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="field-wrapper">
+                <label>Fecha prevista (Opcional)</label>
+                <input type="date" id="huc-fecha">
+            </div>
+            <p id="err-crear-huc" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-crear-huc', true)">Cancelar</button>
+                <button class="btn-confirm" id="btn-submit-huc" onclick="crearHuchaBD()">CREAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR HUCHA -->
+    <div class="modal-overlay" id="modal-editar-huc">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--text-main);">Editar Hucha</h3>
+            <input type="hidden" id="edit-huc-id">
+            
+            <div class="field-wrapper"><label>Título <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="edit-huc-nombre"></div>
+            <div class="field-wrapper"><label>Icono <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="inline-selector" id="edit-huc-iconos-inline"></div>
+            </div>
+            <div class="field-wrapper"><label>Color <span style="color:var(--color-retenidos)">*</span></label>
+                <div class="inline-selector" id="edit-huc-colores-inline"></div>
+            </div>
+            <div class="field-wrapper">
+                <label>Objetivo (Opcional)</label>
+                <input type="number" id="edit-huc-objetivo" placeholder="0.00" min="0" step="0.01">
+                <span id="info-objetivo-actual" style="font-size:11px; color:#7F8C8D; margin-top:2px;"></span>
+            </div>
+            <div class="field-wrapper">
+                <label>Fecha prevista (Opcional)</label>
+                <input type="date" id="edit-huc-fecha">
+            </div>
+            <p id="err-editar-huc" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-editar-huc')">Cancelar</button>
+                <button class="btn-confirm" style="background: var(--color-disponibles);" id="btn-submit-edit-huc" onclick="guardarEdicionHucha()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AÑADIR DINERO (+) (SOLO IMPORTE) -->
+    <div class="modal-overlay" id="modal-add-dinero">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-disponibles);">Añadir Ahorro</h3>
+            <p id="info-add-huc" style="text-align:center; font-weight:bold; color:var(--text-main); margin-bottom:0;"></p>
+            <div class="field-wrapper"><label>Importe <span style="color:var(--color-retenidos)">*</span></label><input type="number" id="add-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <p id="err-add-dinero" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-add-dinero')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-disponibles);" id="btn-submit-add" onclick="procesarAñadirDinero()">AÑADIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RETIRAR DINERO (-) -->
+    <div class="modal-overlay" id="modal-remove-dinero">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-totales);">Retirar a Disponibles</h3>
+            <p style="font-size:13px; color:#555; text-align:center;">Retira dinero de esta hucha hacia tus Fondos Disponibles libres.</p>
+            <p id="info-remove-huc" style="text-align:center; font-weight:bold; color:var(--text-main); margin-bottom:0;"></p>
+            <div class="field-wrapper"><label>Concepto de retiro <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="remove-concepto" placeholder="Ej: Dinero necesitado"></div>
+            <div class="field-wrapper"><label>Importe a retirar <span style="color:var(--color-retenidos)">*</span></label><input type="number" id="remove-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <p id="err-remove-dinero" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-remove-dinero')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-totales);" id="btn-submit-remove" onclick="procesarRetirarDinero()">RETIRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REALIZAR GASTO -->
+    <div class="modal-overlay" id="modal-gasto-hucha">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Realizar Gasto Definitivo</h3>
+            <p style="font-size:13px; color:#555; text-align:center;">El dinero saldrá de esta hucha y desaparecerá de la aplicación (Ej: al comprar aquello para lo que ahorrabas).</p>
+            <div class="field-wrapper"><label>Concepto del gasto <span style="color:var(--color-retenidos)">*</span></label><input type="text" id="gasto-concepto" placeholder="Ej: Compra de ordenador"></div>
+            <div class="field-wrapper"><label>Importe <span style="color:var(--color-retenidos)">*</span></label><input type="number" id="gasto-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <p id="err-gasto" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-gasto-hucha')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-retenidos);" id="btn-submit-gasto" onclick="procesarGastoHucha()">GASTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR HUCHA(S) -->
+    <div class="modal-overlay" id="modal-delete-huc">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--color-retenidos); text-align: center;">Eliminar Hucha(s)</h3>
+            <p id="del-huc-name" style="text-align:center; font-weight:bold; margin-top:5px; margin-bottom:15px; font-size:18px;"></p>
+            
+            <div id="del-no-dinero" style="display:none; text-align:center; font-size:14px; color:#555;">
+                Las huchas seleccionadas están vacías. ¿Deseas eliminarlas?
+            </div>
+
+            <div id="del-con-dinero" style="display:none; flex-direction:column; gap:15px;">
+                <div style="background:#FDEDEC; color:#C0392B; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
+                    Suman un total de <span id="del-guardado-val"></span>€ ahorrados.<br>¿Dónde deseas reubicar este dinero?
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:12px; margin-top:5px; text-align: left;">
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:normal; width: 100%;">
+                        <input type="radio" name="destino-borrado" value="disponibles" checked onchange="cambiarOpcionDestinoBorrado()" style="width: 18px; height: 18px; flex-shrink: 0;"> 
+                        <span><b>Liberar a Fondos Disponibles</b></span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:normal; width: 100%;" id="label-opt-fon">
+                        <input type="radio" name="destino-borrado" value="fondo" onchange="cambiarOpcionDestinoBorrado()" id="radio-opt-fon" style="width: 18px; height: 18px; flex-shrink: 0;"> 
+                        <span id="text-opt-fon"><b>Meter en un fondo reservado</b></span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:normal; width: 100%;" id="label-opt-huc">
+                        <input type="radio" name="destino-borrado" value="hucha" onchange="cambiarOpcionDestinoBorrado()" id="radio-opt-huc" style="width: 18px; height: 18px; flex-shrink: 0;"> 
+                        <span id="text-opt-huc"><b>Meter en otra hucha</b></span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:normal; width: 100%;" id="label-opt-div">
+                        <input type="radio" name="destino-borrado" value="repartir" onchange="cambiarOpcionDestinoBorrado()" id="radio-opt-div" style="width: 18px; height: 18px; flex-shrink: 0;"> 
+                        <span id="text-opt-div"><b>Repartir</b></span>
+                    </label>
+                </div>
+
+                <!-- Opcion: Fondo -->
+                <div id="bloque-opc-fondo" class="field-wrapper" style="display:none; text-align: left;">
+                    <label>Selecciona el fondo destino <span style="color:var(--color-retenidos)">*</span></label>
+                    <div id="lista-opc-fondo" style="max-height: 220px; overflow-y: auto; padding-right: 5px; margin-top: 5px;"></div>
+                </div>
+
+                <!-- Opcion: Hucha -->
+                <div id="bloque-opc-hucha" class="field-wrapper" style="display:none; text-align: left;">
+                    <label>Selecciona la hucha destino <span style="color:var(--color-retenidos)">*</span></label>
+                    <div id="lista-opc-hucha" style="max-height: 220px; overflow-y: auto; padding-right: 5px; margin-top: 5px;"></div>
+                </div>
+
+                <!-- Opcion: Repartir -->
+                <div id="bloque-opc-repartir" style="display:none; flex-direction:column; gap:12px; background:#F9F9F9; padding:15px; border-radius:8px; border:1px solid #eee; text-align: left;">
+                    
+                    <div style="font-size:13px; font-weight:bold; color:var(--text-main);">Liberar a Fondos Disponibles:</div>
+                    <input type="number" id="repartir-disp" placeholder="0.00" min="0" step="0.01" style="padding:10px; font-size:13px; box-sizing:border-box;" oninput="calcularRestanteRepartoHuc()">
+
+                    <div style="font-size:13px; font-weight:bold; color:var(--text-main); margin-top:5px;">Aportar a Fondos Reservados:</div>
+                    <div id="repartir-lista-fondos" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+                    <div style="font-size:13px; font-weight:bold; color:var(--text-main); margin-top:5px;">Aportar a Huchas:</div>
+                    <div id="repartir-lista-huchas" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    
+                    <div style="text-align:right; font-weight:bold; font-size:14px; margin-top:5px; padding-top:10px; border-top:1px dashed #ccc;" id="repartir-restante-huc">
+                        Faltan por repartir: 0.00€
+                    </div>
+                </div>
+            </div>
+
+            <p id="err-delete" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-delete-huc')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-retenidos);" id="btn-submit-delete" onclick="procesarEliminarMultiples()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        const fechaActualDate = new Date(); document.getElementById('header-date').textContent = `${meses[fechaActualDate.getMonth()]} ${fechaActualDate.getFullYear()}`;
+
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (link.getAttribute('href') && link.getAttribute('href') !== '#' && !link.getAttribute('onclick')) {
+                    document.getElementById('global-loader').style.display = 'flex';
+                }
+            });
+        });
+
+        let uidActual = null; let datosUsuario = null; 
+        let colFondos = []; let colHuchas = []; let colCategorias = [];
+        let huchaSeleccionada = null; 
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) { uidActual = user.uid; await recargarPantalla(); } 
+            else { window.location.href = 'index.html'; }
+        });
+
+        window.toggleMenu = function() { 
+            const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); 
+            if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display = 'none'; }
+            else{ sb.classList.add('open'); ov.style.display = 'block'; } 
+        };
+
+        window.toggleMenuFiltros = function() {
+            const drop = document.getElementById('dropdown-filtros');
+            drop.style.display = (drop.style.display === 'block') ? 'none' : 'block';
+        };
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.filter-btn') && !e.target.closest('#dropdown-filtros')) {
+                const drop = document.getElementById('dropdown-filtros');
+                if (drop) drop.style.display = 'none';
+            }
+        });
+
+        window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
+        window.abrirInfo = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
+        window.cerrarInfo = function(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; };
+
+        window.animarYabrirModal = function(id, btn) {
+            btn.classList.add('spin');
+            setTimeout(() => { 
+                btn.classList.remove('spin'); 
+                document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; 
+                if (id === 'modal-crear-huc') {
+                    colorActualSeleccionado = "#58D68D"; iconoActualSeleccionado = "🏠";
+                    document.getElementById('huc-nombre').value = ''; document.getElementById('huc-aporte').value = '';
+                    document.getElementById('huc-objetivo').value = ''; document.getElementById('huc-fecha').value = '';
+                    renderizarSelectoresInline('huc');
+                }
+            }, 300);
+        };
+        
+        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
+        window.cerrarModal = function(id, limpiarError=false) { 
+            document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; 
+            document.querySelectorAll('p[id^="err-"]').forEach(el => el.style.display = 'none');
+        };
+
+        async function fetchColeccion(nombreCol) {
+            const arr = [];
+            const qs = await getDocs(collection(db, "usuarios", uidActual, nombreCol));
+            qs.forEach((doc) => { arr.push({ id: doc.id, ...doc.data() }); });
+            return arr;
+        }
+
+        function prepararDesgloseRetenidos(cats, huchs, fonds) {
+            const div = document.getElementById('lista-retenidos');
+            if (!div) return;
+            let html = ""; let total = 0;
+            if(cats.length > 0) html += `<div style="font-weight:bold; margin-top:5px; color:var(--text-main);">Presupuestos:</div>`;
+            cats.forEach(c => { let r = Math.max(0, (Number(c.presupuestoMaximo)||0) - (Number(c.gastado)||0)); html += `<div class="breakdown-item"><span>${c.icono||'🏠'} ${c.nombre}</span> <b>${r.toFixed(2)}€</b></div>`; total += r; });
+            if(huchs.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Huchas:</div>`;
+            huchs.forEach(h => { let g = Number(h.guardado)||0; html += `<div class="breakdown-item"><span>${h.icono||'🐖'} ${h.nombre}</span> <b>${g.toFixed(2)}€</b></div>`; total += g; });
+            if(fonds.length > 0) html += `<div style="font-weight:bold; margin-top:10px; color:var(--text-main);">Fondos:</div>`;
+            fonds.forEach(f => { let g = Number(f.guardado)||0; html += `<div class="breakdown-item"><span>${f.icono||'🏦'} ${f.nombre}</span> <b>${g.toFixed(2)}€</b></div>`; total += g; });
+            if (total === 0) html = "<div style='text-align:center; padding:10px;'>No hay fondos retenidos actualmente.</div>";
+            div.innerHTML = html;
+        }
+
+        async function recargarPantalla() {
+            try {
+                const userDocPromise = getDoc(doc(db, "usuarios", uidActual));
+                const catsPromise = fetchColeccion("categorias");
+                const huchsPromise = fetchColeccion("huchas");
+                const fondsPromise = fetchColeccion("fondos_reservados");
+
+                const userDoc = await userDocPromise;
+                if (userDoc.exists()) {
+                    datosUsuario = userDoc.data();
+                    document.getElementById('ui-totales').textContent = (datosUsuario.fondosTotales || 0).toFixed(2) + " €";
+                    document.getElementById('ui-disponibles').textContent = (datosUsuario.fondosDisponibles || 0).toFixed(2) + " €";
+                    document.getElementById('ui-retenidos').textContent = (datosUsuario.fondosRetenidos || 0).toFixed(2) + " €";
+                    sincronizarDesbloqueos(datosUsuario);
+                }
+
+                const [cats, huchs, fonds] = await Promise.all([catsPromise, huchsPromise, fondsPromise]);
+                colCategorias = cats; colHuchas = huchs; colFondos = fonds;
+                
+                actualizarDistintivoFiltros(); 
+                renderizarHuchas();
+                prepararDesgloseRetenidos(cats, huchs, fonds);
+            } catch (error) { console.error("Error al cargar datos:", error); } 
+            finally { document.getElementById('global-loader').style.display = 'none'; }
+        }
+
+        let criterioOrdenActual = 'mayor'; 
+
+        window.ordenarHuchas = function(criterio) {
+            criterioOrdenActual = criterio;
+            document.getElementById('dropdown-filtros').style.display = 'none';
+            actualizarDistintivoFiltros(); renderizarHuchas();
+        };
+
+        function actualizarDistintivoFiltros() {
+            const opciones = ['mayor', 'menor', 'az', 'za', 'fecha'];
+            opciones.forEach(op => {
+                const el = document.getElementById('filt-' + op);
+                if (el) {
+                    el.style.fontWeight = 'normal'; el.style.color = 'var(--text-main)';
+                    const check = el.querySelector('.check-activo');
+                    if (check) check.remove();
+                }
+            });
+            const activoEl = document.getElementById('filt-' + criterioOrdenActual);
+            if (activoEl) {
+                activoEl.style.fontWeight = 'bold'; activoEl.style.color = 'var(--color-disponibles)';
+                if (!activoEl.querySelector('.check-activo')) {
+                    activoEl.insertAdjacentHTML('beforeend', '<span class="check-activo" style="margin-left:auto; font-weight:bold;">✓</span>');
+                }
+            }
+        }
+
+        function renderizarHuchas() {
+            const container = document.getElementById('contenedor-huchas');
+            container.innerHTML = ""; let sumaHuchas = 0; 
+
+            if(colHuchas.length === 0) { 
+                container.innerHTML = "<div style='text-align:center;color:#7F8C8D; margin-top:20px;'>No tienes ninguna hucha de ahorro. Pulsa el botón + para crearla.</div>"; 
+                document.getElementById('ui-resumen-huchas').innerHTML = `Total: 0.00€`;
+                actualizarSeleccionBorrar(); return; 
+            }
+            
+            colHuchas.sort((a, b) => {
+                let gA = Number(a.guardado) || 0; let gB = Number(b.guardado) || 0;
+                if (criterioOrdenActual === 'az') return a.nombre.localeCompare(b.nombre);
+                if (criterioOrdenActual === 'za') return b.nombre.localeCompare(a.nombre);
+                if (criterioOrdenActual === 'mayor') return gB - gA;
+                if (criterioOrdenActual === 'menor') return gA - gB;
+                if (criterioOrdenActual === 'fecha') {
+                    if (a.fechaPrevista && b.fechaPrevista) return new Date(a.fechaPrevista) - new Date(b.fechaPrevista);
+                    if (a.fechaPrevista) return -1;
+                    if (b.fechaPrevista) return 1;
+                    return gB - gA;
+                }
+                return 0;
+            });
+
+            colHuchas.forEach(huc => {
+                let guardado = Number(huc.guardado) || 0;
+                let objetivo = Number(huc.objetivo) || 0;
+                sumaHuchas += guardado;
+
+                let hasObj = objetivo > 0;
+                let pct = hasObj ? Math.min(100, Math.floor((guardado / objetivo) * 100)) : 0;
+                let colorBar = (pct < 50) ? '#E74C3C' : (pct < 80 ? '#F4D03F' : '#27AE60');
+                
+                let amountsHtml = `<span>${guardado.toFixed(2)}€</span>`;
+                if (hasObj) {
+                    amountsHtml = `<span>${guardado.toFixed(2)}€ / ${objetivo.toFixed(2)}€</span>`;
+                    if (guardado > objetivo) {
+                        amountsHtml += `<div class="text-superado">Superado en ${(guardado - objetivo).toFixed(2)}€</div>`;
+                    }
+                }
+
+                let fechaHtml = "";
+                if (huc.fechaPrevista) {
+                    let d = new Date(huc.fechaPrevista);
+                    let fd = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth()+1).padStart(2, '0') + '/' + d.getFullYear();
+                    fechaHtml = `<div class="fecha-prevista">📅 ${fd}</div>`;
+                }
+
+                let progressHtml = "";
+                let pctHtml = "";
+                if (hasObj) {
+                    pctHtml = `<div class="card-percent" style="color:${colorBar};">${pct}%</div>`;
+                    progressHtml = `
+                    <div class="card-progress-row">
+                        <div class="card-progress-bg"><div class="card-progress-fill" style="width:${pct}%; background:${colorBar};"></div></div>
+                        ${pctHtml}
+                    </div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="categoria-row">
+                        <input type="checkbox" class="categoria-checkbox" value="${huc.id}" onchange="actualizarSeleccionBorrar()">
+                        <div class="item-card">
+                            <div class="card-icon" style="background-color:${huc.color}20; color:${huc.color};">${huc.icono}</div>
+                            <div class="card-details">
+                                <div class="card-header-row">
+                                    <div class="card-title">${huc.nombre}</div>
+                                    <div class="card-action-btns">
+                                        <button class="action-mini-btn" title="Añadir dinero" onclick="abrirAddDinero('${huc.id}')">+</button>
+                                        <button class="action-mini-btn" title="Retirar a disponibles" onclick="abrirRemoveDinero('${huc.id}')">-</button>
+                                        <button class="action-mini-btn" title="Realizar gasto" onclick="abrirGastoHucha('${huc.id}')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                        </button>
+                                        <button class="action-mini-btn" title="Editar" onclick="abrirModalEditarHuc('${huc.id}')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                ${progressHtml}
+                                <div class="card-footer-row">
+                                    <div class="card-amounts">${amountsHtml}</div>
+                                    ${fechaHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('ui-resumen-huchas').innerHTML = `Total: <span style="color:var(--text-main)">${sumaHuchas.toFixed(2)}€</span>`;
+            actualizarSeleccionBorrar();
+        }
+
+        // --- BORRADO MÚLTIPLE ---
+        let idsHuchasABorrar = []; let sumaGuardadoGlobal = 0;
+
+        window.actualizarSeleccionBorrar = function() {
+            const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
+            const bar = document.getElementById('delete-bar-huc');
+            const counter = document.getElementById('delete-counter-huc');
+            if (checkboxes.length > 0) {
+                bar.style.display = 'flex';
+                counter.textContent = checkboxes.length === 1 ? '1 seleccionada' : `${checkboxes.length} seleccionadas`;
+            } else { bar.style.display = 'none'; }
+        };
+
+        window.abrirModalBorrarMulti = function() {
+            const checkboxes = document.querySelectorAll('.categoria-checkbox:checked');
+            idsHuchasABorrar = Array.from(checkboxes).map(chk => chk.value);
+            if (idsHuchasABorrar.length === 0) return;
+
+            sumaGuardadoGlobal = 0;
+            idsHuchasABorrar.forEach(id => { const h = colHuchas.find(x => x.id === id); if (h) sumaGuardadoGlobal += (h.guardado || 0); });
+
+            document.getElementById('modal-delete-huc').style.display = 'flex';
+            document.getElementById('del-huc-name').textContent = `${idsHuchasABorrar.length} hucha(s) seleccionada(s)`;
+            
+            const noD = document.getElementById('del-no-dinero'); const conD = document.getElementById('del-con-dinero');
+            if (sumaGuardadoGlobal === 0) { noD.style.display = 'block'; conD.style.display = 'none'; return; }
+            noD.style.display = 'none'; conD.style.display = 'flex';
+            document.getElementById('del-guardado-val').textContent = sumaGuardadoGlobal.toFixed(2);
+
+            const hRestantes = colHuchas.filter(h => !idsHuchasABorrar.includes(h.id));
+            const hayFondos = colFondos.length > 0; const hayHuchas = hRestantes.length > 0;
+
+            const radF = document.getElementById('radio-opt-fon'); const lblF = document.getElementById('label-opt-fon');
+            const radH = document.getElementById('radio-opt-huc'); const lblH = document.getElementById('label-opt-huc');
+            const radD = document.getElementById('radio-opt-div'); const lblD = document.getElementById('label-opt-div');
+
+            if (!hayFondos) { radF.disabled = true; radF.checked = false; lblF.style.color = '#BDC3C7'; } else { radF.disabled = false; lblF.style.color = 'var(--text-main)'; }
+            if (!hayHuchas) { radH.disabled = true; radH.checked = false; lblH.style.color = '#BDC3C7'; } else { radH.disabled = false; lblH.style.color = 'var(--text-main)'; }
+            if (!hayFondos && !hayHuchas) { radD.disabled = true; radD.checked = false; lblD.style.color = '#BDC3C7'; } else { radD.disabled = false; lblD.style.color = 'var(--text-main)'; }
+            
+            document.querySelector('input[name="destino-borrado"][value="disponibles"]').checked = true;
+
+            const formatCard = (item) => {
+                let amounts = `${(item.guardado||0).toFixed(2)}€`; if (item.objetivo) amounts += ` / ${item.objetivo.toFixed(2)}€`;
+                let fecha = "";
+                if (item.fechaPrevista) {
+                    let d = new Date(item.fechaPrevista);
+                    fecha = `<span style="font-size:10px; color:#7F8C8D; font-weight:bold;">📅 ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}/${d.getFullYear()}</span>`;
+                }
+                return `
+                    <div style="flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden;">
+                        <span style="font-size:13px; font-weight:bold; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.nombre}</span>
+                        <span style="font-size:11px; font-weight:bold; color:var(--text-main);">${amounts}</span>
+                        ${fecha}
+                    </div>
+                `;
+            };
+
+            let htmlF = ""; colFondos.forEach(f => {
+                htmlF += `
+                <label style="display:flex; align-items:center; background:#fff; padding:12px; border:1px solid #e5e7e9; border-radius:10px; cursor:pointer; gap:12px; margin-bottom:8px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
+                    <input type="radio" name="radio-fondo-destino" value="${f.id}" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--color-retenidos);">
+                    <div style="font-size:22px; flex-shrink:0; background-color:${f.color}20; color:${f.color}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">${f.icono}</div>
+                    ${formatCard(f)}
+                </label>`;
+            }); document.getElementById('lista-opc-fondo').innerHTML = htmlF;
+
+            let htmlH = ""; hRestantes.forEach(h => {
+                htmlH += `
+                <label style="display:flex; align-items:center; background:#fff; padding:12px; border:1px solid #e5e7e9; border-radius:10px; cursor:pointer; gap:12px; margin-bottom:8px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
+                    <input type="radio" name="radio-hucha-destino" value="${h.id}" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--color-retenidos);">
+                    <div style="font-size:22px; flex-shrink:0; background-color:${h.color}20; color:${h.color}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">${h.icono}</div>
+                    ${formatCard(h)}
+                </label>`;
+            }); document.getElementById('lista-opc-hucha').innerHTML = htmlH;
+
+            let rF = ""; colFondos.forEach(f => {
+                rF += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:12px; border:1px solid #e5e7e9; border-radius:10px; margin-bottom:8px; gap:10px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size:22px; flex-shrink:0; background-color:${f.color}20; color:${f.color}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">${f.icono}</div>
+                    ${formatCard(f)}
+                    <input type="number" class="input-repartir-item" data-type="fondo" data-id="${f.id}" placeholder="0.00" min="0" step="0.01" style="width:68px; padding:8px; text-align:right; flex-shrink:0; font-size:13px; border:1px solid #D5D8DC; border-radius:8px; outline:none;" oninput="calcularRestanteRepartoHuc()">
+                </div>`;
+            }); document.getElementById('repartir-lista-fondos').innerHTML = rF;
+
+            let rH = ""; hRestantes.forEach(h => {
+                rH += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:12px; border:1px solid #e5e7e9; border-radius:10px; margin-bottom:8px; gap:10px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size:22px; flex-shrink:0; background-color:${h.color}20; color:${h.color}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">${h.icono}</div>
+                    ${formatCard(h)}
+                    <input type="number" class="input-repartir-item" data-type="hucha" data-id="${h.id}" placeholder="0.00" min="0" step="0.01" style="width:68px; padding:8px; text-align:right; flex-shrink:0; font-size:13px; border:1px solid #D5D8DC; border-radius:8px; outline:none;" oninput="calcularRestanteRepartoHuc()">
+                </div>`;
+            }); document.getElementById('repartir-lista-huchas').innerHTML = rH;
+
+            document.getElementById('repartir-disp').value = "";
+            cambiarOpcionDestinoBorrado();
+        };
+
+        window.cambiarOpcionDestinoBorrado = function() {
+            const val = document.querySelector('input[name="destino-borrado"]:checked').value;
+            document.getElementById('bloque-opc-fondo').style.display = (val==='fondo') ? 'flex' : 'none';
+            document.getElementById('bloque-opc-hucha').style.display = (val==='hucha') ? 'flex' : 'none';
+            document.getElementById('bloque-opc-repartir').style.display = (val==='repartir') ? 'flex' : 'none';
+            if(val==='repartir') calcularRestanteRepartoHuc();
+        };
+
+        window.calcularRestanteRepartoHuc = function() {
+            let suma = parseFloat(document.getElementById('repartir-disp').value) || 0;
+            document.querySelectorAll('.input-repartir-item').forEach(inp => suma += (parseFloat(inp.value)||0));
+            const rest = sumaGuardadoGlobal - suma;
+            const rd = document.getElementById('repartir-restante-huc');
+            if (rd) {
+                if (Math.abs(rest) < 0.01) {
+                    rd.textContent = "Has repartido todo exactamente.";
+                    rd.style.color = 'var(--color-disponibles)';
+                } else if (rest > 0) {
+                    rd.textContent = `Faltan por repartir: ${rest.toFixed(2)}€`;
+                    rd.style.color = 'var(--text-main)';
+                } else {
+                    rd.textContent = `Has repartido ${Math.abs(rest).toFixed(2)}€ de más.`;
+                    rd.style.color = 'var(--color-retenidos)';
+                }
+            }
+        };
+
+        window.procesarEliminarMultiples = async function() {
+            const btn = document.getElementById('btn-submit-delete');
+            const err = document.getElementById('err-delete'); err.style.display = 'none';
+
+            let rDisp = 0; let reubF = []; let reubH = [];
+
+            if (sumaGuardadoGlobal > 0) {
+                const op = document.querySelector('input[name="destino-borrado"]:checked').value;
+                if (op === 'disponibles') { rDisp = sumaGuardadoGlobal; }
+                else if (op === 'fondo') { 
+                    const dstRadio = document.querySelector('input[name="radio-fondo-destino"]:checked'); 
+                    if(!dstRadio) { err.textContent="Selecciona un fondo destino de la lista."; err.style.display='block'; return; } 
+                    reubF.push({id:dstRadio.value, val:sumaGuardadoGlobal}); 
+                }
+                else if (op === 'hucha') { 
+                    const dstRadio = document.querySelector('input[name="radio-hucha-destino"]:checked'); 
+                    if(!dstRadio) { err.textContent="Selecciona una hucha destino de la lista."; err.style.display='block'; return; } 
+                    reubH.push({id:dstRadio.value, val:sumaGuardadoGlobal}); 
+                }
+                else if (op === 'repartir') {
+                    let sDisp = parseFloat(document.getElementById('repartir-disp').value) || 0; rDisp = sDisp;
+                    let sumaRep = sDisp;
+                    document.querySelectorAll('.input-repartir-item').forEach(inp => {
+                        let v = parseFloat(inp.value)||0; if(v>0) {
+                            sumaRep += v;
+                            if(inp.getAttribute('data-type')==='fondo') reubF.push({id:inp.getAttribute('data-id'), val:v});
+                            else reubH.push({id:inp.getAttribute('data-id'), val:v});
+                        }
+                    });
+                    if (Math.abs(sumaGuardadoGlobal - sumaRep) > 0.01) { err.textContent="El reparto no cuadra exactamente con el total ahorrado."; err.style.display='block'; return; }
+                }
+            }
+
+            btn.disabled = true; btn.textContent = "ELIMINANDO...";
+            try {
+                for (let id of idsHuchasABorrar) { await deleteDoc(doc(db, "usuarios", uidActual, "huchas", id)); }
+                for (let r of reubF) { const d = doc(db, "usuarios", uidActual, "fondos_reservados", r.id); const snap = await getDoc(d); if(snap.exists()) await updateDoc(d, {guardado: (snap.data().guardado||0) + r.val}); }
+                for (let r of reubH) { const d = doc(db, "usuarios", uidActual, "huchas", r.id); const snap = await getDoc(d); if(snap.exists()) await updateDoc(d, {guardado: (snap.data().guardado||0) + r.val}); }
+                
+                let nRet = Math.max(0, (datosUsuario.fondosRetenidos||0) - rDisp);
+                let nDis = (datosUsuario.fondosDisponibles||0) + rDisp;
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosRetenidos: nRet, fondosDisponibles: nDis });
+                
+                cerrarModal('modal-delete-huc'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al eliminar: " + e.message; err.style.display='block'; }
+            finally { btn.disabled = false; btn.textContent = "ELIMINAR"; }
+        };
+
+        // --- CREAR Y EDITAR HUCHA ---
+        window.crearHuchaBD = async function() {
+            const btn = document.getElementById('btn-submit-huc'); const err = document.getElementById('err-crear-huc');
+            const nom = document.getElementById('huc-nombre').value.trim();
+            const ap = parseFloat(document.getElementById('huc-aporte').value) || 0;
+            const obj = parseFloat(document.getElementById('huc-objetivo').value) || null;
+            const fec = document.getElementById('huc-fecha').value;
+
+            if(!nom) { err.textContent="Rellena el título de la hucha."; err.style.display='block'; return; }
+            if(fec) { let d=new Date(fec); let hoy=new Date(); hoy.setHours(0,0,0,0); if(d<=hoy){ err.textContent="La fecha no puede ser igual o anterior a hoy."; err.style.display='block'; return; } }
+            if(obj && obj < ap) { err.textContent="El objetivo no puede ser inferior al aporte inicial."; err.style.display='block'; return; }
+            if(ap > (datosUsuario.fondosDisponibles || 0)) { err.textContent="El aporte inicial supera tus Fondos Disponibles."; err.style.display='block'; return; }
+
+            btn.disabled=true; err.style.display='none';
+            try {
+                const nuevaHuc = { nombre: nom, guardado: ap, objetivo: obj, fechaPrevista: fec||null, icono: iconoActualSeleccionado, color: colorActualSeleccionado };
+                await addDoc(collection(db, "usuarios", uidActual, "huchas"), nuevaHuc);
+                if(ap > 0) {
+                    await updateDoc(doc(db, "usuarios", uidActual), { fondosDisponibles: (datosUsuario.fondosDisponibles - ap), fondosRetenidos: (datosUsuario.fondosRetenidos + ap) });
+                }
+                document.getElementById('huc-nombre').value=""; document.getElementById('huc-aporte').value=""; document.getElementById('huc-objetivo').value=""; document.getElementById('huc-fecha').value="";
+                cerrarModal('modal-crear-huc'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al crear."; err.style.display='block'; } finally { btn.disabled=false; }
+        };
+
+        window.abrirModalEditarHuc = function(id) {
+            const h = colHuchas.find(x => x.id === id); if(!h) return;
+            document.getElementById('edit-huc-id').value = h.id;
+            document.getElementById('edit-huc-nombre').value = h.nombre || '';
+            document.getElementById('edit-huc-objetivo').value = h.objetivo || '';
+            document.getElementById('edit-huc-fecha').value = h.fechaPrevista || '';
+            colorActualSeleccionado = h.color || "#58D68D"; iconoActualSeleccionado = h.icono || "🏠";
+            renderizarSelectoresInline('edit-huc');
+            document.getElementById('info-objetivo-actual').textContent = `Acumulado hasta ahora: ${(h.guardado||0).toFixed(2)}€ (El objetivo no puede ser inferior)`;
+            abrirModal('modal-editar-huc');
+        };
+
+        window.guardarEdicionHucha = async function() {
+            const btn = document.getElementById('btn-submit-edit-huc'); const err = document.getElementById('err-editar-huc');
+            const id = document.getElementById('edit-huc-id').value; const nom = document.getElementById('edit-huc-nombre').value.trim();
+            const obj = parseFloat(document.getElementById('edit-huc-objetivo').value) || null; const fec = document.getElementById('edit-huc-fecha').value;
+            const hOriginal = colHuchas.find(x => x.id === id); if(!hOriginal) return;
+
+            if(!nom) { err.textContent="Rellena el título de la hucha."; err.style.display='block'; return; }
+            if(fec) { let d=new Date(fec); let hoy=new Date(); hoy.setHours(0,0,0,0); if(d<=hoy){ err.textContent="La fecha no puede ser igual o anterior a hoy."; err.style.display='block'; return; } }
+            if(obj && obj < (hOriginal.guardado||0) && obj !== (hOriginal.objetivo||null)) { err.textContent=`El nuevo objetivo no puede ser inferior al dinero ahorrado (${(hOriginal.guardado||0).toFixed(2)}€).`; err.style.display='block'; return; }
+
+            btn.disabled=true; err.style.display='none';
+            try {
+                await updateDoc(doc(db, "usuarios", uidActual, "huchas", id), { nombre: nom, objetivo: obj, fechaPrevista: fec||null, icono: iconoActualSeleccionado, color: colorActualSeleccionado });
+                cerrarModal('modal-editar-huc'); await recargarPantalla();
+            } catch(e) { err.textContent="Error al guardar."; err.style.display='block'; } finally { btn.disabled=false; }
+        };
+
+        // --- AÑADIR, RETIRAR Y GASTAR DINERO ---
+        window.abrirAddDinero = function(id) {
+            huchaSeleccionada = colHuchas.find(x => x.id === id);
+            document.getElementById('info-add-huc').textContent = `Ahorrar en: ${huchaSeleccionada.nombre}`;
+            document.getElementById('add-importe').value="";
+            abrirModal('modal-add-dinero');
+        };
+
+        window.procesarAñadirDinero = async function() {
+            const btn = document.getElementById('btn-submit-add'); const err = document.getElementById('err-add-dinero');
+            const imp = parseFloat(document.getElementById('add-importe').value);
+            if(isNaN(imp) || imp<=0) { err.textContent="Rellena un importe válido."; err.style.display='block'; return; }
+            if(imp > (datosUsuario.fondosDisponibles||0)) {
+                document.getElementById('alert-msg').innerHTML=`No tienes suficientes <b>Fondos Disponibles</b>.<br><br>Te faltan ${(imp - datosUsuario.fondosDisponibles).toFixed(2)}€ libres.`;
+                cerrarModal('modal-add-dinero'); abrirModal('modal-alert-error'); return;
+            }
+
+            btn.disabled=true; err.style.display='none';
+            try {
+                let nuevoGuardado = (huchaSeleccionada.guardado||0) + imp;
+                await updateDoc(doc(db, "usuarios", uidActual, "huchas", huchaSeleccionada.id), { guardado: nuevoGuardado });
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "hucha", huchaId: huchaSeleccionada.id, concepto: `Aportación a ${huchaSeleccionada.nombre}`, importe: imp, fecha: new Date().toISOString() });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosDisponibles: datosUsuario.fondosDisponibles - imp, fondosRetenidos: datosUsuario.fondosRetenidos + imp });
+                
+                cerrarModal('modal-add-dinero'); await recargarPantalla();
+                if(huchaSeleccionada.objetivo && nuevoGuardado >= huchaSeleccionada.objetivo && (huchaSeleccionada.guardado||0) < huchaSeleccionada.objetivo) {
+                    abrirModal('modal-objetivo-logrado');
+                }
+            } catch(e) { err.textContent="Error."; err.style.display='block'; } finally { btn.disabled=false; }
+        };
+
+        window.abrirRemoveDinero = function(id) {
+            huchaSeleccionada = colHuchas.find(x => x.id === id);
+            document.getElementById('info-remove-huc').textContent = `Hucha: ${huchaSeleccionada.nombre} (Ahorrado: ${(huchaSeleccionada.guardado||0).toFixed(2)}€)`;
+            document.getElementById('remove-concepto').value=""; document.getElementById('remove-importe').value="";
+            abrirModal('modal-remove-dinero');
+        };
+
+        window.procesarRetirarDinero = async function() {
+            const btn = document.getElementById('btn-submit-remove'); const err = document.getElementById('err-remove-dinero');
+            const con = document.getElementById('remove-concepto').value.trim(); const imp = parseFloat(document.getElementById('remove-importe').value);
+            if(!con || isNaN(imp) || imp<=0) { err.textContent="Rellena concepto e importe válido."; err.style.display='block'; return; }
+            if(imp > (huchaSeleccionada.guardado||0)) {
+                document.getElementById('alert-msg').innerHTML=`No puedes retirar más de lo que hay en la hucha (${(huchaSeleccionada.guardado||0).toFixed(2)}€).`;
+                cerrarModal('modal-remove-dinero'); abrirModal('modal-alert-error'); return;
+            }
+
+            btn.disabled=true; err.style.display='none';
+            try {
+                await updateDoc(doc(db, "usuarios", uidActual, "huchas", huchaSeleccionada.id), { guardado: (huchaSeleccionada.guardado||0) - imp });
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "ingreso", subtipo: "devolución_hucha", huchaId: huchaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosDisponibles: datosUsuario.fondosDisponibles + imp, fondosRetenidos: datosUsuario.fondosRetenidos - imp });
+                cerrarModal('modal-remove-dinero'); await recargarPantalla();
+            } catch(e) { err.textContent="Error."; err.style.display='block'; } finally { btn.disabled=false; }
+        };
+
+        window.abrirGastoHucha = function(id) {
+            huchaSeleccionada = colHuchas.find(x => x.id === id);
+            document.getElementById('gasto-concepto').value=""; document.getElementById('gasto-importe').value="";
+            abrirModal('modal-gasto-hucha');
+        };
+
+        window.procesarGastoHucha = async function() {
+            const btn = document.getElementById('btn-submit-gasto'); const err = document.getElementById('err-gasto');
+            const con = document.getElementById('gasto-concepto').value.trim(); const imp = parseFloat(document.getElementById('gasto-importe').value);
+            if(!con || isNaN(imp) || imp<=0) { err.textContent="Rellena concepto e importe válido."; err.style.display='block'; return; }
+            if(imp > (huchaSeleccionada.guardado||0)) {
+                document.getElementById('alert-msg').innerHTML=`No puedes gastar más de lo que hay acumulado en la hucha (${(huchaSeleccionada.guardado||0).toFixed(2)}€).`;
+                cerrarModal('modal-gasto-hucha'); abrirModal('modal-alert-error'); return;
+            }
+
+            btn.disabled=true; err.style.display='none';
+            try {
+                await updateDoc(doc(db, "usuarios", uidActual, "huchas", huchaSeleccionada.id), { guardado: (huchaSeleccionada.guardado||0) - imp });
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "gasto", subtipo: "hucha_gasto_real", huchaId: huchaSeleccionada.id, concepto: con, importe: imp, fecha: new Date().toISOString() });
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosTotales: datosUsuario.fondosTotales - imp, fondosRetenidos: datosUsuario.fondosRetenidos - imp });
+                cerrarModal('modal-gasto-hucha'); await recargarPantalla();
+            } catch(e) { err.textContent="Error."; err.style.display='block'; } finally { btn.disabled=false; }
+        };
+
+        // --- SISTEMA DE CATÁLOGO Y SINCRONIZACIÓN ---
+        let prefijoFormularioActual = "huc"; 
+        let colorActualSeleccionado = "#58D68D"; let iconoActualSeleccionado = "🏠";
+
+        const CATALOGO_COLORES = {
+            Básicos: [ { id: "verde", hex: "#58D68D", desbloqueado: true }, { id: "azul", hex: "#5DADE2", desbloqueado: true }, { id: "amarillo", hex: "#F4D03F", desbloqueado: true }, { id: "rojo", hex: "#E74C3C", desbloqueado: true }, { id: "naranja", hex: "#EB984E", desbloqueado: true } ],
+            Otros: [ { id: "gris", hex: "#7F8C8D", desbloqueado: false }, { id: "granate", hex: "#800020", desbloqueado: false }, { id: "coral", hex: "#FF6F61", desbloqueado: false }, { id: "frambuesa", hex: "#C71585", desbloqueado: false }, { id: "dorado", hex: "#D4AC0D", desbloqueado: false }, { id: "melon", hex: "#FFB347", desbloqueado: false }, { id: "calabaza", hex: "#D35400", desbloqueado: false }, { id: "oro", hex: "#FFD700", desbloqueado: false }, { id: "limon", hex: "#CCFF00", desbloqueado: false }, { id: "crema", hex: "#FFFDD0", desbloqueado: false }, { id: "esmeralda", hex: "#2ECC71", desbloqueado: false }, { id: "verde_botella", hex: "#006600", desbloqueado: false }, { id: "oliva", hex: "#808000", desbloqueado: false }, { id: "menta", hex: "#AAF0D1", desbloqueado: false }, { id: "turquesa", hex: "#40E0D0", desbloqueado: false }, { id: "pistacho", hex: "#93C572", desbloqueado: false }, { id: "azul_marino", hex: "#000080", desbloqueado: false }, { id: "celeste", hex: "#B0E0E6", desbloqueado: false }, { id: "violeta", hex: "#8A2BE2", desbloqueado: false }, { id: "purpura", hex: "#6A0DAD", desbloqueado: false }, { id: "morado", hex: "#4B0082", desbloqueado: false }, { id: "lila", hex: "#C8A2C8", desbloqueado: false }, { id: "rosa", hex: "#FFC0CB", desbloqueado: false }, { id: "magenta", hex: "#FF00FF", desbloqueado: false }, { id: "fucsia", hex: "#FF00FF", desbloqueado: false }, { id: "salmon", hex: "#FA8072", desbloqueado: false }, { id: "marron", hex: "#8B4513", desbloqueado: false }, { id: "beige", hex: "#F5F5DC", desbloqueado: false }, { id: "cafe", hex: "#6F4E37", desbloqueado: false }, { id: "chocolate", hex: "#D2691E", desbloqueado: false }, { id: "caoba", hex: "#C04000", desbloqueado: false } ]
+        };
+
+        const CATALOGO_ICONOS = {
+            Básicos: [ { emoji: "🏠", desbloqueado: true }, { emoji: "🚗", desbloqueado: true }, { emoji: "🛒", desbloqueado: true }, { emoji: "💼", desbloqueado: true }, { emoji: "🧳", desbloqueado: true } ],
+            Comunes: [ { emoji: "🐶", desbloqueado: false }, { emoji: "🐱", desbloqueado: false }, { emoji: "🌸", desbloqueado: false }, { emoji: "☀️", desbloqueado: false }, { emoji: "⭐", desbloqueado: false }, { emoji: "🍼", desbloqueado: false }, { emoji: "⚽", desbloqueado: false }, { emoji: "💅", desbloqueado: false }, { emoji: "✂️", desbloqueado: false }, { emoji: "👄", desbloqueado: false }, { emoji: "⏰", desbloqueado: false }, { emoji: "💧", desbloqueado: false }, { emoji: "💡", desbloqueado: false }, { emoji: "🔒", desbloqueado: false }, { emoji: "🔑", desbloqueado: false }, { emoji: "⛺", desbloqueado: false }, { emoji: "🪵", desbloqueado: false }, { emoji: "🪑", desbloqueado: false }, { emoji: "👕", desbloqueado: false }, { emoji: "👖", desbloqueado: false }, { emoji: "🐚", desbloqueado: false }, { emoji: "📦", desbloqueado: false }, { emoji: "🎲", desbloqueado: false } ],
+            Raros: [ { emoji: "🐰", desbloqueado: false }, { emoji: "🐎", desbloqueado: false }, { emoji: "🎂", desbloqueado: false }, { emoji: "🍔", desbloqueado: false }, { emoji: "🥳", desbloqueado: false }, { emoji: "📞", desbloqueado: false }, { emoji: "❤️", desbloqueado: false }, { emoji: "💊", desbloqueado: false }, { emoji: "✉️", desbloqueado: false }, { emoji: "📌", desbloqueado: false }, { emoji: "👁️", desbloqueado: false }, { emoji: "📢", desbloqueado: false }, { emoji: "📺", desbloqueado: false }, { emoji: "🛏️", desbloqueado: false }, { emoji: "🧥", desbloqueado: false }, { emoji: "👟", desbloqueado: false }, { emoji: "👠", desbloqueado: false }, { emoji: "🎤", desbloqueado: false }, { emoji: "🎨", desbloqueado: false }, { emoji: "🍿", desbloqueado: false }, { emoji: "🎳", desbloqueado: false }, { emoji: "🎸", desbloqueado: false } ],
+            Épicos: [ { emoji: "🏆", desbloqueado: false }, { emoji: "🎮", desbloqueado: false }, { emoji: "🎹", desbloqueado: false }, { emoji: "🚲", desbloqueado: false }, { emoji: "🚆", desbloqueado: false }, { emoji: "💻", desbloqueado: false }, { emoji: "💍", desbloqueado: false }, { emoji: "📅", desbloqueado: false }, { emoji: "📖", desbloqueado: false }, { emoji: "📍", desbloqueado: false }, { emoji: "📶", desbloqueado: false }, { emoji: "🎵", desbloqueado: false }, { emoji: "👓", desbloqueado: false }, { emoji: "🦷", desbloqueado: false }, { emoji: "🧾", desbloqueado: false } ],
+            Legendarios: [ { emoji: "✈️", desbloqueado: false }, { emoji: "🍷", desbloqueado: false }, { emoji: "🚢", desbloqueado: false }, { emoji: "🏖️", desbloqueado: false }, { emoji: "🎓", desbloqueado: false }, { emoji: "⚖️", desbloqueado: false }, { emoji: "🎬", desbloqueado: false }, { emoji: "🏋️", desbloqueado: false }, { emoji: "🎧", desbloqueado: false }, { emoji: "📻", desbloqueado: false }, { emoji: "🌊", desbloqueado: false }, { emoji: "🚀", desbloqueado: false } ]
+        };
+
+        window.sincronizarDesbloqueos = function(datos) {
+            const mI = datos.iconosDesbloqueados || ["🏠", "🚗", "🛒", "💼", "🧳"];
+            const mC = datos.coloresDesbloqueados || ["#58D68D", "#5DADE2", "#F4D03F", "#E74C3C", "#EB984E", "#7F8C8D"];
+            Object.keys(CATALOGO_ICONOS).forEach(c => CATALOGO_ICONOS[c].forEach(i => i.desbloqueado = mI.includes(i.emoji)));
+            Object.keys(CATALOGO_COLORES).forEach(c => CATALOGO_COLORES[c].forEach(i => i.desbloqueado = mC.includes(i.hex)));
+        };
+
+        window.abrirModalCatalogo = function(tipo) { renderizarAcordeon(tipo, tipo === 'iconos' ? CATALOGO_ICONOS : CATALOGO_COLORES, tipo === 'iconos' ? iconoActualSeleccionado : colorActualSeleccionado); abrirModal(`modal-selector-${tipo}`); };
+        
+        window.toggleAcordeon = function(id) {
+            const c = document.getElementById(id); const f = document.getElementById(id + '-flecha');
+            if (c.style.display === 'none' || !c.style.display) { c.style.display = 'block'; f.textContent = '▲'; } 
+            else { c.style.display = 'none'; f.textContent = '▼'; }
+        };
+
+        function renderizarAcordeon(tipo, catalogo, selAct) {
+            let html = "";
+            Object.keys(catalogo).forEach((cat, idx) => {
+                let opn = idx === 0 ? 'open' : ''; let flc = idx === 0 ? '▲' : '▼';
+                html += `<div class="acordeon-header" onclick="toggleAcordeon('${tipo}-${cat}')"><span>${cat}</span> <span id="${tipo}-${cat}-flecha">${flc}</span></div>
+                         <div class="acordeon-content ${opn}" id="${tipo}-${cat}"><div class="modal-grid-container">`;
+                catalogo[cat].forEach(i => {
+                    let isL = !i.desbloqueado; let isS = (tipo === 'iconos' ? i.emoji===selAct : i.hex===selAct);
+                    let vItem = tipo === 'iconos' ? i.emoji : i.hex;
+                    if (tipo === 'iconos') {
+                        let okA = isL ? `mostrarAlertaBloqueado('¡Sigue avanzando para conseguir este icono!')` : `seleccionarValorGlobal('iconos', '${vItem}')`;
+                        html += `<div class="modal-opt-item ${isL?'locked':''} ${isS?'selected':''}" data-val="${vItem}" onclick="${okA}">${i.emoji}</div>`;
+                    } else {
+                        let okA = isL ? `mostrarAlertaBloqueado('¡Completa logros para desbloquear este color!')` : `seleccionarValorGlobal('colores', '${vItem}')`;
+                        html += `<div class="modal-opt-item color-item ${isL?'locked':''} ${isS?'selected':''}" data-val="${vItem}" style="background:${i.hex};" onclick="${okA}"></div>`;
+                    }
+                }); html += `</div></div>`;
+            }); document.getElementById(`contenedor-lista-${tipo}`).innerHTML = html;
+        }
+
+        window.mostrarAlertaBloqueado = function(msg) { document.getElementById('bloqueado-msg').textContent = msg; abrirModal('modal-alerta-bloqueado'); };
+
+        window.seleccionarValorGlobal = function(tipo, val) {
+            if (tipo === 'iconos') iconoActualSeleccionado = val; else colorActualSeleccionado = val;
+            renderizarSelectoresInline(prefijoFormularioActual);
+            const m = document.getElementById(`modal-selector-${tipo}`);
+            if (m) m.querySelectorAll('.modal-opt-item').forEach(el => { el.classList.remove('selected'); if(el.getAttribute('data-val')===val) el.classList.add('selected'); });
+        };
+
+        window.renderizarSelectoresInline = function(pref) {
+            prefijoFormularioActual = pref;
+            let htmlI = ''; CATALOGO_ICONOS.Básicos.forEach(i => { htmlI += `<div class="inline-opt-btn ${i.emoji===iconoActualSeleccionado?'selected':''}" onclick="seleccionarValorGlobal('iconos', '${i.emoji}')">${i.emoji}</div>`; });
+            if (!CATALOGO_ICONOS.Básicos.some(b => b.emoji === iconoActualSeleccionado)) htmlI += `<div class="inline-opt-btn selected">${iconoActualSeleccionado}</div>`;
+            htmlI += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('iconos')">+</div>`;
+            document.getElementById(`${pref}-iconos-inline`).innerHTML = htmlI;
+
+            let htmlC = ''; CATALOGO_COLORES.Básicos.forEach(c => { htmlC += `<div class="inline-opt-btn color-btn ${c.hex===colorActualSeleccionado?'selected':''}" style="background:${c.hex};" onclick="seleccionarValorGlobal('colores', '${c.hex}')"></div>`; });
+            if (!CATALOGO_COLORES.Básicos.some(b => b.hex === colorActualSeleccionado)) htmlC += `<div class="inline-opt-btn color-btn selected" style="background:${colorActualSeleccionado};"></div>`;
+            htmlC += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('colores')">+</div>`;
+            document.getElementById(`${pref}-colores-inline`).innerHTML = htmlC;
+        };
+    </script>
+</body>
+</html>
