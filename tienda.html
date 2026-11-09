@@ -198,7 +198,7 @@
                     <circle cx="12" cy="12" r="2"></circle>
                 </svg>
             </button>
-            <button class="icon-btn" style="color: var(--text-main); display: flex; align-items: center;" onclick="abrirModal('modal-libro')" title="Libro de colección">
+            <button class="icon-btn" style="color: var(--text-main); display: flex; align-items: center;" onclick="abrirLibro()" title="Libro de colección">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -623,13 +623,13 @@
             gachaResults = [];
             // 1. Calidad de la caja
             let r = Math.random();
-            let rarezaStr = "Comunes", color = "#3498DB", minMon=10, maxMon=15, probCup = 0.10;
+            let rarezaCat = "Comunes", textCalidad = "COMÚN", color = "#3498DB", minMon=10, maxMon=15, probCup = 0.10;
             
-            if(r > 0.60 && r <= 0.85) { rarezaStr = "Raros"; color = "#27AE60"; minMon=16; maxMon=20; probCup = 0.20; }
-            else if(r > 0.85 && r <= 0.95) { rarezaStr = "Épicos"; color = "#E74C3C"; minMon=21; maxMon=30; probCup = 0.35; }
-            else if(r > 0.95) { rarezaStr = "Legendarios"; color = "#F1C40F"; minMon=31; maxMon=40; probCup = 0.50; }
+            if(r > 0.60 && r <= 0.85) { rarezaCat = "Raros"; textCalidad = "RARA"; color = "#27AE60"; minMon=16; maxMon=20; probCup = 0.20; }
+            else if(r > 0.85 && r <= 0.95) { rarezaCat = "Épicos"; textCalidad = "ÉPICA"; color = "#E74C3C"; minMon=21; maxMon=30; probCup = 0.35; }
+            else if(r > 0.95) { rarezaCat = "Legendarios"; textCalidad = "LEGENDARIA"; color = "#F1C40F"; minMon=31; maxMon=40; probCup = 0.50; }
             
-            gachaResults.push({ type: 'quality', color: color, text: rarezaStr.replace('s','').toUpperCase() });
+            gachaResults.push({ type: 'quality', color: color, text: textCalidad });
 
             // 2. Helpers para Iconos y Colores
             const getIconoFromGacha = (startRarity) => {
@@ -666,7 +666,7 @@
                 let rand = Math.random();
                 if (rand < p.mon) { gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) }); }
                 else if (rand < p.icn) {
-                    let ic = getIconoFromGacha(rarezaStr);
+                    let ic = getIconoFromGacha(rarezaCat);
                     if(ic) gachaResults.push({ type: 'icono', val: ic });
                     else gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) });
                 } else {
@@ -689,14 +689,21 @@
             }
         }
 
+        window.abrirLibro = function() {
+            // Quitamos la exclamación justo al tocar el botón
+            document.getElementById('badge-libro').style.display = 'none';
+            localStorage.setItem('showLibroBadge', 'false');
+            abrirModal('modal-libro');
+        };
+
         async function progresarGacha() {
             const box = document.getElementById('gacha-box'); const item = document.getElementById('gacha-item');
             const txt = document.getElementById('gacha-text'); const glow = document.getElementById('gacha-glow');
             
             gachaState++;
             
-            // Si el estado actual coincide con la longitud de los resultados, toca mostrar el resumen
-            if (gachaState === gachaResults.length) {
+            // Si el estado actual es IGUAL a la cantidad de premios + 1 (AQUÍ ESTABA EL ERROR)
+            if (gachaState === gachaResults.length + 1) {
                 item.style.display = 'none'; txt.style.display = 'none'; glow.style.display = 'none';
                 document.getElementById('gacha-summary').style.display = 'flex';
                 
@@ -723,8 +730,8 @@
                     if(nIcos.length > 0 || nCols.length > 0 || nCup) localStorage.setItem('showLibroBadge', 'true');
                 }
             } 
-            // Si el estado es mayor a la longitud, cerramos y recargamos
-            else if (gachaState > gachaResults.length) {
+            // Si el estado es mayor a los premios, cerramos y recargamos
+            else if (gachaState > gachaResults.length + 1) {
                 document.getElementById('gacha-overlay').onclick = null;
                 window.location.reload(); 
             } 
@@ -745,7 +752,7 @@
                 else { item.textContent = ''; item.style.background = it.val; item.style.width='80px'; item.style.height='80px'; item.style.borderRadius='50%'; item.style.margin = "0 auto"; txt.textContent = "¡Nuevo Color!"; }
             }
         }
-
+        
         // --- COMPRAR MONEDAS (DIVISA) ---
         let buyPacks = 1;
         window.cambiarPaquetes = function(val) {
