@@ -397,18 +397,22 @@
 
     <!-- MODAL FELICITACIÓN MONEDAS -->
     <div class="modal-overlay" id="modal-felicitacion-monedas" style="z-index: 25000;">
-        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center;">
-            <div style="font-size: 50px; margin-bottom: 5px;">🪙</div>
-            <h3 class="modal-title" style="color: #F1C40F;">¡Felicidades!</h3>
-            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold;">
-                Has conseguido <span id="feli-monedas-ganadas" style="color:#F1C40F; font-size:18px;"></span> monedas de BudgetFlow por tu ingreso.
+        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center; max-width: 320px;">
+            <div style="font-size: 55px; margin-bottom: 5px; filter: drop-shadow(0px 4px 6px rgba(241, 196, 15, 0.4));">🪙</div>
+            <h3 class="modal-title" style="color: #F1C40F; font-size: 22px;">¡Felicidades!</h3>
+            
+            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold; line-height: 1.4;">
+                Has conseguido <span id="feli-monedas-ganadas" style="color:#F1C40F; font-size:18px;"></span> monedas de BudgetFlow por tu ingreso de <span id="feli-ingreso-importe" style="color:var(--color-disponibles); font-size:16px;"></span>€.
             </p>
+            
             <p style="color:#7F8C8D; font-size:13px; margin-bottom:0;">¡Úsalas para comprar en la tienda!</p>
-            <div style="background:#F4F6F9; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; font-size:14px;">
-                Total acumulado: 🪙 <span id="feli-monedas-total"></span>
+            
+            <div style="background:#F4F6F9; padding:12px; border-radius:10px; margin-top:15px; font-weight:bold; font-size:14px; border: 1px solid #E5E7E9;">
+                Total acumulado: <span style="color:#F1C40F; font-size:16px;">🪙 <span id="feli-monedas-total"></span></span>
             </div>
-            <div class="btn-row">
-                <button class="btn-confirm" style="background:#F1C40F; color:var(--text-main);" onclick="cerrarModal('modal-felicitacion-monedas')">¡Genial!</button>
+            
+            <div style="margin-top: 20px;">
+                <button style="width: 100%; background: linear-gradient(135deg, #F1C40F, #F39C12); color: white; border: none; padding: 15px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4); text-transform: uppercase;" onclick="cerrarModal('modal-felicitacion-monedas')">¡Genial!</button>
             </div>
         </div>
     </div>
@@ -580,6 +584,7 @@
                 // 6. Lanzar felicitación si ha ganado monedas
                 if (monedasGanadas > 0) {
                     document.getElementById('feli-monedas-ganadas').textContent = monedasGanadas;
+                    document.getElementById('feli-ingreso-importe').textContent = importeNeto.toFixed(2);
                     document.getElementById('feli-monedas-total').textContent = nuevasMonedas;
                     abrirModal('modal-felicitacion-monedas');
                 }
