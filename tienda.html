@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Tienda</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9; --text-main: #2C3E50;
+            --color-monedas: #F1C40F; --color-gemas: #9B59B6;
+            --color-disponibles: #27AE60; --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF; --nav-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        button, a, .action-btn, .fab-btn, .action-mini-btn, .acordeon-header { -webkit-tap-highlight-color: transparent; outline: none; }
+
+        /* LOADER GLOBAL */
+        #global-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* HEADER FIJO SUPERIOR */
+        .top-header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--bg-color); z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; box-sizing: border-box;
+        }
+        .menu-btn { font-size: 28px; cursor: pointer; border: none; background: none; color: var(--text-main); padding: 0; }
+        .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
+        .header-logo img { width: 40px; height: auto; }
+        
+        .header-right-btns { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { font-size: 24px; cursor: pointer; background: none; border: none; padding: 0; position: relative; }
+        .badge-alert { position: absolute; top: -5px; right: -5px; background: var(--color-retenidos); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; display: none; }
+
+        /* MENÚ LATERAL (SIDEBAR) */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .sidebar {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+            background-color: var(--card-bg); z-index: 1000; transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column;
+        }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #E5E7E9; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
+        .sidebar-header img { width: 40px; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
+        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
+
+        /* ZONA FIJA SUPERIOR */
+        .fixed-top-section {
+            position: fixed; top: 60px; left: 0; width: 100%; height: 120px;
+            background-color: var(--bg-color); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            padding: 10px 15px; box-sizing: border-box;
+        }
+        .economy-panel {
+            background-color: var(--card-bg); border-radius: 16px; padding: 15px 20px; width: 100%; max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-around; text-align: center; box-sizing: border-box; border: 1px solid #e5e7e9;
+        }
+        .eco-block { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center; font-size: 18px; font-weight: bold; }
+
+        /* CONTENEDOR CON SCROLL */
+        .page-content {
+            position: fixed; top: 180px; bottom: 70px; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px;
+            overflow-y: auto; padding: 0 15px 80px 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .section-title { font-size: 15px; font-weight: bold; color: var(--text-main); text-transform: uppercase; margin: 0; letter-spacing: 0.5px; border-bottom: 2px solid #E5E7E9; padding-bottom: 5px; }
+
+        /* OFERTAS DIARIAS (GRID 3x2) */
+        .offers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .offer-card { background: var(--card-bg); border: 1px solid #E5E7E9; border-radius: 12px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); position: relative; }
+        .offer-card.disabled { opacity: 0.6; filter: grayscale(100%); pointer-events: none; }
+        .offer-title { font-size: 11px; font-weight: bold; color: #7F8C8D; height: 26px; display: flex; align-items: center; justify-content: center; }
+        .offer-icon-box { font-size: 32px; height: 50px; display: flex; align-items: center; justify-content: center; width: 50px; border-radius: 50%; background: #F4F6F9; margin-bottom: 5px; }
+        .offer-price { font-size: 12px; font-weight: bold; color: var(--text-main); margin-top: auto; display: flex; align-items: center; gap: 4px; }
+        .offer-old-price { text-decoration: line-through; color: #BDC3C7; font-size: 10px; }
+        .btn-buy { background: var(--text-main); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-buy:active { transform: scale(0.95); }
+
+        /* TABS CATÁLOGO */
+        .tabs-wrapper { display: flex; gap: 10px; margin-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; background: #E5E7E9; border-radius: 8px; font-weight: bold; font-size: 13px; color: #7F8C8D; cursor: pointer; border: none; }
+        .tab-btn.active { background: var(--text-main); color: white; }
+
+        /* GRID CATÁLOGO */
+        .catalog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .cat-item { background: var(--card-bg); border: 2px solid #E5E7E9; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; position: relative; }
+        .cat-item.selected { border-color: var(--text-main); background: #F8F9F9; transform: scale(1.03); }
+        .cat-item.selected::after { content: '✓'; position: absolute; top: -5px; right: -5px; background: var(--text-main); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        .cat-rarity-comun { color: #3498DB; }
+        .cat-rarity-raro { color: #27AE60; }
+        .cat-rarity-epico { color: #E74C3C; }
+        .cat-rarity-legend { color: #F1C40F; }
+
+        /* CARRITO FLOTANTE */
+        .cart-bar { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 460px; background: var(--text-main); color: white; padding: 12px 20px; border-radius: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 95; font-size: 14px; font-weight: bold; box-sizing: border-box; cursor: pointer; transition: 0.3s; opacity: 0; pointer-events: none; }
+        .cart-bar.visible { opacity: 1; pointer-events: auto; }
+        .cart-total { display: flex; align-items: center; gap: 5px; }
+
+        /* BARRA INFERIOR FIJA */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
+
+        /* MODALES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background-color: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-sizing: border-box; text-align: left; display: flex; flex-direction: column; gap: 15px; }
+        .modal-title { font-size: 18px; font-weight: bold; margin: 0; text-align: center; }
+        .field-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        label { font-size: 13px; font-weight: bold; color: var(--text-main); }
+        input, select { padding: 15px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 15px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
+        .btn-confirm { flex: 1; padding: 15px; border: none; background: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-confirm:disabled { background: #BDC3C7; cursor: not-allowed; }
+
+        /* FACTURA / CARRITO */
+        .invoice-list { display: flex; flex-direction: column; gap: 8px; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #E5E7E9; font-size: 13px; }
+        .invoice-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #D5D8DC; padding-bottom: 4px; }
+        .invoice-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .invoice-total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; margin-top: 10px; border-top: 2px solid #D5D8DC; padding-top: 10px; }
+
+        /* GACHA ANIMATION */
+        .gacha-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 20000; color: white; text-align: center; flex-direction: column; }
+        .gacha-box { font-size: 100px; cursor: pointer; transition: 0.3s; }
+        .gacha-box:active { transform: scale(0.9); }
+        .gacha-glow { position: absolute; width: 200px; height: 200px; border-radius: 50%; filter: blur(50px); z-index: -1; display: none; }
+        .gacha-item-reveal { font-size: 80px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: none; }
+        .gacha-text { font-size: 20px; font-weight: bold; margin-top: 20px; display: none; }
+        .gacha-summary { display: none; flex-direction: column; align-items: center; gap: 15px; animation: fadeIn 0.5s; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+        /* LIBRO MODAL */
+        .libro-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 300px; overflow-y: auto; padding: 10px 5px; }
+        .libro-item { width: 45px; height: 45px; border-radius: 10px; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #fff; }
+        .libro-item.locked { filter: grayscale(100%); opacity: 0.3; background: #f4f4f4; }
+        .coupon-list { display: flex; flex-direction: column; gap: 10px; }
+        .coupon-card { display: flex; justify-content: space-between; align-items: center; background: #F9F9F9; border: 1px solid #E5E7E9; border-left: 4px solid var(--color-disponibles); padding: 12px; border-radius: 8px; }
+        .coupon-card.used { border-left-color: #BDC3C7; opacity: 0.6; }
+        .btn-copy { background: #E5E7E9; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader"><div class="spinner"></div></div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="tienda.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span> Tienda de la app</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span> Centro de ayuda</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Cerrar sesión</a></li>
+        </ul>
+    </aside>
+
+    <header class="top-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> <span style="color:#000; font-size: 18px;">Tienda</span></div>
+        </div>
+        <div class="header-right-btns">
+            <button class="icon-btn" onclick="window.location.href='misiones.html'">🎯</button>
+            <button class="icon-btn" onclick="abrirModal('modal-libro')">
+                📖<div class="badge-alert" id="badge-libro">!</div>
+            </button>
+        </div>
+    </header>
+
+    <div class="fixed-top-section">
+        <div class="economy-panel">
+            <div class="eco-block" style="color: var(--color-monedas);">🪙 <span id="ui-monedas">0</span></div>
+            <div style="width: 1px; background: #E5E7E9; height: 30px;"></div>
+            <div class="eco-block" style="color: var(--color-gemas);">💎 <span id="ui-gemas">0</span></div>
+        </div>
+    </div>
+
+    <main class="page-content">
+        <div class="section-title">OFERTAS DIARIAS</div>
+        <div class="offers-grid" id="grid-ofertas">
+            <!-- Rellenado por JS -->
+        </div>
+
+        <div class="section-title" style="margin-top: 10px;">CATÁLOGO</div>
+        <div class="tabs-wrapper">
+            <button class="tab-btn active" id="tab-iconos" onclick="switchCatalog('iconos')">Iconos</button>
+            <button class="tab-btn" id="tab-colores" onclick="switchCatalog('colores')">Colores</button>
+        </div>
+        <div class="catalog-grid" id="grid-catalogo">
+            <!-- Rellenado por JS -->
+        </div>
+    </main>
+
+    <!-- CARRITO FLOTANTE -->
+    <div class="cart-bar" id="cart-bar" onclick="abrirCarrito()">
+        <div class="cart-total">
+            <span style="background: white; color: var(--text-main); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px;" id="cart-count">0</span>
+            <span>Ver carrito</span>
+        </div>
+        <div style="color: var(--color-monedas); font-size: 16px;">🪙 <span id="cart-price">0</span></div>
+    </div>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <a href="huchas.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path></svg></span>Fondos</a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>Presupuestos</a>
+        <a href="tienda.html" class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span>Tienda</a>
+    </nav>
+
+    <!-- MODAL LIBRO (INVENTARIO) -->
+    <div class="modal-overlay" id="modal-libro">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3 class="modal-title">Mi Libro de Colección</h3>
+            <div class="tabs-wrapper" style="margin-bottom:0;">
+                <button class="tab-btn active" id="tab-lib-iconos" onclick="switchLibroTab('iconos')">Iconos</button>
+                <button class="tab-btn" id="tab-lib-colores" onclick="switchLibroTab('colores')">Colores</button>
+                <button class="tab-btn" id="tab-lib-cupones" onclick="switchLibroTab('cupones')">Cupones</button>
+            </div>
+            
+            <div id="libro-iconos" class="libro-grid"></div>
+            <div id="libro-colores" class="libro-grid" style="display:none;"></div>
+            <div id="libro-cupones" class="coupon-list" style="display:none; padding:10px 5px; max-height:300px; overflow-y:auto;"></div>
+
+            <div class="btn-row"><button class="btn-cancel" onclick="cerrarModal('modal-libro')">Cerrar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL CARRITO / FACTURA -->
+    <div class="modal-overlay" id="modal-carrito">
+        <div class="modal-content">
+            <h3 class="modal-title">Finalizar Compra</h3>
+            <div class="invoice-list" id="invoice-items"></div>
+            
+            <div class="field-wrapper" style="margin-top: 15px;">
+                <label>Código de Descuento</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="input-cupon" placeholder="PROM..." style="flex:1; text-transform:uppercase;">
+                    <button class="btn-confirm" style="flex:0; padding:15px;" onclick="aplicarCupon()">Aplicar</button>
+                </div>
+                <p id="msg-cupon" style="font-size:12px; font-weight:bold; margin:0; display:none;"></p>
+            </div>
+
+            <div class="invoice-total-row">
+                <span>Total a pagar:</span>
+                <span style="color:var(--color-monedas);">🪙 <span id="invoice-total-final">0</span></span>
+            </div>
+
+            <p id="err-compra" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center; margin:0;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-carrito')">Volver</button>
+                <button class="btn-confirm" style="background:var(--color-disponibles);" onclick="procesarCompraCatalogo()">COMPRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL COMPRAR MONEDAS -->
+    <div class="modal-overlay" id="modal-comprar-monedas">
+        <div class="modal-content">
+            <h3 class="modal-title">Comprar Monedas</h3>
+            <p style="font-size:13px; color:#555; text-align:center;">Cambia tus gemas por monedas de la tienda. (1 Paquete = 3💎 = 20🪙)</p>
+            
+            <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin: 15px 0;">
+                <button class="action-mini-btn" style="width:40px; height:40px; font-size:24px;" onclick="cambiarPaquetes(-1)">-</button>
+                <div style="font-size:20px; font-weight:bold;"><span id="buy-packs-count">1</span> <span style="font-size:14px; color:#7F8C8D;">Packs</span></div>
+                <button class="action-mini-btn" style="width:40px; height:40px; font-size:24px;" onclick="cambiarPaquetes(1)">+</button>
+            </div>
+            
+            <div style="text-align:center; font-size:16px; font-weight:bold;">
+                Recibes: <span style="color:var(--color-monedas);">🪙 <span id="buy-receive">20</span></span><br>
+                Cuesta: <span style="color:var(--color-gemas);">💎 <span id="buy-cost">3</span></span>
+            </div>
+
+            <p id="err-buy-monedas" style="color: var(--color-retenidos); font-size: 13px; font-weight: bold; display: none; text-align:center; margin:0;"></p>
+            <div class="btn-row">
+                <button class="btn-cancel" onclick="cerrarModal('modal-comprar-monedas')">Cancelar</button>
+                <button class="btn-confirm" style="background:var(--color-monedas); color:var(--text-main);" onclick="procesarCompraMonedas()">CANJEAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERTA BÁSICA -->
+    <div class="modal-overlay" id="modal-alert-error" style="z-index: 25000;">
+        <div class="modal-content" style="border-top: 5px solid var(--color-retenidos); max-width: 320px;">
+            <h3 class="modal-title" style="color: var(--color-retenidos);">Aviso</h3>
+            <p id="alert-msg" style="color:#555;font-size:14px; text-align:center;"></p>
+            <div class="btn-row"><button class="btn-confirm" style="background:var(--color-retenidos);" onclick="cerrarModal('modal-alert-error')">Entendido</button></div>
+        </div>
+    </div>
+
+    <!-- GACHA ANIMATION OVERLAY -->
+    <div class="gacha-overlay" id="gacha-overlay">
+        <div class="gacha-glow" id="gacha-glow"></div>
+        <div class="gacha-box" id="gacha-box">🎁</div>
+        <div class="gacha-item-reveal" id="gacha-item"></div>
+        <div class="gacha-text" id="gacha-text">¡Toca para abrir!</div>
+        <div class="gacha-summary" id="gacha-summary">
+            <h2 style="margin:0;">¡Recompensas!</h2>
+            <div id="gacha-summary-list" style="font-size:24px; display:flex; flex-direction:column; gap:10px;"></div>
+            <p style="font-size:14px; color:#ccc; margin-top:20px;">Toca para continuar</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        // CATÁLOGOS BASE Y PRECIOS
+        const CATALOGO_COLORES = {
+            Básicos: [ { id: "verde", hex: "#58D68D" }, { id: "azul", hex: "#5DADE2" }, { id: "amarillo", hex: "#F4D03F" }, { id: "rojo", hex: "#E74C3C" }, { id: "naranja", hex: "#EB984E" } ],
+            Otros: [ { id: "gris", hex: "#7F8C8D" }, { id: "granate", hex: "#800020" }, { id: "coral", hex: "#FF6F61" }, { id: "frambuesa", hex: "#C71585" }, { id: "dorado", hex: "#D4AC0D" }, { id: "melon", hex: "#FFB347" }, { id: "calabaza", hex: "#D35400" }, { id: "oro", hex: "#FFD700" }, { id: "limon", hex: "#CCFF00" }, { id: "crema", hex: "#FFFDD0" }, { id: "esmeralda", hex: "#2ECC71" }, { id: "verde_botella", hex: "#006600" }, { id: "oliva", hex: "#808000" }, { id: "menta", hex: "#AAF0D1" }, { id: "turquesa", hex: "#40E0D0" }, { id: "pistacho", hex: "#93C572" }, { id: "azul_marino", hex: "#000080" }, { id: "celeste", hex: "#B0E0E6" }, { id: "violeta", hex: "#8A2BE2" }, { id: "purpura", hex: "#6A0DAD" }, { id: "morado", hex: "#4B0082" }, { id: "lila", hex: "#C8A2C8" }, { id: "rosa", hex: "#FFC0CB" }, { id: "magenta", hex: "#FF00FF" }, { id: "salmon", hex: "#FA8072" }, { id: "marron", hex: "#8B4513" }, { id: "beige", hex: "#F5F5DC" }, { id: "cafe", hex: "#6F4E37" }, { id: "chocolate", hex: "#D2691E" }, { id: "caoba", hex: "#C04000" } ]
+        };
+        const CATALOGO_ICONOS = {
+            Básicos: [ "🏠", "🚗", "🛒", "💼", "🧳" ],
+            Comunes: [ "🐶", "🐱", "🌸", "☀️", "⭐", "🍼", "⚽", "💅", "✂️", "👄", "⏰", "💧", "💡", "🔒", "🔑", "⛺", "🪵", "🪑", "👕", "👖", "🐚", "📦", "🎲" ],
+            Raros: [ "🐰", "🐎", "🎂", "🍔", "🥳", "📞", "❤️", "💊", "✉️", "📌", "👁️", "📢", "📺", "🛏️", "🧥", "👟", "👠", "🎤", "🎨", "🍿", "🎳", "🎸" ],
+            Épicos: [ "🏆", "🎮", "🎹", "🚲", "🚆", "💻", "💍", "📅", "📖", "📍", "📶", "🎵", "👓", "🦷", "🧾" ],
+            Legendarios: [ "✈️", "🍷", "🚢", "🏖️", "🎓", "⚖️", "🎬", "🏋️", "🎧", "📻", "🌊", "🚀" ]
+        };
+        
+        const PRECIOS = { Comunes: 50, Raros: 80, Épicos: 120, Legendarios: 200, Colores: 75 };
+        const CUPONES_VALIDOS = { "PROM4362": 0.05, "PROM3713": 0.10, "PROM9346": 0.15, "PROM0725": 0.20, "PROM3197": 0.25, "PROM2028": 0.30 };
+
+        let uidActual = null; let datosUsuario = null; 
+        let misIconos = []; let misColores = []; let misCupones = [];
+        let itemsBloqueados = { iconos: { Comunes:[], Raros:[], Épicos:[], Legendarios:[] }, colores: [] };
+        
+        // Carrito de compra
+        let carrito = []; let descuentoAplicado = 0; let cuponAplicadoStr = "";
+
+        // UI Helpers
+        window.toggleMenu = function() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display = 'none'; } else{ sb.classList.add('open'); ov.style.display = 'block'; } };
+        window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
+        window.abrirModal = function(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; };
+        window.cerrarModal = function(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; document.querySelectorAll('p[id^="err-"]').forEach(el => el.style.display = 'none'); };
+        window.mostrarAlerta = function(msg) { document.getElementById('alert-msg').innerHTML = msg; abrirModal('modal-alert-error'); };
+
+        // RNG Helper
+        function getRand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) { uidActual = user.uid; await inicializarTienda(); } 
+            else { window.location.href = 'index.html'; }
+        });
+
+        async function inicializarTienda() {
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", uidActual));
+                if (userDoc.exists()) {
+                    datosUsuario = userDoc.data();
+                    
+                    // Init basic arrays if missing
+                    if (datosUsuario.monedas === undefined) datosUsuario.monedas = 0;
+                    if (datosUsuario.gemas === undefined) datosUsuario.gemas = 0;
+                    
+                    misIconos = datosUsuario.iconosDesbloqueados || CATALOGO_ICONOS.Básicos;
+                    misColores = datosUsuario.coloresDesbloqueados || CATALOGO_COLORES.Básicos.map(c=>c.hex);
+                    misCupones = datosUsuario.cupones || []; // Array de {codigo, usado}
+
+                    actualizarUIBalances();
+                    calcularBloqueados();
+                    await gestionarDiaTienda();
+                    renderizarCatalogo();
+                    renderizarLibro();
+
+                    // Check badge
+                    if (localStorage.getItem('showLibroBadge') === 'true') {
+                        document.getElementById('badge-libro').style.display = 'flex';
+                    }
+                }
+            } catch (e) { console.error("Error cargando tienda:", e); }
+            finally { document.getElementById('global-loader').style.display = 'none'; }
+        }
+
+        function actualizarUIBalances() {
+            document.getElementById('ui-monedas').textContent = datosUsuario.monedas;
+            document.getElementById('ui-gemas').textContent = datosUsuario.gemas;
+        }
+
+        function calcularBloqueados() {
+            itemsBloqueados = { iconos: { Comunes:[], Raros:[], Épicos:[], Legendarios:[] }, colores: [] };
+            ["Comunes", "Raros", "Épicos", "Legendarios"].forEach(cat => {
+                CATALOGO_ICONOS[cat].forEach(ic => { if (!misIconos.includes(ic)) itemsBloqueados.iconos[cat].push({ id: ic, tipo: 'icono', rareza: cat, precio: PRECIOS[cat] }); });
+            });
+            CATALOGO_COLORES.Otros.forEach(co => {
+                if (!misColores.includes(co.hex)) itemsBloqueados.colores.push({ id: co.hex, tipo: 'color', precio: PRECIOS.Colores });
+            });
+        }
+
+        // --- LÓGICA DEL DÍA Y OFERTAS DIARIAS ---
+        async function gestionarDiaTienda() {
+            const hoy = new Date().toLocaleDateString('es-ES');
+            let dbUpdates = false;
+
+            if (!datosUsuario.fechaTienda || datosUsuario.fechaTienda !== hoy) {
+                // Es un nuevo día o primera vez -> Generar ofertas
+                datosUsuario.fechaTienda = hoy;
+                datosUsuario.ofertasDiarias = generarNuevasOfertas();
+                dbUpdates = true;
+            }
+
+            renderizarOfertasDiarias();
+            if (dbUpdates) {
+                await updateDoc(doc(db, "usuarios", uidActual), { fechaTienda: hoy, ofertasDiarias: datosUsuario.ofertasDiarias });
+            }
+        }
+
+        function generarNuevasOfertas() {
+            // 1. Regalo Diario
+            let regType = (Math.random() < 0.8) ? 'monedas' : 'gemas';
+            let regAmount = 0;
+            let r = Math.random();
+            if (regType === 'monedas') {
+                if(r<0.4) regAmount=getRand(5,10); else if(r<0.7) regAmount=getRand(11,15); else if(r<0.9) regAmount=getRand(16,20); else regAmount=getRand(21,25);
+            } else {
+                if(r<0.4) regAmount=getRand(1,3); else if(r<0.7) regAmount=getRand(4,5); else if(r<0.9) regAmount=getRand(6,8); else regAmount=getRand(9,10);
+            }
+
+            // 2. Ofertas de items (-25%)
+            let todosBloq = [...itemsBloqueados.colores, ...itemsBloqueados.iconos.Comunes, ...itemsBloqueados.iconos.Raros, ...itemsBloqueados.iconos.Épicos, ...itemsBloqueados.iconos.Legendarios];
+            // Shuffle
+            for (let i = todosBloq.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [todosBloq[i], todosBloq[j]] = [todosBloq[j], todosBloq[i]]; }
+            
+            let of1 = { id: 'gema_gratis', tipo: 'gema', precio: 0, priceOld: 0 };
+            let of2 = { id: 'gema_gratis', tipo: 'gema', precio: 0, priceOld: 0 };
+
+            if (todosBloq.length >= 1) {
+                let it1 = todosBloq[0];
+                of1 = { id: it1.id, tipo: it1.tipo, precio: Math.floor(it1.precio * 0.75), priceOld: it1.precio };
+            }
+            if (todosBloq.length >= 2) {
+                let it2 = todosBloq[1];
+                of2 = { id: it2.id, tipo: it2.tipo, precio: Math.floor(it2.precio * 0.75), priceOld: it2.precio };
+            }
+
+            return {
+                regalo: { claimed: false, type: regType, amount: regAmount },
+                oferta1: { claimed: false, ...of1 },
+                oferta2: { claimed: false, ...of2 }
+            };
+        }
+
+        function renderizarOfertasDiarias() {
+            const grid = document.getElementById('grid-ofertas');
+            const ofs = datosUsuario.ofertasDiarias;
+            let html = "";
+
+            // B1: Regalo
+            html += `
+                <div class="offer-card ${ofs.regalo.claimed ? 'disabled' : ''}">
+                    <div class="offer-title">Regalo Diario</div>
+                    <div class="offer-icon-box" style="font-size:35px;">🎁</div>
+                    <div class="offer-price" style="color:var(--text-main); font-size:14px; margin-bottom:5px;">+${ofs.regalo.amount} ${ofs.regalo.type==='monedas'?'🪙':'💎'}</div>
+                    <button class="btn-buy" onclick="reclamarRegalo()">RECOGER</button>
+                </div>`;
+
+            // B2 & B3: Ofertas o Gemas
+            [ofs.oferta1, ofs.oferta2].forEach((of, idx) => {
+                let isG = of.tipo === 'gema';
+                let iconHtml = isG ? '💎' : (of.tipo === 'icono' ? of.id : '');
+                let bgHtml = isG ? '#F4F6F9' : (of.tipo === 'color' ? of.id : '#F4F6F9');
+                
+                html += `
+                <div class="offer-card ${of.claimed ? 'disabled' : ''}">
+                    <div class="offer-title">${isG ? 'Recompensa' : 'Oferta del día'}</div>
+                    <div class="offer-icon-box" style="background:${bgHtml};">${iconHtml}</div>
+                    <div class="offer-price">
+                        ${isG ? 'GRATIS' : `🪙 ${of.precio} <span class="offer-old-price">${of.priceOld}</span>`}
+                    </div>
+                    <button class="btn-buy" onclick="comprarOferta(${idx+1})">${isG ? 'RECOGER' : 'COMPRAR'}</button>
+                </div>`;
+            });
+
+            // B4: Caja Sorpresa (Fijo)
+            html += `
+                <div class="offer-card">
+                    <div class="offer-title" style="color:var(--color-gemas); gap:4px;">Caja Sorpresa <span class="info-icon" style="width:14px;height:14px;font-size:9px;" onclick="mostrarAlerta('<b>Probabilidades:</b><br>Común (Azul): 60%<br>Rara (Verde): 25%<br>Épica (Rojo): 10%<br>Legendaria (Oro): 5%<br><br>Contiene 3 ítems (Monedas o Artículos exclusivos).')">i</span></div>
+                    <div class="offer-icon-box" style="font-size:38px;">📦</div>
+                    <div class="offer-price" style="color:var(--color-gemas);">💎 5</div>
+                    <button class="btn-buy" style="background:var(--color-gemas);" onclick="abrirGacha()">ABRIR</button>
+                </div>`;
+
+            // B5: Comprar Monedas
+            html += `
+                <div class="offer-card">
+                    <div class="offer-title">Cambio de Divisa</div>
+                    <div class="offer-icon-box" style="font-size:35px;">💰</div>
+                    <div class="offer-price" style="font-size:11px;">💎3 = 🪙20</div>
+                    <button class="btn-buy" style="background:var(--color-monedas); color:var(--text-main);" onclick="abrirModal('modal-comprar-monedas')">CANJEAR</button>
+                </div>`;
+
+            // B6: Comprar Gemas (Deshabilitado)
+            html += `
+                <div class="offer-card disabled">
+                    <div class="offer-title">Comprar Gemas</div>
+                    <div class="offer-icon-box" style="font-size:35px;">💎</div>
+                    <div class="offer-price">1.00 €</div>
+                    <button class="btn-buy">COMPRAR</button>
+                </div>`;
+
+            grid.innerHTML = html;
+        }
+
+        window.reclamarRegalo = async function() {
+            if (datosUsuario.ofertasDiarias.regalo.claimed) return;
+            document.getElementById('global-loader').style.display = 'flex';
+            const reg = datosUsuario.ofertasDiarias.regalo;
+            datosUsuario.ofertasDiarias.regalo.claimed = true;
+            
+            let upd = { ofertasDiarias: datosUsuario.ofertasDiarias };
+            if (reg.type === 'monedas') { datosUsuario.monedas += reg.amount; upd.monedas = datosUsuario.monedas; }
+            else { datosUsuario.gemas += reg.amount; upd.gemas = datosUsuario.gemas; }
+
+            await updateDoc(doc(db, "usuarios", uidActual), upd);
+            actualizarUIBalances(); renderizarOfertasDiarias();
+            document.getElementById('global-loader').style.display = 'none';
+        };
+
+        window.comprarOferta = async function(idx) {
+            let ofKey = idx === 1 ? 'oferta1' : 'oferta2';
+            let of = datosUsuario.ofertasDiarias[ofKey];
+            if (of.claimed) return;
+
+            if (of.tipo === 'gema') {
+                document.getElementById('global-loader').style.display = 'flex';
+                datosUsuario.gemas += 1; datosUsuario.ofertasDiarias[ofKey].claimed = true;
+                await updateDoc(doc(db, "usuarios", uidActual), { gemas: datosUsuario.gemas, ofertasDiarias: datosUsuario.ofertasDiarias });
+                actualizarUIBalances(); renderizarOfertasDiarias();
+                document.getElementById('global-loader').style.display = 'none';
+                return;
+            }
+
+            // Es item
+            if (datosUsuario.monedas < of.precio) { mostrarAlerta(`No tienes suficientes monedas.<br>Te faltan 🪙 ${of.precio - datosUsuario.monedas}.`); return; }
+
+            document.getElementById('global-loader').style.display = 'flex';
+            datosUsuario.monedas -= of.precio;
+            datosUsuario.ofertasDiarias[ofKey].claimed = true;
+            
+            let upd = { monedas: datosUsuario.monedas, ofertasDiarias: datosUsuario.ofertasDiarias };
+            if (of.tipo === 'icono') { misIconos.push(of.id); upd.iconosDesbloqueados = misIconos; }
+            else { misColores.push(of.id); upd.coloresDesbloqueados = misColores; }
+
+            await updateDoc(doc(db, "usuarios", uidActual), upd);
+            localStorage.setItem('showLibroBadge', 'true');
+            window.location.reload(); // Recarga limpia para recalcular todo
+        };
+
+        // --- SISTEMA DE GACHA (CAJA SORPRESA) ---
+        let gachaState = 0; let gachaResults = [];
+        window.abrirGacha = async function() {
+            if (datosUsuario.gemas < 5) { mostrarAlerta(`No tienes suficientes gemas para abrir la caja.<br>Cuesta 💎 5.`); return; }
+            
+            // 1. Cobrar y generar items antes de la animación
+            document.getElementById('global-loader').style.display = 'flex';
+            datosUsuario.gemas -= 5;
+            await updateDoc(doc(db, "usuarios", uidActual), { gemas: datosUsuario.gemas });
+            actualizarUIBalances();
+            
+            generarContenidoCaja();
+            document.getElementById('global-loader').style.display = 'none';
+
+            // 2. Iniciar Animación
+            gachaState = 0;
+            document.getElementById('gacha-overlay').style.display = 'flex';
+            document.getElementById('gacha-box').style.display = 'block';
+            document.getElementById('gacha-box').textContent = '📦';
+            document.getElementById('gacha-glow').style.display = 'none';
+            document.getElementById('gacha-item').style.display = 'none';
+            document.getElementById('gacha-summary').style.display = 'none';
+            document.getElementById('gacha-text').style.display = 'block';
+            document.getElementById('gacha-text').textContent = '¡Toca para abrir!';
+            document.getElementById('gacha-overlay').onclick = progresarGacha;
+        };
+
+        function generarContenidoCaja() {
+            gachaResults = [];
+            // Calidad de la caja
+            let r = Math.random();
+            let rarezaStr = "Comunes", color = "#3498DB", minMon=10, maxMon=15;
+            if(r > 0.60 && r <= 0.85) { rarezaStr = "Raros"; color = "#27AE60"; minMon=16; maxMon=20; }
+            else if(r > 0.85 && r <= 0.95) { rarezaStr = "Épicos"; color = "#E74C3C"; minMon=21; maxMon=30; }
+            else if(r > 0.95) { rarezaStr = "Legendarios"; color = "#F1C40F"; minMon=31; maxMon=40; }
+            
+            gachaResults.push({ type: 'quality', color: color, text: rarezaStr.replace('s','').toUpperCase() });
+
+            // Probabilidades de Items (Monedas, Icono, Color)
+            const getIconoFromGacha = (startRarity) => {
+                let rList = ["Comunes", "Raros", "Épicos", "Legendarios"];
+                let idx = rList.indexOf(startRarity);
+                for(let i=idx; i<rList.length; i++) {
+                    let disp = itemsBloqueados.iconos[rList[i]];
+                    if(disp.length > 0) {
+                        let elegido = disp[Math.floor(Math.random() * disp.length)];
+                        // Fake remove for next items in same box
+                        disp.splice(disp.indexOf(elegido), 1); 
+                        return elegido.id;
+                    }
+                }
+                return null;
+            };
+
+            const getColorFromGacha = () => {
+                if(itemsBloqueados.colores.length > 0) {
+                    let elegido = itemsBloqueados.colores[Math.floor(Math.random() * itemsBloqueados.colores.length)];
+                    itemsBloqueados.colores.splice(itemsBloqueados.colores.indexOf(elegido), 1);
+                    return elegido.id;
+                }
+                return null;
+            };
+
+            const probItems = [
+                { mon: 0.80, icn: 0.90 }, // Item 1: 80% mon, 10% icn, 10% col
+                { mon: 0.70, icn: 0.85 }, // Item 2: 70% mon, 15% icn, 15% col
+                { mon: 0.50, icn: 0.75 }  // Item 3: 50% mon, 25% icn, 25% col
+            ];
+
+            probItems.forEach(p => {
+                let rand = Math.random();
+                if (rand < p.mon) { gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) }); }
+                else if (rand < p.icn) {
+                    let ic = getIconoFromGacha(rarezaStr);
+                    if(ic) gachaResults.push({ type: 'icono', val: ic });
+                    else gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) });
+                } else {
+                    let co = getColorFromGacha();
+                    if(co) gachaResults.push({ type: 'color', val: co });
+                    else gachaResults.push({ type: 'monedas', val: getRand(minMon, maxMon) });
+                }
+            });
+        }
+
+        async function progresarGacha() {
+            const box = document.getElementById('gacha-box'); const item = document.getElementById('gacha-item');
+            const txt = document.getElementById('gacha-text'); const glow = document.getElementById('gacha-glow');
+            
+            gachaState++;
+            if (gachaState === 1) {
+                // Revelar rareza
+                box.style.display = 'none';
+                glow.style.display = 'block'; glow.style.background = gachaResults[0].color;
+                item.style.display = 'block'; item.textContent = '✨'; item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
+                txt.textContent = `Calidad: ${gachaResults[0].text}`;
+            } else if (gachaState >= 2 && gachaState <= 4) {
+                // Revelar items 1, 2, 3
+                let it = gachaResults[gachaState-1];
+                item.style.animation = 'none'; void item.offsetWidth; item.style.animation = 'popIn 0.5s';
+                if(it.type === 'monedas') { item.textContent = '🪙'; txt.textContent = `+${it.val} Monedas`; }
+                else if(it.type === 'icono') { item.textContent = it.val; txt.textContent = "¡Nuevo Icono!"; }
+                else { item.textContent = ''; item.style.background = it.val; item.style.width='80px'; item.style.height='80px'; item.style.borderRadius='50%'; txt.textContent = "¡Nuevo Color!"; }
+            } else if (gachaState === 5) {
+                // Resumen y guardado
+                item.style.display = 'none'; txt.style.display = 'none'; glow.style.display = 'none';
+                document.getElementById('gacha-summary').style.display = 'flex';
+                
+                let sumHtml = ""; let totMon = 0; let nIcos = []; let nCols = [];
+                for(let i=1; i<=3; i++) {
+                    let r = gachaResults[i];
+                    if(r.type==='monedas') { totMon+=r.val; sumHtml += `<div>🪙 +${r.val}</div>`; }
+                    else if(r.type==='icono') { nIcos.push(r.val); sumHtml += `<div>⭐ ${r.val}</div>`; }
+                    else { nCols.push(r.val); sumHtml += `<div>🎨 <span style="display:inline-block;width:15px;height:15px;background:${r.val};border-radius:50%;vertical-align:middle;"></span></div>`; }
+                }
+                document.getElementById('gacha-summary-list').innerHTML = sumHtml;
+                
+                // Guardar en DB
+                let upd = {};
+                if(totMon > 0) { datosUsuario.monedas += totMon; upd.monedas = datosUsuario.monedas; }
+                if(nIcos.length > 0) { misIconos = [...misIconos, ...nIcos]; upd.iconosDesbloqueados = misIconos; }
+                if(nCols.length > 0) { misColores = [...misColores, ...nCols]; upd.coloresDesbloqueados = misColores; }
+                
+                if(Object.keys(upd).length > 0) {
+                    await updateDoc(doc(db, "usuarios", uidActual), upd);
+                    if(nIcos.length > 0 || nCols.length > 0) localStorage.setItem('showLibroBadge', 'true');
+                }
+            } else if (gachaState === 6) {
+                // Cerrar
+                document.getElementById('gacha-overlay').onclick = null;
+                window.location.reload(); // Recargar para actualizar catálogos limpios
+            }
+        }
+
+        // --- COMPRAR MONEDAS (DIVISA) ---
+        let buyPacks = 1;
+        window.cambiarPaquetes = function(val) {
+            buyPacks += val; if (buyPacks < 1) buyPacks = 1;
+            document.getElementById('buy-packs-count').textContent = buyPacks;
+            document.getElementById('buy-receive').textContent = buyPacks * 20;
+            document.getElementById('buy-cost').textContent = buyPacks * 3;
+            document.getElementById('err-buy-monedas').style.display = 'none';
+        };
+
+        window.procesarCompraMonedas = async function() {
+            let cost = buyPacks * 3; let rec = buyPacks * 20;
+            if (datosUsuario.gemas < cost) {
+                document.getElementById('err-buy-monedas').textContent = `No tienes gemas suficientes. Te faltan 💎 ${cost - datosUsuario.gemas}.`;
+                document.getElementById('err-buy-monedas').style.display = 'block'; return;
+            }
+            document.getElementById('global-loader').style.display = 'flex';
+            datosUsuario.gemas -= cost; datosUsuario.monedas += rec;
+            await updateDoc(doc(db, "usuarios", uidActual), { gemas: datosUsuario.gemas, monedas: datosUsuario.monedas });
+            actualizarUIBalances();
+            cerrarModal('modal-comprar-monedas');
+            document.getElementById('global-loader').style.display = 'none';
+        };
+
+
+        // --- CATÁLOGO Y CARRITO ---
+        let currentCatTab = 'iconos';
+        window.switchCatalog = function(tab) {
+            currentCatTab = tab;
+            document.getElementById('tab-iconos').classList.toggle('active', tab==='iconos');
+            document.getElementById('tab-colores').classList.toggle('active', tab==='colores');
+            renderizarCatalogo();
+        };
+
+        function renderizarCatalogo() {
+            const grid = document.getElementById('grid-catalogo');
+            let html = "";
+            let arr = [];
+
+            if (currentCatTab === 'iconos') {
+                arr = [...itemsBloqueados.iconos.Comunes, ...itemsBloqueados.iconos.Raros, ...itemsBloqueados.iconos.Épicos, ...itemsBloqueados.iconos.Legendarios];
+            } else {
+                arr = itemsBloqueados.colores;
+            }
+
+            if (arr.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#7F8C8D;">¡Lo tienes todo desbloqueado en esta categoría!</div>`;
+                return;
+            }
+
+            arr.forEach(it => {
+                let isSel = carrito.some(c => c.id === it.id);
+                let contentHtml = it.tipo === 'icono' ? `<div style="font-size:30px; margin:5px 0;">${it.id}</div>` : `<div style="width:35px; height:35px; border-radius:50%; background:${it.id}; margin:5px 0;"></div>`;
+                let rarityClass = it.rareza ? `cat-rarity-${it.rareza.replace('é','e').toLowerCase().substring(0,5)}` : '';
+                
+                html += `
+                <div class="cat-item ${isSel ? 'selected' : ''}" onclick="toggleCarrito('${it.id}', '${it.tipo}', ${it.precio})">
+                    ${contentHtml}
+                    <div style="font-size:11px; font-weight:bold;" class="${rarityClass}">${it.precio} 🪙</div>
+                </div>`;
+            });
+            grid.innerHTML = html;
+        }
+
+        window.toggleCarrito = function(id, tipo, precio) {
+            let idx = carrito.findIndex(c => c.id === id);
+            if (idx >= 0) carrito.splice(idx, 1);
+            else carrito.push({ id, tipo, precio });
+            
+            renderizarCatalogo(); actualizarBarraCarrito();
+        };
+
+        function actualizarBarraCarrito() {
+            const bar = document.getElementById('cart-bar');
+            if (carrito.length > 0) {
+                bar.classList.add('visible');
+                document.getElementById('cart-count').textContent = carrito.length;
+                let tot = carrito.reduce((sum, i) => sum + i.precio, 0);
+                document.getElementById('cart-price').textContent = tot;
+            } else { bar.classList.remove('visible'); }
+        }
+
+        window.abrirCarrito = function() {
+            let html = ""; let subtotal = 0;
+            carrito.forEach(c => {
+                subtotal += c.precio;
+                let name = c.tipo === 'icono' ? `Icono ${c.id}` : `Color <span style="display:inline-block;width:10px;height:10px;background:${c.id};border-radius:50%;"></span>`;
+                html += `<div class="invoice-item"><span>${name}</span> <b>${c.precio} 🪙</b></div>`;
+            });
+            document.getElementById('invoice-items').innerHTML = html;
+            
+            descuentoAplicado = 0; cuponAplicadoStr = "";
+            document.getElementById('input-cupon').value = ""; document.getElementById('input-cupon').disabled = false;
+            document.getElementById('msg-cupon').style.display = 'none';
+            document.getElementById('err-compra').style.display = 'none';
+            
+            recalcularTotalCarrito(subtotal);
+            abrirModal('modal-carrito');
+        };
+
+        window.aplicarCupon = function() {
+            let code = document.getElementById('input-cupon').value.trim().toUpperCase();
+            let msg = document.getElementById('msg-cupon');
+            if(!code) return;
+
+            let cupInfo = misCupones.find(c => c.codigo === code);
+            if (!cupInfo) { msg.textContent="Cupón no encontrado o no desbloqueado."; msg.style.color="var(--color-retenidos)"; msg.style.display="block"; return; }
+            if (cupInfo.usado) { msg.textContent="Este cupón ya ha sido utilizado."; msg.style.color="var(--color-retenidos)"; msg.style.display="block"; return; }
+            if (!CUPONES_VALIDOS[code]) { msg.textContent="Código inválido."; msg.style.color="var(--color-retenidos)"; msg.style.display="block"; return; }
+
+            descuentoAplicado = CUPONES_VALIDOS[code]; cuponAplicadoStr = code;
+            document.getElementById('input-cupon').disabled = true;
+            msg.textContent = `¡Descuento aplicado! (-${descuentoAplicado*100}%)`; msg.style.color = "var(--color-disponibles)"; msg.style.display="block";
+            
+            let subtotal = carrito.reduce((sum, i) => sum + i.precio, 0);
+            recalcularTotalCarrito(subtotal);
+        };
+
+        function recalcularTotalCarrito(subtotal) {
+            let descVal = Math.floor(subtotal * descuentoAplicado);
+            let total = subtotal - descVal;
+            if (descVal > 0) {
+                document.getElementById('invoice-items').insertAdjacentHTML('beforeend', `<div class="invoice-item" style="color:var(--color-disponibles); font-weight:bold; padding-top:5px;"><span>Descuento (${descuentoAplicado*100}%)</span> <b>-${descVal} 🪙</b></div>`);
+            }
+            document.getElementById('invoice-total-final').textContent = total;
+            document.getElementById('invoice-total-final').setAttribute('data-val', total);
+        }
+
+        window.procesarCompraCatalogo = async function() {
+            let total = parseInt(document.getElementById('invoice-total-final').getAttribute('data-val'));
+            let err = document.getElementById('err-compra');
+            if (datosUsuario.monedas < total) { err.textContent = `No tienes suficientes monedas. Faltan 🪙 ${total - datosUsuario.monedas}`; err.style.display = 'block'; return; }
+
+            document.getElementById('global-loader').style.display = 'flex';
+            
+            datosUsuario.monedas -= total;
+            let nIcos = carrito.filter(c => c.tipo === 'icono').map(c => c.id);
+            let nCols = carrito.filter(c => c.tipo === 'color').map(c => c.id);
+            
+            let upd = { monedas: datosUsuario.monedas };
+            if(nIcos.length > 0) { misIconos = [...misIconos, ...nIcos]; upd.iconosDesbloqueados = misIconos; }
+            if(nCols.length > 0) { misColores = [...misColores, ...nCols]; upd.coloresDesbloqueados = misColores; }
+            
+            if (cuponAplicadoStr) {
+                let idx = misCupones.findIndex(c => c.codigo === cuponAplicadoStr);
+                if (idx >= 0) { misCupones[idx].usado = true; upd.cupones = misCupones; }
+            }
+
+            await updateDoc(doc(db, "usuarios", uidActual), upd);
+            localStorage.setItem('showLibroBadge', 'true');
+            window.location.reload();
+        };
+
+        // --- LIBRO DE COLECCIÓN ---
+        window.switchLibroTab = function(tab) {
+            document.getElementById('tab-lib-iconos').classList.toggle('active', tab==='iconos');
+            document.getElementById('tab-lib-colores').classList.toggle('active', tab==='colores');
+            document.getElementById('tab-lib-cupones').classList.toggle('active', tab==='cupones');
+            document.getElementById('libro-iconos').style.display = tab==='iconos' ? 'grid' : 'none';
+            document.getElementById('libro-colores').style.display = tab==='colores' ? 'grid' : 'none';
+            document.getElementById('libro-cupones').style.display = tab==='cupones' ? 'flex' : 'none';
+            
+            // Remove badge when opening book
+            document.getElementById('badge-libro').style.display = 'none';
+            localStorage.setItem('showLibroBadge', 'false');
+        };
+
+        function renderizarLibro() {
+            let hI = "";
+            let todosIconos = [...CATALOGO_ICONOS.Básicos, ...CATALOGO_ICONOS.Comunes, ...CATALOGO_ICONOS.Raros, ...CATALOGO_ICONOS.Épicos, ...CATALOGO_ICONOS.Legendarios];
+            todosIconos.forEach(ic => { let u = misIconos.includes(ic); hI += `<div class="libro-item ${u?'':'locked'}">${ic}</div>`; });
+            document.getElementById('libro-iconos').innerHTML = hI;
+
+            let hC = "";
+            let todosColores = [...CATALOGO_COLORES.Básicos, ...CATALOGO_COLORES.Otros];
+            todosColores.forEach(co => { let u = misColores.includes(co.hex); hC += `<div class="libro-item ${u?'':'locked'}" style="background:${u?co.hex:'#f4f4f4'}; border-color:${u?'#E5E7E9':'#ddd'};"></div>`; });
+            document.getElementById('libro-colores').innerHTML = hC;
+
+            let hCup = "";
+            if (misCupones.length === 0) { hCup = `<div style="text-align:center; color:#7F8C8D; font-size:13px; margin-top:20px;">No has desbloqueado ningún cupón en misiones.</div>`; }
+            else {
+                misCupones.forEach(c => {
+                    let desc = (CUPONES_VALIDOS[c.codigo]*100) + "%";
+                    hCup += `
+                    <div class="coupon-card ${c.usado?'used':''}">
+                        <div>
+                            <div style="font-weight:bold; color:var(--text-main); font-size:15px;">${c.codigo}</div>
+                            <div style="font-size:12px; color:#7F8C8D;">Descuento del ${desc}</div>
+                        </div>
+                        ${!c.usado ? `<button class="btn-copy" onclick="navigator.clipboard.writeText('${c.codigo}'); this.textContent='¡Copiado!'; setTimeout(()=>this.textContent='Copiar', 2000);">Copiar</button>` : '<span style="font-size:11px; font-weight:bold; color:#BDC3C7;">USADO</span>'}
+                    </div>`;
+                });
+            }
+            document.getElementById('libro-cupones').innerHTML = hCup;
+        }
+
+    </script>
+</body>
+</html>
