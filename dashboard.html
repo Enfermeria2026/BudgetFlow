@@ -394,6 +394,24 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL FELICITACIÓN MONEDAS -->
+    <div class="modal-overlay" id="modal-felicitacion-monedas" style="z-index: 25000;">
+        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 5px;">🪙</div>
+            <h3 class="modal-title" style="color: #F1C40F;">¡Felicidades!</h3>
+            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold;">
+                Has conseguido <span id="feli-monedas-ganadas" style="color:#F1C40F; font-size:18px;"></span> monedas de BudgetFlow por tu ingreso.
+            </p>
+            <p style="color:#7F8C8D; font-size:13px; margin-bottom:0;">¡Úsalas para comprar en la tienda!</p>
+            <div style="background:#F4F6F9; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; font-size:14px;">
+                Total acumulado: 🪙 <span id="feli-monedas-total"></span>
+            </div>
+            <div class="btn-row">
+                <button class="btn-confirm" style="background:#F1C40F; color:var(--text-main);" onclick="cerrarModal('modal-felicitacion-monedas')">¡Genial!</button>
+            </div>
+        </div>
+    </div>
     
     <!-- SCRIPTS -->
     <script type="module">
@@ -793,23 +811,6 @@
             if (divIng) divIng.innerHTML = htmlIngresos;
             if (divGas) divGas.innerHTML = htmlGastos;
         };
-        <!-- MODAL FELICITACIÓN MONEDAS -->
-    <div class="modal-overlay" id="modal-felicitacion-monedas" style="z-index: 25000;">
-        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center;">
-            <div style="font-size: 50px; margin-bottom: 5px;">🪙</div>
-            <h3 class="modal-title" style="color: #F1C40F;">¡Felicidades!</h3>
-            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold;">
-                Has conseguido <span id="feli-monedas-ganadas" style="color:#F1C40F; font-size:18px;"></span> monedas de BudgetFlow por tu ingreso.
-            </p>
-            <p style="color:#7F8C8D; font-size:13px; margin-bottom:0;">¡Úsalas para comprar en la tienda!</p>
-            <div style="background:#F4F6F9; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; font-size:14px;">
-                Total acumulado: 🪙 <span id="feli-monedas-total"></span>
-            </div>
-            <div class="btn-row">
-                <button class="btn-confirm" style="background:#F1C40F; color:var(--text-main);" onclick="cerrarModal('modal-felicitacion-monedas')">¡Genial!</button>
-            </div>
-        </div>
-    </div>
     </script>
 </body>
 </html>
