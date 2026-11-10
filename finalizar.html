@@ -15,7 +15,7 @@
             background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
             height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
-        button, input, select { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
+        button, input, select, .inline-opt-btn, .modal-opt-item, .acordeon-header { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
 
         /* LOADER */
         #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -32,10 +32,10 @@
         .progress-fill { height: 100%; background: var(--text-main); transition: width 0.3s ease; }
         .step-indicator { text-align: center; font-size: 11px; font-weight: bold; color: #7F8C8D; margin-top: 5px; }
 
-        /* PROJECTION PANEL (STICKY) */
-        .projection-panel { background: var(--text-main); color: white; padding: 10px 15px; display: flex; justify-content: space-around; font-size: 12px; font-weight: bold; }
+        /* PROJECTION PANEL */
+        .projection-panel { background: var(--text-main); color: white; padding: 10px 15px; display: flex; justify-content: space-around; font-size: 12px; font-weight: bold; transition: 0.3s; }
         .proj-item { display: flex; flex-direction: column; align-items: center; }
-        .proj-val { font-size: 15px; color: #F4D03F; }
+        .proj-val { font-size: 15px; color: #F4D03F; transition: color 0.3s; }
 
         /* CONTENT AREA */
         .wizard-content { position: fixed; top: 125px; bottom: 80px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; overflow-y: auto; padding: 15px; box-sizing: border-box; display: none; flex-direction: column; gap: 15px; }
@@ -77,10 +77,24 @@
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
         .btn-modal-cancel { flex: 1; padding: 12px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-modal-ok { flex: 1; padding: 12px; border: none; background: var(--text-main); color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        .inline-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
-        .inline-opt { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #E5E7E9; cursor: pointer; flex-shrink: 0; }
-        .inline-opt.selected { border-color: #000; transform: scale(1.1); }
+
+        /* ESTILOS DE SELECTORES (LÍNEA Y CATÁLOGO) */
+        .inline-selector { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between; align-items: center; margin-top: 2px; overflow-x: auto; padding: 10px 4px; width: 100%; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none; }
+        .inline-selector::-webkit-scrollbar { display: none; }
+        .inline-opt-btn { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #E5E7E9; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: 0.2s; background: #fff; flex-shrink: 0; }
+        .inline-opt-btn.color-btn { border-color: transparent; }
+        .inline-opt-btn.selected { border-color: #000 !important; box-shadow: 0 0 0 1.5px #000; transform: scale(1.12); }
+        .inline-opt-btn.btn-mas { background: #F4F6F9; color: var(--text-main); font-weight: bold; border: 2px solid #D5D8DC; }
+
+        .modal-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px; justify-items: center; }
+        .modal-opt-item { width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .modal-opt-item.color-item { border: 2px solid #E5E7E9; }
+        .modal-opt-item.selected { border-color: #000 !important; box-shadow: 0 0 0 1.5px #000; transform: scale(1.05); background: #fff; }
+        .modal-opt-item.locked { filter: grayscale(100%); opacity: 0.35; cursor: not-allowed; }
+
+        .acordeon-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--text-main); background: #F4F6F9; padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 1px solid #E5E7E9; }
+        .acordeon-content { display: none; padding: 5px; }
+        .acordeon-content.open { display: block; }
 
         /* PANTALLA BIENVENIDA / TRANSICIÓN */
         #welcome-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--text-main); color:white; z-index:50000; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; }
@@ -241,22 +255,18 @@
         <button class="btn-nav btn-next" id="btn-next" onclick="goNext()">Siguiente</button>
     </div>
 
-    <!-- MODAL CREAR ITEM (PASO 3) -->
-    <div class="modal-overlay" id="modal-crear-item">
+    <!-- MODAL CREAR ITEM CON CATÁLOGO COMPLETO -->
+    <div class="modal-overlay" id="modal-crear-item" style="z-index: 10500;">
         <div class="modal-content">
             <h3 class="modal-title" id="mc-title">Crear Nuevo</h3>
             <input type="hidden" id="mc-type">
             
             <div class="field-wrapper"><label>Título *</label><input type="text" id="mc-nombre" placeholder="Ej: Viaje a Japón"></div>
-            <div class="field-wrapper"><label>Icono</label>
-                <div class="inline-selector" id="mc-iconos">
-                    <div class="inline-opt selected" onclick="selIcon(this)">🏠</div><div class="inline-opt" onclick="selIcon(this)">🚗</div><div class="inline-opt" onclick="selIcon(this)">🛒</div><div class="inline-opt" onclick="selIcon(this)">✈️</div><div class="inline-opt" onclick="selIcon(this)">💻</div>
-                </div>
+            <div class="field-wrapper"><label>Icono *</label>
+                <div class="inline-selector" id="mc-iconos"></div>
             </div>
-            <div class="field-wrapper"><label>Color</label>
-                <div class="inline-selector" id="mc-colores">
-                    <div class="inline-opt selected" style="background:#58D68D;" onclick="selCol(this, '#58D68D')"></div><div class="inline-opt" style="background:#5DADE2;" onclick="selCol(this, '#5DADE2')"></div><div class="inline-opt" style="background:#F4D03F;" onclick="selCol(this, '#F4D03F')"></div><div class="inline-opt" style="background:#E74C3C;" onclick="selCol(this, '#E74C3C')"></div><div class="inline-opt" style="background:#9B59B6;" onclick="selCol(this, '#9B59B6')"></div>
-                </div>
+            <div class="field-wrapper"><label>Color *</label>
+                <div class="inline-selector" id="mc-colores"></div>
             </div>
             <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="mc-aporte" placeholder="0.00" min="0" step="0.01"></div>
             <div class="field-wrapper"><label>Objetivo (Opcional)</label><input type="number" id="mc-obj" placeholder="0.00" min="0" step="0.01"></div>
@@ -269,8 +279,33 @@
         </div>
     </div>
 
+    <!-- MODALES DE CATÁLOGO (PARA ICONOS Y COLORES) -->
+    <div class="modal-overlay" id="modal-selector-iconos" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Iconos</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-iconos"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-modal-cancel" onclick="cerrarModal('modal-selector-iconos')">Cerrar</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modal-selector-colores" style="z-index: 11000;">
+        <div class="modal-content" style="max-width: 450px; max-height: 85vh; display: flex; flex-direction: column;">
+            <h3 class="modal-title" style="color: var(--text-main);">Catálogo de Colores</h3>
+            <div style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 5px;" id="contenedor-lista-colores"></div>
+            <div class="btn-row" style="margin-top: 15px; flex-shrink: 0;"><button class="btn-modal-cancel" onclick="cerrarModal('modal-selector-colores')">Cerrar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERTA BLOQUEADO -->
+    <div class="modal-overlay" id="modal-alerta-bloqueado" style="z-index: 12000;">
+        <div class="modal-content" style="border-top: 5px solid var(--text-main); max-width: 320px;">
+            <h3 class="modal-title" style="color: var(--text-main);">🔒 Bloqueado</h3>
+            <p id="bloqueado-msg" style="color:#555;font-size:14px; text-align:center; margin-top:15px;"></p>
+            <div class="btn-row"><button class="btn-modal-ok" onclick="cerrarModal('modal-alerta-bloqueado')">Entendido</button></div>
+        </div>
+    </div>
+
     <!-- MODAL DOBLE CONFIRMAR BORRADO (PASO 3) -->
-    <div class="modal-overlay" id="modal-del-item">
+    <div class="modal-overlay" id="modal-del-item" style="z-index: 10500;">
         <div class="modal-content" style="text-align:center;">
             <div style="font-size:40px; margin-bottom:5px;">⚠️</div>
             <h3 class="modal-title" style="color:var(--color-retenidos);">¿Eliminar elemento?</h3>
@@ -292,7 +327,7 @@
     </div>
 
     <!-- MODAL PRIMER INGRESO -->
-    <div class="modal-overlay" id="modal-primer-ingreso">
+    <div class="modal-overlay" id="modal-primer-ingreso" style="z-index: 10500;">
         <div class="modal-content" style="text-align:left;">
             <h3 class="modal-title" style="color:var(--color-disponibles);">Primer Ingreso del Mes</h3>
             <p style="font-size:13px; color:#555; text-align:center;">¿Deseas registrar ya tu primer ingreso de este nuevo mes o prefieres hacerlo más tarde?</p>
@@ -338,7 +373,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, writeBatch, addDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
@@ -347,13 +382,29 @@
         let movimientos = []; 
         let currentStep = 1;
 
+        // Variables de catálogos
+        let selIc = "🏠", selCo = "#58D68D";
+        let misIconos = []; let misColores = [];
+
+        const CATALOGO_COLORES = {
+            Básicos: [ { id: "verde", hex: "#58D68D" }, { id: "azul", hex: "#5DADE2" }, { id: "amarillo", hex: "#F4D03F" }, { id: "rojo", hex: "#E74C3C" }, { id: "naranja", hex: "#EB984E" } ],
+            Otros: [ { id: "gris", hex: "#7F8C8D" }, { id: "granate", hex: "#800020" }, { id: "coral", hex: "#FF6F61" }, { id: "frambuesa", hex: "#C71585" }, { id: "dorado", hex: "#D4AC0D" }, { id: "melon", hex: "#FFB347" }, { id: "calabaza", hex: "#D35400" }, { id: "oro", hex: "#FFD700" }, { id: "limon", hex: "#CCFF00" }, { id: "crema", hex: "#FFFDD0" }, { id: "esmeralda", hex: "#2ECC71" }, { id: "verde_botella", hex: "#006600" }, { id: "oliva", hex: "#808000" }, { id: "menta", hex: "#AAF0D1" }, { id: "turquesa", hex: "#40E0D0" }, { id: "pistacho", hex: "#93C572" }, { id: "azul_marino", hex: "#000080" }, { id: "celeste", hex: "#B0E0E6" }, { id: "violeta", hex: "#8A2BE2" }, { id: "purpura", hex: "#6A0DAD" }, { id: "morado", hex: "#4B0082" }, { id: "lila", hex: "#C8A2C8" }, { id: "rosa", hex: "#FFC0CB" }, { id: "magenta", hex: "#FF00FF" }, { id: "salmon", hex: "#FA8072" }, { id: "marron", hex: "#8B4513" }, { id: "beige", hex: "#F5F5DC" }, { id: "cafe", hex: "#6F4E37" }, { id: "chocolate", hex: "#D2691E" }, { id: "caoba", hex: "#C04000" } ]
+        };
+        const CATALOGO_ICONOS = {
+            Básicos: [ { emoji: "🏠" }, { emoji: "🚗" }, { emoji: "🛒" }, { emoji: "💼" }, { emoji: "🧳" } ],
+            Comunes: [ { emoji: "🐶" }, { emoji: "🐱" }, { emoji: "🌸" }, { emoji: "☀️" }, { emoji: "⭐" }, { emoji: "🍼" }, { emoji: "⚽" }, { emoji: "💅" }, { emoji: "✂️" }, { emoji: "👄" }, { emoji: "⏰" }, { emoji: "💧" }, { emoji: "💡" }, { emoji: "🔒" }, { emoji: "🔑" }, { emoji: "⛺" }, { emoji: "🪵" }, { emoji: "🪑" }, { emoji: "👕" }, { emoji: "👖" }, { emoji: "🐚" }, { emoji: "📦" }, { emoji: "🎲" } ],
+            Raros: [ { emoji: "🐰" }, { emoji: "🐎" }, { emoji: "🎂" }, { emoji: "🍔" }, { emoji: "🥳" }, { emoji: "📞" }, { emoji: "❤️" }, { emoji: "💊" }, { emoji: "✉️" }, { emoji: "📌" }, { emoji: "👁️" }, { emoji: "📢" }, { emoji: "📺" }, { emoji: "🛏️" }, { emoji: "🧥" }, { emoji: "👟" }, { emoji: "👠" }, { emoji: "🎤" }, { emoji: "🎨" }, { emoji: "🍿" }, { emoji: "🎳" }, { emoji: "🎸" } ],
+            Épicos: [ { emoji: "🏆" }, { emoji: "🎮" }, { emoji: "🎹" }, { emoji: "🚲" }, { emoji: "🚆" }, { emoji: "💻" }, { emoji: "💍" }, { emoji: "📅" }, { emoji: "📖" }, { emoji: "📍" }, { emoji: "📶" }, { emoji: "🎵" }, { emoji: "👓" }, { emoji: "🦷" }, { emoji: "🧾" } ],
+            Legendarios: [ { emoji: "✈️" }, { emoji: "🍷" }, { emoji: "🚢" }, { emoji: "🏖️" }, { emoji: "🎓" }, { emoji: "⚖️" }, { emoji: "🎬" }, { emoji: "🏋️" }, { emoji: "🎧" }, { emoji: "📻" }, { emoji: "🌊" }, { emoji: "🚀" } ]
+        };
+
         // Estado en memoria del asistente
         let wiz = {
             orig: { ftot:0, fdis:0, fret:0, cats:[], huchas:[], fondos:[] },
             s1: { ingTot:0, ingNom:0, ingPun:0, ingBru:0, irpf:0, ss:0, otr:0, gasTot:0, gasCat:0, gasImp:0, gasHuc:0, gasFon:0 },
             s2: { ahorroCat:0 },
-            s3: { draftHuchas:[], draftFondos:[] }, // Items vivos (existentes + nuevos - borrados)
-            s4: { dispRestante:0, asigHuc:{}, asigFon:{}, asigDisp:0 } // Repartos
+            s3: { draftHuchas:[], draftFondos:[] },
+            s4: { dispRestante:0, asigHuc:{}, asigFon:{}, asigDisp:0 } 
         };
 
         // UI Helpers
@@ -377,6 +428,11 @@
                 wiz.orig.ftot = datosUsuario.fondosTotales || 0;
                 wiz.orig.fdis = datosUsuario.fondosDisponibles || 0;
                 wiz.orig.fret = datosUsuario.fondosRetenidos || 0;
+                
+                // Cargar ítems desbloqueados para el catálogo
+                misIconos = datosUsuario.iconosDesbloqueados || CATALOGO_ICONOS.Básicos.map(i=>i.emoji);
+                misColores = datosUsuario.coloresDesbloqueados || CATALOGO_COLORES.Básicos.map(c=>c.hex);
+                sincronizarDesbloqueos();
 
                 [wiz.orig.cats, wiz.orig.huchas, wiz.orig.fondos, movimientos] = await Promise.all([
                     fetchCol("categorias"), fetchCol("huchas"), fetchCol("fondos_reservados"), fetchCol("movimientos")
@@ -391,6 +447,65 @@
                 renderStep(1);
             } catch (e) { console.error(e); }
         }
+
+        // --- SISTEMA DE CATÁLOGOS ---
+        function sincronizarDesbloqueos() {
+            Object.keys(CATALOGO_ICONOS).forEach(c => CATALOGO_ICONOS[c].forEach(i => i.desbloqueado = misIconos.includes(i.emoji)));
+            Object.keys(CATALOGO_COLORES).forEach(c => CATALOGO_COLORES[c].forEach(i => i.desbloqueado = misColores.includes(i.hex)));
+        }
+
+        window.abrirModalCatalogo = function(tipo) { 
+            renderizarAcordeon(tipo, tipo === 'iconos' ? CATALOGO_ICONOS : CATALOGO_COLORES, tipo === 'iconos' ? selIc : selCo); 
+            abrirModal(`modal-selector-${tipo}`); 
+        };
+        
+        window.toggleAcordeon = function(id) {
+            const c = document.getElementById(id); const f = document.getElementById(id + '-flecha');
+            if (c.style.display === 'none' || !c.style.display) { c.style.display = 'block'; f.textContent = '▲'; } 
+            else { c.style.display = 'none'; f.textContent = '▼'; }
+        };
+
+        function renderizarAcordeon(tipo, catalogo, selAct) {
+            let html = "";
+            Object.keys(catalogo).forEach((cat, idx) => {
+                let opn = idx === 0 ? 'open' : ''; let flc = idx === 0 ? '▲' : '▼';
+                html += `<div class="acordeon-header" onclick="toggleAcordeon('${tipo}-${cat}')"><span>${cat}</span> <span id="${tipo}-${cat}-flecha">${flc}</span></div>
+                         <div class="acordeon-content ${opn}" id="${tipo}-${cat}"><div class="modal-grid-container">`;
+                catalogo[cat].forEach(i => {
+                    let isL = !i.desbloqueado; let isS = (tipo === 'iconos' ? i.emoji===selAct : i.hex===selAct);
+                    let vItem = tipo === 'iconos' ? i.emoji : i.hex;
+                    if (tipo === 'iconos') {
+                        let okA = isL ? `mostrarAlertaBloqueado('¡Consigue este icono en la tienda!')` : `seleccionarValorGlobal('iconos', '${vItem}')`;
+                        html += `<div class="modal-opt-item ${isL?'locked':''} ${isS?'selected':''}" data-val="${vItem}" onclick="${okA}">${i.emoji}</div>`;
+                    } else {
+                        let okA = isL ? `mostrarAlertaBloqueado('¡Consigue este color en la tienda!')` : `seleccionarValorGlobal('colores', '${vItem}')`;
+                        html += `<div class="modal-opt-item color-item ${isL?'locked':''} ${isS?'selected':''}" data-val="${vItem}" style="background:${i.hex};" onclick="${okA}"></div>`;
+                    }
+                }); html += `</div></div>`;
+            }); document.getElementById(`contenedor-lista-${tipo}`).innerHTML = html;
+        }
+
+        window.mostrarAlertaBloqueado = function(msg) { document.getElementById('bloqueado-msg').textContent = msg; abrirModal('modal-alerta-bloqueado'); };
+
+        window.seleccionarValorGlobal = function(tipo, val) {
+            if (tipo === 'iconos') selIc = val; else selCo = val;
+            renderizarSelectoresInline();
+            const m = document.getElementById(`modal-selector-${tipo}`);
+            if (m) m.querySelectorAll('.modal-opt-item').forEach(el => { el.classList.remove('selected'); if(el.getAttribute('data-val')===val) el.classList.add('selected'); });
+        };
+
+        window.renderizarSelectoresInline = function() {
+            let htmlI = ''; CATALOGO_ICONOS.Básicos.forEach(i => { htmlI += `<div class="inline-opt-btn ${i.emoji===selIc?'selected':''}" onclick="seleccionarValorGlobal('iconos', '${i.emoji}')">${i.emoji}</div>`; });
+            if (!CATALOGO_ICONOS.Básicos.some(b => b.emoji === selIc)) htmlI += `<div class="inline-opt-btn selected">${selIc}</div>`;
+            htmlI += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('iconos')">+</div>`;
+            document.getElementById(`mc-iconos`).innerHTML = htmlI;
+
+            let htmlC = ''; CATALOGO_COLORES.Básicos.forEach(c => { htmlC += `<div class="inline-opt-btn color-btn ${c.hex===selCo?'selected':''}" style="background:${c.hex};" onclick="seleccionarValorGlobal('colores', '${c.hex}')"></div>`; });
+            if (!CATALOGO_COLORES.Básicos.some(b => b.hex === selCo)) htmlC += `<div class="inline-opt-btn color-btn selected" style="background:${selCo};"></div>`;
+            htmlC += `<div class="inline-opt-btn btn-mas" onclick="abrirModalCatalogo('colores')">+</div>`;
+            document.getElementById(`mc-colores`).innerHTML = htmlC;
+        };
+
 
         // --- PASO 1: RESUMEN ---
         function calcularResumenS1() {
@@ -483,10 +598,27 @@
         let currentS3Dis = 0; let currentS3Ret = 0;
         
         function renderS3() {
-            currentS3Dis = wiz.orig.fdis + wiz.s2.ahorroCat; currentS3Ret = wiz.orig.fret - wiz.s2.ahorroCat;
+            // Partimos de la base del paso 2 (Fondos Originales + el Ahorro de las Categorías devuelto a disponibles)
+            currentS3Dis = wiz.orig.fdis + wiz.s2.ahorroCat; 
+            currentS3Ret = wiz.orig.fret - wiz.s2.ahorroCat;
+            
+            // Calculamos cuánto retenido había ORIGINALMENTE en huchas y fondos
+            let baseHucFonOrig = 0;
+            wiz.orig.huchas.forEach(h => baseHucFonOrig += (Number(h.guardado)||0));
+            wiz.orig.fondos.forEach(f => baseHucFonOrig += (Number(f.guardado)||0));
+            
+            // Calculamos cuánto retenido hay AHORA MISMO en el draft (los creados nuevos suman, los borrados restan)
+            let draftHucFonAct = 0;
+            wiz.s3.draftHuchas.forEach(h => draftHucFonAct += (Number(h.guardado)||0));
+            wiz.s3.draftFondos.forEach(f => draftHucFonAct += (Number(f.guardado)||0));
+
+            // Aplicamos la diferencia global
+            currentS3Dis = currentS3Dis + baseHucFonOrig - draftHucFonAct;
+            currentS3Ret = currentS3Ret - baseHucFonOrig + draftHucFonAct;
+
             const renL = (arr, tipo) => {
                 let ht = ""; arr.forEach(i => {
-                    let g = Number(i.guardado)||0; currentS3Dis -= g; currentS3Ret += g; // Ajuste interno de proyección por aportes nuevos
+                    let g = Number(i.guardado)||0; 
                     ht += `<div class="list-item"><div class="item-icon" style="background:${i.color}20; color:${i.color};">${i.icono}</div>
                            <div class="item-details"><div class="item-title">${i.nombre}</div><div class="item-sub">Ahorro: ${g.toFixed(2)}€</div></div>
                            <button class="btn-icon-del" onclick="preDelItem('${i.id}','${tipo}')">X</button></div>`;
@@ -494,21 +626,6 @@
                 return ht || `<div style="text-align:center;color:#7F8C8D;font-size:12px;margin:10px 0;">No tienes elementos aquí.</div>`;
             };
             
-            // Recalculamos base
-            currentS3Dis = wiz.orig.fdis + wiz.s2.ahorroCat; currentS3Ret = wiz.orig.fret - wiz.s2.ahorroCat;
-            
-            // Restamos lo que ya estaba en retención original de huchas/fondos y sumamos el estado actual (para reflejar creaciones/borrados)
-            let baseHucFonOrig = 0;
-            wiz.orig.huchas.forEach(h => baseHucFonOrig += (Number(h.guardado)||0));
-            wiz.orig.fondos.forEach(f => baseHucFonOrig += (Number(f.guardado)||0));
-            
-            let draftHucFonAct = 0;
-            wiz.s3.draftHuchas.forEach(h => draftHucFonAct += (Number(h.guardado)||0));
-            wiz.s3.draftFondos.forEach(f => draftHucFonAct += (Number(f.guardado)||0));
-
-            currentS3Dis = currentS3Dis + baseHucFonOrig - draftHucFonAct;
-            currentS3Ret = currentS3Ret - baseHucFonOrig + draftHucFonAct;
-
             document.getElementById('s3-list-huchas').innerHTML = renL(wiz.s3.draftHuchas, 'hucha');
             document.getElementById('s3-list-fondos').innerHTML = renL(wiz.s3.draftFondos, 'fondo');
             updateProj(currentS3Dis, currentS3Ret);
@@ -518,14 +635,11 @@
             document.getElementById('mc-title').textContent = t==='hucha' ? 'Nueva Hucha' : 'Nuevo Fondo';
             document.getElementById('mc-type').value = t; document.getElementById('mc-nombre').value = '';
             document.getElementById('mc-aporte').value = ''; document.getElementById('mc-obj').value = ''; document.getElementById('mc-err').style.display='none';
-            document.getElementById('mc-iconos').children[0].click(); document.getElementById('mc-colores').children[0].click();
+            selIc = "🏠"; selCo = "#58D68D";
+            renderizarSelectoresInline();
             abrirModal('modal-crear-item');
         };
         
-        let selIc = "🏠", selCo = "#58D68D";
-        window.selIcon = el => { document.getElementById('mc-iconos').querySelectorAll('.inline-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); selIc = el.textContent; };
-        window.selCol = (el, c) => { document.getElementById('mc-colores').querySelectorAll('.inline-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); selCo = c; };
-
         window.guardarDraftItem = () => {
             let n = document.getElementById('mc-nombre').value.trim(); let ap = parseFloat(document.getElementById('mc-aporte').value)||0; let ob = parseFloat(document.getElementById('mc-obj').value)||null;
             let t = document.getElementById('mc-type').value; let er = document.getElementById('mc-err');
@@ -548,7 +662,7 @@
         window.toggleDistMode = () => {
             let m = document.querySelector('input[name="dist-mode"]:checked').value;
             document.getElementById('s4-dist-block').style.display = m==='repartir' ? 'flex' : 'none';
-            if(m==='mantener') { document.getElementById('dist-disp-input').value = currentS3Dis.toFixed(2); calcRestanteDist(); }
+            if(m==='mantener') { document.getElementById('dist-disp-input').value = currentS3Dis.toFixed(2); window.calcRestanteDist(); }
         };
 
         function renderS4() {
@@ -567,21 +681,33 @@
             document.getElementById('s4-dist-huchas').innerHTML = hHtml; document.getElementById('s4-dist-fondos').innerHTML = fHtml;
             document.getElementById('dist-huchas-card').style.display = hHtml ? 'flex' : 'none';
             document.getElementById('dist-fondos-card').style.display = fHtml ? 'flex' : 'none';
-            calcRestanteDist();
+            window.calcRestanteDist();
         }
 
         window.calcRestanteDist = () => {
             let m = document.querySelector('input[name="dist-mode"]:checked').value;
             let sum = 0; wiz.s4.asigHuc = {}; wiz.s4.asigFon = {};
+            let retenidoAñadido = 0;
+            
             if(m === 'repartir') {
-                sum += parseFloat(document.getElementById('dist-disp-input').value)||0; wiz.s4.asigDisp = sum;
+                wiz.s4.asigDisp = parseFloat(document.getElementById('dist-disp-input').value)||0;
+                sum += wiz.s4.asigDisp;
+                
                 document.querySelectorAll('.dist-inp').forEach(i => {
                     let v = parseFloat(i.value)||0; sum += v;
+                    retenidoAñadido += v; // El dinero puesto en huchas/fondos pasa a ser retenido
                     if(i.dataset.type==='hucha') wiz.s4.asigHuc[i.dataset.id] = v; else wiz.s4.asigFon[i.dataset.id] = v;
                 });
-            } else { sum = currentS3Dis; wiz.s4.asigDisp = sum; }
+            } else { 
+                sum = currentS3Dis; 
+                wiz.s4.asigDisp = sum; 
+            }
 
             wiz.s4.dispRestante = currentS3Dis - sum;
+
+            // ACTUALIZAR PROYECCIÓN ARRIBA EN TIEMPO REAL (Lo que mandamos a huchas se vuelve retenido)
+            updateProj(currentS3Dis - retenidoAñadido, currentS3Ret + retenidoAñadido);
+
             let rt = document.getElementById('s4-restante-txt');
             if(Math.abs(wiz.s4.dispRestante) < 0.01) { rt.textContent = "Has asignado todo exactamente."; rt.style.color = "var(--color-disponibles)"; }
             else if(wiz.s4.dispRestante > 0) { rt.textContent = `Faltan por asignar: ${wiz.s4.dispRestante.toFixed(2)}€`; rt.style.color = "var(--text-main)"; }
@@ -595,7 +721,7 @@
         function renderS5() {
             finalFdis = wiz.s4.asigDisp; finalFret = 0;
             wiz.s3.draftHuchas.forEach(h => { finalFret += (Number(h.guardado)||0) + (wiz.s4.asigHuc[h.id]||0); });
-            wiz.s3.draftFondos.forEach(f => { finalFret += (Number(f.guardado)||0) + (wiz.s4.asigFon[h.id]||0); });
+            wiz.s3.draftFondos.forEach(f => { finalFret += (Number(f.guardado)||0) + (wiz.s4.asigFon[f.id]||0); });
             finalFtot = finalFdis + finalFret;
 
             document.getElementById('s5-txt-huchas').textContent = `${wiz.s3.draftHuchas.length} huchas activas.`;
@@ -610,81 +736,42 @@
             document.getElementById('global-loader').style.display = 'flex';
             try {
                 const batch = writeBatch(db);
-                
-                const mesCierre = new Date().getMonth(); // 0 es Enero, 11 es Diciembre
-                const anioCierre = new Date().getFullYear();
+                const mesCierre = new Date().getMonth(); const anioCierre = new Date().getFullYear();
                 
                 // 1. Crear el resumen del mes actual
                 const idMesActual = `mes_${anioCierre}_${mesCierre}`;
                 const histRef = doc(db, "usuarios", uidActual, "historial_mensual", idMesActual);
-                
-                const datosMes = { 
-                    mes: mesCierre, 
-                    anio: anioCierre, 
-                    ingresoNetoTotal: wiz.s1.ingTot, 
-                    ingresoNominaNeto: wiz.s1.ingNom, 
-                    ingresoNominaBruto: wiz.s1.ingBru, 
-                    retencionIRPF: wiz.s1.irpf, 
-                    retencionSS: wiz.s1.ss, 
-                    otrasRetenciones: wiz.s1.otr, 
-                    gastoTotal: wiz.s1.gasTot 
-                };
-                
-                // Guardamos el mes (Por defecto)
+                const datosMes = { mes: mesCierre, anio: anioCierre, ingresoNetoTotal: wiz.s1.ingTot, ingresoNominaNeto: wiz.s1.ingNom, ingresoNominaBruto: wiz.s1.ingBru, retencionIRPF: wiz.s1.irpf, retencionSS: wiz.s1.ss, otrasRetenciones: wiz.s1.otr, gastoTotal: wiz.s1.gasTot };
                 batch.set(histRef, datosMes);
 
                 // --- MAGIA: COMPRESIÓN ANUAL SI ES DICIEMBRE (Mes 11) ---
                 if (mesCierre === 11) {
                     const mesesSnapshot = await getDocs(collection(db, "usuarios", uidActual, "historial_mensual"));
-                    let sumaAnual = { ...datosMes }; // Empezamos sumando diciembre
-                    
+                    let sumaAnual = { ...datosMes }; 
                     mesesSnapshot.forEach(docSnap => {
                         let d = docSnap.data();
-                        // Si el mes es de este año y no es el diciembre actual...
                         if (d.anio === anioCierre && docSnap.id !== idMesActual) {
-                            // Sumamos todos los valores de los meses anteriores
-                            sumaAnual.ingresoNetoTotal += (d.ingresoNetoTotal || 0);
-                            sumaAnual.ingresoNominaNeto += (d.ingresoNominaNeto || 0);
-                            sumaAnual.ingresoNominaBruto += (d.ingresoNominaBruto || 0);
-                            sumaAnual.retencionIRPF += (d.retencionIRPF || 0);
-                            sumaAnual.retencionSS += (d.retencionSS || 0);
-                            sumaAnual.otrasRetenciones += (d.otrasRetenciones || 0);
-                            sumaAnual.gastoTotal += (d.gastoTotal || 0);
-                            
-                            // Borramos ese mes antiguo para limpiar la base de datos
+                            sumaAnual.ingresoNetoTotal += (d.ingresoNetoTotal || 0); sumaAnual.ingresoNominaNeto += (d.ingresoNominaNeto || 0); sumaAnual.ingresoNominaBruto += (d.ingresoNominaBruto || 0);
+                            sumaAnual.retencionIRPF += (d.retencionIRPF || 0); sumaAnual.retencionSS += (d.retencionSS || 0); sumaAnual.otrasRetenciones += (d.otrasRetenciones || 0); sumaAnual.gastoTotal += (d.gastoTotal || 0);
                             batch.delete(docSnap.ref); 
                         }
                     });
-                    
-                    // Borramos también el registro de diciembre mensual (para que no quede suelto)
                     batch.delete(histRef); 
-                    
-                    // Guardamos el "Super Bloque" anual
                     const anualRef = doc(db, "usuarios", uidActual, "historial_anual", `anio_${anioCierre}`);
-                    batch.set(anualRef, {
-                        anio: anioCierre,
-                        ingresoNetoTotal: sumaAnual.ingresoNetoTotal,
-                        ingresoNominaNeto: sumaAnual.ingresoNominaNeto,
-                        ingresoNominaBruto: sumaAnual.ingresoNominaBruto,
-                        retencionIRPF: sumaAnual.retencionIRPF,
-                        retencionSS: sumaAnual.retencionSS,
-                        otrasRetenciones: sumaAnual.otrasRetenciones,
-                        gastoTotal: sumaAnual.gastoTotal
-                    });
+                    batch.set(anualRef, { anio: anioCierre, ingresoNetoTotal: sumaAnual.ingresoNetoTotal, ingresoNominaNeto: sumaAnual.ingresoNominaNeto, ingresoNominaBruto: sumaAnual.ingresoNominaBruto, retencionIRPF: sumaAnual.retencionIRPF, retencionSS: sumaAnual.retencionSS, otrasRetenciones: sumaAnual.otrasRetenciones, gastoTotal: sumaAnual.gastoTotal });
                 }
-                // --------------------------------------------------------
 
-                // 2. Borrar movimientos del mes para reiniciar el dashboard
+                // 2. Borrar movimientos del mes
                 movimientos.filter(m => new Date(m.fecha).getMonth() === mesCierre && new Date(m.fecha).getFullYear() === anioCierre).forEach(m => { batch.delete(doc(db, "usuarios", uidActual, "movimientos", m.id)); });
 
                 // 3. Reset categorías (Gastado = 0)
                 wiz.orig.cats.forEach(c => { batch.update(doc(db, "usuarios", uidActual, "categorias", c.id), { gastado: 0 }); });
 
-                // 4. Gestión CRUD Huchas (Guardar decisiones del asistente)
+                // 4. Gestión CRUD Huchas
                 wiz.orig.huchas.forEach(hOrig => {
                     let d = wiz.s3.draftHuchas.find(x => x.id === hOrig.id);
-                    if(!d) batch.delete(doc(db, "usuarios", uidActual, "huchas", hOrig.id)); // Eliminada
-                    else { let gNuevo = (Number(d.guardado)||0) + (wiz.s4.asigHuc[d.id]||0); batch.update(doc(db, "usuarios", uidActual, "huchas", hOrig.id), { guardado: gNuevo }); } // Actualizada
+                    if(!d) batch.delete(doc(db, "usuarios", uidActual, "huchas", hOrig.id)); 
+                    else { let gNuevo = (Number(d.guardado)||0) + (wiz.s4.asigHuc[d.id]||0); batch.update(doc(db, "usuarios", uidActual, "huchas", hOrig.id), { guardado: gNuevo }); } 
                 });
                 wiz.s3.draftHuchas.filter(x => x.isNew).forEach(n => {
                     let gNuevo = (Number(n.guardado)||0) + (wiz.s4.asigHuc[n.id]||0);
@@ -702,17 +789,14 @@
                     batch.set(doc(collection(db, "usuarios", uidActual, "fondos_reservados")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: null });
                 });
 
-                // 6. Actualizar Totales Globales (El dinero real)
+                // 6. Actualizar Totales Globales
                 batch.update(doc(db, "usuarios", uidActual), { fondosTotales: finalFtot, fondosDisponibles: finalFdis, fondosRetenidos: finalFret });
 
                 await batch.commit();
                 document.getElementById('global-loader').style.display = 'none';
-                document.getElementById('welcome-screen').style.display = 'flex'; // ¡Bienvenida al nuevo mes!
+                document.getElementById('welcome-screen').style.display = 'flex'; 
 
-            } catch(e) { 
-                alert("Error al cerrar el mes: "+e.message); 
-                document.getElementById('global-loader').style.display = 'none'; 
-            }
+            } catch(e) { alert("Error al cerrar el mes: "+e.message); document.getElementById('global-loader').style.display = 'none'; }
         }
 
         // --- PRIMER INGRESO ---
@@ -732,7 +816,6 @@
                 
                 let monGan = Math.floor(imp / 10) * 5; let nMon = (datosUsuario.monedas||0) + monGan;
                 
-                // Actualizar nuevo disponible sobre el calculado en el cierre (finalFdis + imp)
                 await updateDoc(doc(db, "usuarios", uidActual), { fondosTotales: finalFtot + imp, fondosDisponibles: finalFdis + imp, monedas: nMon });
                 
                 cerrarModal('modal-primer-ingreso');
