@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Asistente de Cierre</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9; --text-main: #2C3E50;
+            --color-disponibles: #27AE60; --color-retenidos: #E74C3C;
+            --color-totales: #D4AC0D; --card-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        }
+        button, input, select { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
+
+        /* LOADER */
+        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--color-disponibles); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* WIZARD HEADER */
+        .wizard-header { position: fixed; top: 0; left: 0; width: 100%; background: var(--card-bg); z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; padding-bottom: 10px; }
+        .wizard-topbar { display: flex; justify-content: center; align-items: center; padding: 15px; position: relative; }
+        .wizard-title { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-close-wizard { position: absolute; left: 15px; font-size: 24px; color: #7F8C8D; text-decoration: none; font-weight: bold; }
+        
+        .progress-container { width: 90%; max-width: 450px; margin: 0 auto; height: 8px; background: #E5E7E9; border-radius: 4px; overflow: hidden; display: flex; }
+        .progress-fill { height: 100%; background: var(--text-main); transition: width 0.3s ease; }
+        .step-indicator { text-align: center; font-size: 11px; font-weight: bold; color: #7F8C8D; margin-top: 5px; }
+
+        /* PROJECTION PANEL (STICKY) */
+        .projection-panel { background: var(--text-main); color: white; padding: 10px 15px; display: flex; justify-content: space-around; font-size: 12px; font-weight: bold; }
+        .proj-item { display: flex; flex-direction: column; align-items: center; }
+        .proj-val { font-size: 15px; color: #F4D03F; }
+
+        /* CONTENT AREA */
+        .wizard-content { position: fixed; top: 125px; bottom: 80px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; overflow-y: auto; padding: 15px; box-sizing: border-box; display: none; flex-direction: column; gap: 15px; }
+        .wizard-content.active { display: flex; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px) translateY(-50%); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+        /* CARDS & UI ELEMENTS */
+        .info-card { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #E5E7E9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; }
+        .card-header { font-size: 15px; font-weight: bold; color: var(--text-main); border-bottom: 2px solid #F4F6F9; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .data-row { display: flex; justify-content: space-between; font-size: 13px; align-items: center; }
+        .data-row.main { font-size: 15px; font-weight: bold; }
+        .data-row.sub { color: #555; padding-left: 10px; }
+        .data-row.highlight { background: #F8F9F9; padding: 8px; border-radius: 6px; font-weight: bold; border-left: 3px solid var(--text-main); }
+        .divider { height: 1px; background: #E5E7E9; margin: 4px 0; }
+        
+        .list-item { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #E5E7E9; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .item-icon { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .item-details { flex: 1; margin: 0 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .item-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-sub { font-size: 11px; color: #7F8C8D; font-weight: bold; }
+        .btn-icon-del { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--color-retenidos); color: var(--color-retenidos); background: transparent; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        
+        .fab-add { width: 100%; background: #F4F6F9; border: 2px dashed #BDC3C7; color: var(--text-main); font-weight: bold; padding: 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; }
+
+        /* WIZARD FOOTER */
+        .wizard-footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--card-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; padding: 0 20px; box-sizing: border-box; z-index: 100; gap: 15px; }
+        .btn-nav { flex: 1; max-width: 200px; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; text-transform: uppercase; }
+        .btn-prev { background: transparent; border: 2px solid #BDC3C7; color: #7F8C8D; }
+        .btn-next { background: var(--text-main); border: none; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-confirm-final { background: var(--color-retenidos); border: none; color: white; }
+
+        /* MODALES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .modal-title { font-size: 18px; font-weight: bold; text-align: center; margin: 0; }
+        .field-wrapper { display: flex; flex-direction: column; gap: 6px; }
+        .field-wrapper label { font-size: 12px; font-weight: bold; }
+        .field-wrapper input, .field-wrapper select { padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-modal-cancel { flex: 1; padding: 12px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-modal-ok { flex: 1; padding: 12px; border: none; background: var(--text-main); color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .inline-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+        .inline-opt { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #E5E7E9; cursor: pointer; flex-shrink: 0; }
+        .inline-opt.selected { border-color: #000; transform: scale(1.1); }
+
+        /* PANTALLA BIENVENIDA / TRANSICIÓN */
+        #welcome-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--text-main); color:white; z-index:50000; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; }
+        .welcome-icon { font-size: 80px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader"><div class="spinner"></div></div>
+
+    <!-- WIZARD HEADER -->
+    <header class="wizard-header">
+        <div class="wizard-topbar">
+            <a href="dashboard.html" class="btn-close-wizard">×</a>
+            <div class="wizard-title">Asistente de Cierre</div>
+        </div>
+        <div class="progress-container"><div class="progress-fill" id="prog-fill" style="width: 20%;"></div></div>
+        <div class="step-indicator" id="prog-text">Paso 1 de 5</div>
+        
+        <div class="projection-panel" id="projection-panel" style="display:none;">
+            <div class="proj-item"><span>Totales</span><span class="proj-val" id="proj-tot">0.00€</span></div>
+            <div class="proj-item"><span>Disponibles</span><span class="proj-val" id="proj-dis" style="color:var(--color-disponibles);">0.00€</span></div>
+            <div class="proj-item"><span>Retenidos</span><span class="proj-val" id="proj-ret" style="color:#E74C3C;">0.00€</span></div>
+        </div>
+    </header>
+
+    <!-- STEP 1: RESUMEN DEL MES -->
+    <div class="wizard-content active" id="step-1">
+        <h2 style="font-size:16px; margin:0; color:var(--text-main); text-align:center;">1. RESUMEN DEL MES</h2>
+        <p style="font-size:13px; color:#555; text-align:center; margin:0;">Estos son los datos que se guardarán en tu historial para este mes.</p>
+        
+        <div class="info-card">
+            <div class="card-header" style="color:var(--color-disponibles);">Ingresos Registrados</div>
+            <div class="data-row main"><span>Total Ingresos</span> <span id="s1-ing-tot">0.00€</span></div>
+            <div class="data-row sub"><span>Nóminas/Autónomo:</span> <b id="s1-ing-nom">0.00€</b></div>
+            <div class="data-row sub"><span>Puntuales:</span> <b id="s1-ing-pun">0.00€</b></div>
+            <div class="divider"></div>
+            <div class="data-row highlight"><span>Total Bruto Nóminas</span> <span id="s1-bru-tot">0.00€</span></div>
+            <div class="data-row sub"><span>IRPF Retenido:</span> <b id="s1-irpf">0.00€</b></div>
+            <div class="data-row sub"><span>Seg. Social:</span> <b id="s1-ss">0.00€</b></div>
+            <div class="data-row sub"><span>Otras retenciones:</span> <b id="s1-otr">0.00€</b></div>
+        </div>
+
+        <div class="info-card">
+            <div class="card-header" style="color:var(--color-retenidos);">Gastos Registrados</div>
+            <div class="data-row main"><span>Total Gastado</span> <span id="s1-gas-tot">0.00€</span></div>
+            <div class="data-row sub"><span>En Categorías:</span> <b id="s1-gas-cat">0.00€</b></div>
+            <div class="data-row sub"><span>Imprevistos:</span> <b id="s1-gas-imp">0.00€</b></div>
+            <div class="data-row sub"><span>Desde Huchas:</span> <b id="s1-gas-huc">0.00€</b></div>
+            <div class="data-row sub"><span>Desde Fondos:</span> <b id="s1-gas-fon">0.00€</b></div>
+        </div>
+        
+        <div class="info-card" style="background:#F4F6F9;">
+            <div class="card-header">Situación Actual</div>
+            <div class="data-row"><span>Fondos Totales:</span> <b id="s1-ftot">0.00€</b></div>
+            <div class="data-row"><span>Disponibles:</span> <b id="s1-fdis" style="color:var(--color-disponibles);">0.00€</b></div>
+            <div class="data-row"><span>Retenidos:</span> <b id="s1-fret" style="color:var(--color-retenidos);">0.00€</b></div>
+        </div>
+    </div>
+
+    <!-- STEP 2: AHORRO EN CATEGORÍAS -->
+    <div class="wizard-content" id="step-2">
+        <h2 style="font-size:16px; margin:0; color:var(--text-main); text-align:center;">2. AHORRO EN CATEGORÍAS</h2>
+        <p style="font-size:13px; color:#555; text-align:center; margin:0;">El dinero no gastado en tus presupuestos vuelve a tus Fondos Disponibles para que puedas reasignarlo.</p>
+        
+        <div id="s2-list-cats" style="display:flex; flex-direction:column; gap:8px;"></div>
+        
+        <div class="info-card" style="background:var(--text-main); color:white; border:none;">
+            <div class="data-row" style="font-size:16px;"><span>Ahorro Total Recuperado:</span> <b id="s2-ahorro-tot" style="color:var(--color-disponibles);">0.00€</b></div>
+        </div>
+    </div>
+
+    <!-- STEP 3: GESTIÓN DE HUCHAS Y FONDOS -->
+    <div class="wizard-content" id="step-3">
+        <h2 style="font-size:16px; margin:0; color:var(--text-main); text-align:center;">3. HUCHAS Y FONDOS</h2>
+        <p style="font-size:13px; color:#555; text-align:center; margin:0;">Puedes crear nuevos objetivos o eliminar los que ya no necesites. Si eliminas, su dinero pasará a Disponibles.</p>
+        
+        <div class="info-card">
+            <div class="card-header">Huchas de Ahorro</div>
+            <div id="s3-list-huchas"></div>
+            <button class="fab-add" onclick="abrirCrearModal('hucha')">+ Crear nueva hucha</button>
+        </div>
+
+        <div class="info-card">
+            <div class="card-header">Fondos Reservados</div>
+            <div id="s3-list-fondos"></div>
+            <button class="fab-add" onclick="abrirCrearModal('fondo')">+ Crear nuevo fondo</button>
+        </div>
+    </div>
+
+    <!-- STEP 4: DISTRIBUCIÓN -->
+    <div class="wizard-content" id="step-4">
+        <h2 style="font-size:16px; margin:0; color:var(--text-main); text-align:center;">4. DISTRIBUIR DISPONIBLES</h2>
+        <p style="font-size:13px; color:#555; text-align:center; margin:0;">Tienes <b id="s4-disp-total" style="color:var(--color-disponibles);">0.00€</b> en Fondos Disponibles. ¿Qué deseas hacer con este dinero sobrante?</p>
+        
+        <div class="info-card" style="gap:15px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input type="radio" name="dist-mode" value="mantener" checked onchange="toggleDistMode()" style="width:18px; height:18px; accent-color:var(--text-main);">
+                <span style="font-size:14px; font-weight:bold;">Mantener todo en Disponibles</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input type="radio" name="dist-mode" value="repartir" onchange="toggleDistMode()" style="width:18px; height:18px; accent-color:var(--text-main);">
+                <span style="font-size:14px; font-weight:bold;">Repartir y asignar</span>
+            </label>
+        </div>
+
+        <div id="s4-dist-block" style="display:none; flex-direction:column; gap:15px;">
+            <div class="info-card">
+                <div class="card-header">Dejar en Disponibles</div>
+                <input type="number" id="dist-disp-input" placeholder="0.00" min="0" step="0.01" style="padding:12px; border:1px solid #D5D8DC; border-radius:8px; font-size:15px; width:100%; box-sizing:border-box;" oninput="calcRestanteDist()">
+            </div>
+            
+            <div class="info-card" id="dist-huchas-card" style="display:none;">
+                <div class="card-header">Aportar a Huchas</div>
+                <div id="s4-dist-huchas"></div>
+            </div>
+
+            <div class="info-card" id="dist-fondos-card" style="display:none;">
+                <div class="card-header">Aportar a Fondos</div>
+                <div id="s4-dist-fondos"></div>
+            </div>
+
+            <div style="text-align:center; font-weight:bold; font-size:16px; padding:10px; background:white; border-radius:8px; position:sticky; bottom:0; box-shadow:0 -4px 10px rgba(0,0,0,0.05);" id="s4-restante-txt">
+                Faltan por asignar: 0.00€
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 5: CONFIRMACIÓN -->
+    <div class="wizard-content" id="step-5">
+        <h2 style="font-size:16px; margin:0; color:var(--text-main); text-align:center;">5. CONFIRMAR CIERRE</h2>
+        <p style="font-size:13px; color:#555; text-align:center; margin:0;">Revisa cómo quedará la aplicación. Al confirmar, se guardará el mes en el historial y comenzará el nuevo periodo.</p>
+        
+        <div class="info-card">
+            <div class="card-header">Resumen de Operaciones</div>
+            <ul style="font-size:13px; color:#555; padding-left:20px; margin:5px 0;">
+                <li>Gastos de Presupuestos e Imprevistos borrados (Puestos a 0€).</li>
+                <li>Mes guardado en el Historial Anual.</li>
+                <li id="s5-txt-huchas"></li>
+                <li id="s5-txt-fondos"></li>
+            </ul>
+        </div>
+
+        <div class="info-card" style="background:#F8F9F9; border:2px solid var(--color-disponibles);">
+            <div class="card-header" style="color:var(--color-disponibles);">Balance Inicial Próximo Mes</div>
+            <div class="data-row main"><span>Gastos Mensuales:</span> <b>0.00€</b></div>
+            <div class="divider"></div>
+            <div class="data-row"><span>Fondos Totales:</span> <b id="s5-ftot">0.00€</b></div>
+            <div class="data-row"><span>Fondos Disponibles:</span> <b id="s5-fdis" style="color:var(--color-disponibles);">0.00€</b></div>
+            <div class="data-row"><span>Fondos Retenidos:</span> <b id="s5-fret" style="color:var(--color-retenidos);">0.00€</b></div>
+        </div>
+    </div>
+
+    <!-- WIZARD FOOTER -->
+    <div class="wizard-footer">
+        <button class="btn-nav btn-prev" id="btn-prev" onclick="goPrev()">Atrás</button>
+        <button class="btn-nav btn-next" id="btn-next" onclick="goNext()">Siguiente</button>
+    </div>
+
+    <!-- MODAL CREAR ITEM (PASO 3) -->
+    <div class="modal-overlay" id="modal-crear-item">
+        <div class="modal-content">
+            <h3 class="modal-title" id="mc-title">Crear Nuevo</h3>
+            <input type="hidden" id="mc-type">
+            
+            <div class="field-wrapper"><label>Título *</label><input type="text" id="mc-nombre" placeholder="Ej: Viaje a Japón"></div>
+            <div class="field-wrapper"><label>Icono</label>
+                <div class="inline-selector" id="mc-iconos">
+                    <div class="inline-opt selected" onclick="selIcon(this)">🏠</div><div class="inline-opt" onclick="selIcon(this)">🚗</div><div class="inline-opt" onclick="selIcon(this)">🛒</div><div class="inline-opt" onclick="selIcon(this)">✈️</div><div class="inline-opt" onclick="selIcon(this)">💻</div>
+                </div>
+            </div>
+            <div class="field-wrapper"><label>Color</label>
+                <div class="inline-selector" id="mc-colores">
+                    <div class="inline-opt selected" style="background:#58D68D;" onclick="selCol(this, '#58D68D')"></div><div class="inline-opt" style="background:#5DADE2;" onclick="selCol(this, '#5DADE2')"></div><div class="inline-opt" style="background:#F4D03F;" onclick="selCol(this, '#F4D03F')"></div><div class="inline-opt" style="background:#E74C3C;" onclick="selCol(this, '#E74C3C')"></div><div class="inline-opt" style="background:#9B59B6;" onclick="selCol(this, '#9B59B6')"></div>
+                </div>
+            </div>
+            <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="mc-aporte" placeholder="0.00" min="0" step="0.01"></div>
+            <div class="field-wrapper"><label>Objetivo (Opcional)</label><input type="number" id="mc-obj" placeholder="0.00" min="0" step="0.01"></div>
+            
+            <p id="mc-err" style="color:var(--color-retenidos); font-size:12px; font-weight:bold; display:none; text-align:center; margin:0;"></p>
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modal-crear-item')">Cancelar</button>
+                <button class="btn-modal-ok" onclick="guardarDraftItem()">CREAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DOBLE CONFIRMAR BORRADO (PASO 3) -->
+    <div class="modal-overlay" id="modal-del-item">
+        <div class="modal-content" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:5px;">⚠️</div>
+            <h3 class="modal-title" style="color:var(--color-retenidos);">¿Eliminar elemento?</h3>
+            <p style="font-size:13px; color:#555;">El dinero guardado en su interior pasará a tus Fondos Disponibles.</p>
+            <input type="hidden" id="md-id"><input type="hidden" id="md-type">
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modal-del-item')">Cancelar</button>
+                <button class="btn-modal-ok" style="background:var(--color-retenidos);" onclick="confirmDelItem()">SÍ, ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA BIENVENIDA Y PRIMER INGRESO -->
+    <div id="welcome-screen">
+        <div class="welcome-icon">✨</div>
+        <h1 style="margin:0;">¡Mes Cerrado!</h1>
+        <p style="font-size:16px; margin-top:10px;">Tu historial se ha guardado correctamente y la app está lista para el nuevo periodo.</p>
+        <button style="margin-top:30px; background:white; color:var(--text-main); font-weight:bold; padding:15px 30px; border-radius:25px; border:none; font-size:16px; cursor:pointer;" onclick="mostrarModalPrimerIngreso()">Continuar</button>
+    </div>
+
+    <!-- MODAL PRIMER INGRESO -->
+    <div class="modal-overlay" id="modal-primer-ingreso">
+        <div class="modal-content" style="text-align:left;">
+            <h3 class="modal-title" style="color:var(--color-disponibles);">Primer Ingreso del Mes</h3>
+            <p style="font-size:13px; color:#555; text-align:center;">¿Deseas registrar ya tu primer ingreso de este nuevo mes o prefieres hacerlo más tarde?</p>
+            
+            <div class="field-wrapper"><label>Tipo de ingreso *</label><select id="ing-tipo"><option value="">Selecciona...</option><option value="Nómina de trabajo">Nómina de trabajo</option><option value="Ingreso puntual">Ingreso puntual</option><option value="Ingreso autónomo">Ingreso autónomo</option></select></div>
+            <div class="field-wrapper"><label>Concepto *</label><input type="text" id="ing-concepto" placeholder="Ej: Nómina"></div>
+            <div class="field-wrapper"><label>Importe neto *</label><input type="number" id="ing-importe" placeholder="0.00" min="0.01" step="0.01"></div>
+            <div class="field-wrapper"><label>Importe bruto (Opcional)</label><input type="number" id="ing-bruto" placeholder="0.00" min="0" step="0.01"></div>
+            
+            <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+                <input type="checkbox" id="check-nomina" style="width:18px; height:18px;" onchange="document.getElementById('bloque-nomina').style.display=this.checked?'flex':'none';">
+                <label for="check-nomina" style="font-size: 13px;">Rellenar retenciones (IRPF, SS...)</label>
+            </div>
+            <div id="bloque-nomina" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+                <div class="field-wrapper"><label>% IRPF aplicado</label><input type="number" id="ing-irpf-pct" step="0.01"></div>
+                <div class="field-wrapper"><label>IRPF retenido (€)</label><input type="number" id="ing-irpf-eur" step="0.01"></div>
+                <div class="field-wrapper"><label>Seg. Social (€)</label><input type="number" id="ing-ss" step="0.01"></div>
+                <div class="field-wrapper"><label>Otras Ret. (€)</label><input type="number" id="ing-otras" step="0.01"></div>
+            </div>
+
+            <p id="err-ing" style="color:var(--color-retenidos); font-size:12px; font-weight:bold; display:none; text-align:center;"></p>
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="window.location.href='dashboard.html'">Saltar</button>
+                <button class="btn-modal-ok" style="background:var(--color-disponibles);" onclick="guardarPrimerIngreso()" id="btn-g-ing">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FELICITACIÓN MONEDAS -->
+    <div class="modal-overlay" id="modal-feli-monedas" style="z-index: 25000;">
+        <div class="modal-content" style="border-top: 5px solid #F1C40F; text-align: center; max-width: 320px;">
+            <div style="font-size: 55px; margin-bottom: 5px; filter: drop-shadow(0px 4px 6px rgba(241, 196, 15, 0.4));">🪙</div>
+            <h3 class="modal-title" style="color: #F1C40F; font-size: 22px;">¡Felicidades!</h3>
+            <p style="color:var(--text-main); font-size:15px; margin-top:15px; font-weight:bold; line-height: 1.4;">Has conseguido <span id="f-mon" style="color:#F1C40F; font-size:18px;"></span> monedas por tu ingreso de <span id="f-imp" style="color:var(--color-disponibles); font-size:16px;"></span>€.</p>
+            <p style="color:#7F8C8D; font-size:13px; margin-bottom:0;">¡Úsalas para comprar en la tienda!</p>
+            <div style="background:#F4F6F9; padding:12px; border-radius:10px; margin-top:15px; font-weight:bold; font-size:14px; border: 1px solid #E5E7E9;">Total acumulado: <span style="color:#F1C40F; font-size:16px;">🪙 <span id="f-tot"></span></span></div>
+            <div style="margin-top: 20px;">
+                <button style="width: 100%; background: linear-gradient(135deg, #F1C40F, #F39C12); color: white; border: none; padding: 15px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4);" onclick="window.location.href='dashboard.html'">¡GENIAL!</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        let uidActual = null; let datosUsuario = null;
+        let movimientos = []; 
+        let currentStep = 1;
+
+        // Estado en memoria del asistente
+        let wiz = {
+            orig: { ftot:0, fdis:0, fret:0, cats:[], huchas:[], fondos:[] },
+            s1: { ingTot:0, ingNom:0, ingPun:0, ingBru:0, irpf:0, ss:0, otr:0, gasTot:0, gasCat:0, gasImp:0, gasHuc:0, gasFon:0 },
+            s2: { ahorroCat:0 },
+            s3: { draftHuchas:[], draftFondos:[] }, // Items vivos (existentes + nuevos - borrados)
+            s4: { dispRestante:0, asigHuc:{}, asigFon:{}, asigDisp:0 } // Repartos
+        };
+
+        // UI Helpers
+        window.abrirModal = id => { document.getElementById(id).style.display = 'flex'; };
+        window.cerrarModal = id => { document.getElementById(id).style.display = 'none'; };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) { uidActual = user.uid; await cargarDatos(); } 
+            else { window.location.href = 'index.html'; }
+        });
+
+        async function fetchCol(colName) {
+            let a = []; const q = await getDocs(collection(db, "usuarios", uidActual, colName));
+            q.forEach(d => a.push({ id: d.id, ...d.data() })); return a;
+        }
+
+        async function cargarDatos() {
+            try {
+                const uDoc = await getDoc(doc(db, "usuarios", uidActual));
+                datosUsuario = uDoc.data() || {};
+                wiz.orig.ftot = datosUsuario.fondosTotales || 0;
+                wiz.orig.fdis = datosUsuario.fondosDisponibles || 0;
+                wiz.orig.fret = datosUsuario.fondosRetenidos || 0;
+
+                [wiz.orig.cats, wiz.orig.huchas, wiz.orig.fondos, movimientos] = await Promise.all([
+                    fetchCol("categorias"), fetchCol("huchas"), fetchCol("fondos_reservados"), fetchCol("movimientos")
+                ]);
+                
+                // Deep copy para el draft
+                wiz.s3.draftHuchas = JSON.parse(JSON.stringify(wiz.orig.huchas));
+                wiz.s3.draftFondos = JSON.parse(JSON.stringify(wiz.orig.fondos));
+
+                calcularResumenS1();
+                document.getElementById('global-loader').style.display = 'none';
+                renderStep(1);
+            } catch (e) { console.error(e); }
+        }
+
+        // --- PASO 1: RESUMEN ---
+        function calcularResumenS1() {
+            const f = new Date(); const mAct = f.getMonth(); const aAct = f.getFullYear();
+            const mMes = movimientos.filter(m => new Date(m.fecha).getMonth() === mAct && new Date(m.fecha).getFullYear() === aAct);
+            
+            let s1 = wiz.s1;
+            mMes.forEach(m => {
+                if (m.tipo === 'ingreso' && !m.subtipo?.includes('devolución')) {
+                    s1.ingTot += m.importe;
+                    if (m.subtipo === 'Nómina de trabajo' || m.subtipo === 'Ingreso autónomo') {
+                        s1.ingNom += m.importe; s1.ingBru += (m.importeBruto || m.importe);
+                        if (m.conceptosNomina) { s1.irpf += (m.conceptosNomina.irpfRetenido||0); s1.ss += (m.conceptosNomina.seguridadSocial||0); s1.otr += (m.conceptosNomina.otrasRetenciones||0); }
+                    } else { s1.ingPun += m.importe; }
+                } else if (m.tipo === 'gasto' && !['fondo','hucha','reubicacion'].includes(m.subtipo)) {
+                    s1.gasTot += m.importe;
+                    if (m.categoriaId || m.subtipo === 'categoria' || m.subtipo === 'categoría') s1.gasCat += m.importe;
+                    else if (m.subtipo === 'imprevisto') s1.gasImp += m.importe;
+                    else if (m.huchaId || m.subtipo?.includes('hucha')) s1.gasHuc += m.importe;
+                    else if (m.fondoId || m.subtipo?.includes('fondo')) s1.gasFon += m.importe;
+                }
+            });
+
+            document.getElementById('s1-ing-tot').textContent = s1.ingTot.toFixed(2)+"€";
+            document.getElementById('s1-ing-nom').textContent = s1.ingNom.toFixed(2)+"€";
+            document.getElementById('s1-ing-pun').textContent = s1.ingPun.toFixed(2)+"€";
+            document.getElementById('s1-bru-tot').textContent = s1.ingBru.toFixed(2)+"€";
+            document.getElementById('s1-irpf').textContent = s1.irpf.toFixed(2)+"€";
+            document.getElementById('s1-ss').textContent = s1.ss.toFixed(2)+"€";
+            document.getElementById('s1-otr').textContent = s1.otr.toFixed(2)+"€";
+            
+            document.getElementById('s1-gas-tot').textContent = s1.gasTot.toFixed(2)+"€";
+            document.getElementById('s1-gas-cat').textContent = s1.gasCat.toFixed(2)+"€";
+            document.getElementById('s1-gas-imp').textContent = s1.gasImp.toFixed(2)+"€";
+            document.getElementById('s1-gas-huc').textContent = s1.gasHuc.toFixed(2)+"€";
+            document.getElementById('s1-gas-fon').textContent = s1.gasFon.toFixed(2)+"€";
+
+            document.getElementById('s1-ftot').textContent = wiz.orig.ftot.toFixed(2)+"€";
+            document.getElementById('s1-fdis').textContent = wiz.orig.fdis.toFixed(2)+"€";
+            document.getElementById('s1-fret').textContent = wiz.orig.fret.toFixed(2)+"€";
+        }
+
+        // --- NAVEGACIÓN ---
+        window.goNext = () => { if(currentStep===4 && !validarS4()) return; if (currentStep < 5) { currentStep++; renderStep(currentStep); } else { ejecutarCierre(); } };
+        window.goPrev = () => { if (currentStep > 1) { currentStep--; renderStep(currentStep); } };
+
+        function renderStep(step) {
+            document.querySelectorAll('.wizard-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+            document.getElementById('prog-fill').style.width = (step * 20) + '%';
+            document.getElementById('prog-text').textContent = `Paso ${step} de 5`;
+            
+            document.getElementById('btn-prev').style.display = step === 1 ? 'none' : 'block';
+            const btnN = document.getElementById('btn-next');
+            if (step === 5) { btnN.textContent = "CONFIRMAR CIERRE"; btnN.classList.add('btn-confirm-final'); } 
+            else { btnN.textContent = "Siguiente"; btnN.classList.remove('btn-confirm-final'); }
+
+            const proj = document.getElementById('projection-panel');
+            if (step === 1) proj.style.display = 'none'; else proj.style.display = 'flex';
+
+            if(step === 2) calcRenderS2();
+            if(step === 3) renderS3();
+            if(step === 4) renderS4();
+            if(step === 5) renderS5();
+        }
+
+        function updateProj(dis, ret) {
+            document.getElementById('proj-tot').textContent = (dis + ret).toFixed(2)+"€";
+            document.getElementById('proj-dis').textContent = dis.toFixed(2)+"€";
+            document.getElementById('proj-ret').textContent = ret.toFixed(2)+"€";
+        }
+
+        // --- PASO 2: AHORRO CATS ---
+        function calcRenderS2() {
+            let h = ""; let ahTot = 0;
+            wiz.orig.cats.forEach(c => {
+                let max = Number(c.presupuestoMaximo)||0; let gas = Number(c.gastado)||0; let ah = Math.max(0, max - gas); ahTot += ah;
+                h += `<div class="list-item"><div class="item-icon" style="background:${c.color}20; color:${c.color};">${c.icono}</div>
+                      <div class="item-details"><div class="item-title">${c.nombre}</div><div class="item-sub">Máx: ${max.toFixed(2)}€ | Gasto: ${gas.toFixed(2)}€</div></div>
+                      <div style="font-size:14px; font-weight:bold; color:var(--color-disponibles);">+${ah.toFixed(2)}€</div></div>`;
+            });
+            if(wiz.orig.cats.length===0) h = "<div style='text-align:center;color:#7F8C8D;font-size:13px;'>No hay presupuestos registrados.</div>";
+            document.getElementById('s2-list-cats').innerHTML = h;
+            document.getElementById('s2-ahorro-tot').textContent = ahTot.toFixed(2)+"€";
+            wiz.s2.ahorroCat = ahTot;
+            updateProj(wiz.orig.fdis + ahTot, wiz.orig.fret - ahTot);
+        }
+
+        // --- PASO 3: GESTIÓN DE HUCHAS/FONDOS (Draft) ---
+        let currentS3Dis = 0; let currentS3Ret = 0;
+        
+        function renderS3() {
+            currentS3Dis = wiz.orig.fdis + wiz.s2.ahorroCat; currentS3Ret = wiz.orig.fret - wiz.s2.ahorroCat;
+            const renL = (arr, tipo) => {
+                let ht = ""; arr.forEach(i => {
+                    let g = Number(i.guardado)||0; currentS3Dis -= g; currentS3Ret += g; // Ajuste interno de proyección por aportes nuevos
+                    ht += `<div class="list-item"><div class="item-icon" style="background:${i.color}20; color:${i.color};">${i.icono}</div>
+                           <div class="item-details"><div class="item-title">${i.nombre}</div><div class="item-sub">Ahorro: ${g.toFixed(2)}€</div></div>
+                           <button class="btn-icon-del" onclick="preDelItem('${i.id}','${tipo}')">X</button></div>`;
+                });
+                return ht || `<div style="text-align:center;color:#7F8C8D;font-size:12px;margin:10px 0;">No tienes elementos aquí.</div>`;
+            };
+            
+            // Recalculamos base
+            currentS3Dis = wiz.orig.fdis + wiz.s2.ahorroCat; currentS3Ret = wiz.orig.fret - wiz.s2.ahorroCat;
+            
+            // Restamos lo que ya estaba en retención original de huchas/fondos y sumamos el estado actual (para reflejar creaciones/borrados)
+            let baseHucFonOrig = 0;
+            wiz.orig.huchas.forEach(h => baseHucFonOrig += (Number(h.guardado)||0));
+            wiz.orig.fondos.forEach(f => baseHucFonOrig += (Number(f.guardado)||0));
+            
+            let draftHucFonAct = 0;
+            wiz.s3.draftHuchas.forEach(h => draftHucFonAct += (Number(h.guardado)||0));
+            wiz.s3.draftFondos.forEach(f => draftHucFonAct += (Number(f.guardado)||0));
+
+            currentS3Dis = currentS3Dis + baseHucFonOrig - draftHucFonAct;
+            currentS3Ret = currentS3Ret - baseHucFonOrig + draftHucFonAct;
+
+            document.getElementById('s3-list-huchas').innerHTML = renL(wiz.s3.draftHuchas, 'hucha');
+            document.getElementById('s3-list-fondos').innerHTML = renL(wiz.s3.draftFondos, 'fondo');
+            updateProj(currentS3Dis, currentS3Ret);
+        }
+
+        window.abrirCrearModal = t => {
+            document.getElementById('mc-title').textContent = t==='hucha' ? 'Nueva Hucha' : 'Nuevo Fondo';
+            document.getElementById('mc-type').value = t; document.getElementById('mc-nombre').value = '';
+            document.getElementById('mc-aporte').value = ''; document.getElementById('mc-obj').value = ''; document.getElementById('mc-err').style.display='none';
+            document.getElementById('mc-iconos').children[0].click(); document.getElementById('mc-colores').children[0].click();
+            abrirModal('modal-crear-item');
+        };
+        
+        let selIc = "🏠", selCo = "#58D68D";
+        window.selIcon = el => { document.getElementById('mc-iconos').querySelectorAll('.inline-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); selIc = el.textContent; };
+        window.selCol = (el, c) => { document.getElementById('mc-colores').querySelectorAll('.inline-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); selCo = c; };
+
+        window.guardarDraftItem = () => {
+            let n = document.getElementById('mc-nombre').value.trim(); let ap = parseFloat(document.getElementById('mc-aporte').value)||0; let ob = parseFloat(document.getElementById('mc-obj').value)||null;
+            let t = document.getElementById('mc-type').value; let er = document.getElementById('mc-err');
+            if(!n) { er.textContent="Rellena el título."; er.style.display='block'; return; }
+            if(ap > currentS3Dis) { er.textContent="El aporte supera tus Fondos Disponibles proyectados."; er.style.display='block'; return; }
+            
+            let obj = { id: 'temp_'+Date.now(), nombre: n, icono: selIc, color: selCo, guardado: ap, objetivo: ob, isNew: true };
+            if(t==='hucha') wiz.s3.draftHuchas.push(obj); else wiz.s3.draftFondos.push(obj);
+            cerrarModal('modal-crear-item'); renderS3();
+        };
+
+        window.preDelItem = (id, t) => { document.getElementById('md-id').value = id; document.getElementById('md-type').value = t; abrirModal('modal-del-item'); };
+        window.confirmDelItem = () => {
+            let id = document.getElementById('md-id').value; let t = document.getElementById('md-type').value;
+            if(t==='hucha') wiz.s3.draftHuchas = wiz.s3.draftHuchas.filter(x=>x.id!==id); else wiz.s3.draftFondos = wiz.s3.draftFondos.filter(x=>x.id!==id);
+            cerrarModal('modal-del-item'); renderS3();
+        };
+
+        // --- PASO 4: DISTRIBUCIÓN ---
+        window.toggleDistMode = () => {
+            let m = document.querySelector('input[name="dist-mode"]:checked').value;
+            document.getElementById('s4-dist-block').style.display = m==='repartir' ? 'flex' : 'none';
+            if(m==='mantener') { document.getElementById('dist-disp-input').value = currentS3Dis.toFixed(2); calcRestanteDist(); }
+        };
+
+        function renderS4() {
+            document.getElementById('s4-disp-total').textContent = currentS3Dis.toFixed(2)+"€";
+            document.getElementById('dist-disp-input').value = currentS3Dis.toFixed(2);
+            document.querySelector('input[name="dist-mode"][value="mantener"]').click();
+            
+            const rL = (arr, prefix) => {
+                let ht = ""; arr.forEach(i => { ht += `<div class="data-row" style="margin-bottom:8px; background:#fff; padding:10px; border:1px solid #eee; border-radius:8px;">
+                    <span style="font-weight:bold; display:flex; align-items:center; gap:5px;"><span style="background:${i.color}20; color:${i.color}; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px;">${i.icono}</span> ${i.nombre}</span>
+                    <input type="number" class="dist-inp" data-id="${i.id}" data-type="${prefix}" placeholder="0.00" min="0" step="0.01" style="width:70px; padding:8px; font-size:13px; text-align:right;" oninput="calcRestanteDist()">
+                </div>`; }); return ht;
+            };
+
+            let hHtml = rL(wiz.s3.draftHuchas, 'hucha'); let fHtml = rL(wiz.s3.draftFondos, 'fondo');
+            document.getElementById('s4-dist-huchas').innerHTML = hHtml; document.getElementById('s4-dist-fondos').innerHTML = fHtml;
+            document.getElementById('dist-huchas-card').style.display = hHtml ? 'flex' : 'none';
+            document.getElementById('dist-fondos-card').style.display = fHtml ? 'flex' : 'none';
+            calcRestanteDist();
+        }
+
+        window.calcRestanteDist = () => {
+            let m = document.querySelector('input[name="dist-mode"]:checked').value;
+            let sum = 0; wiz.s4.asigHuc = {}; wiz.s4.asigFon = {};
+            if(m === 'repartir') {
+                sum += parseFloat(document.getElementById('dist-disp-input').value)||0; wiz.s4.asigDisp = sum;
+                document.querySelectorAll('.dist-inp').forEach(i => {
+                    let v = parseFloat(i.value)||0; sum += v;
+                    if(i.dataset.type==='hucha') wiz.s4.asigHuc[i.dataset.id] = v; else wiz.s4.asigFon[i.dataset.id] = v;
+                });
+            } else { sum = currentS3Dis; wiz.s4.asigDisp = sum; }
+
+            wiz.s4.dispRestante = currentS3Dis - sum;
+            let rt = document.getElementById('s4-restante-txt');
+            if(Math.abs(wiz.s4.dispRestante) < 0.01) { rt.textContent = "Has asignado todo exactamente."; rt.style.color = "var(--color-disponibles)"; }
+            else if(wiz.s4.dispRestante > 0) { rt.textContent = `Faltan por asignar: ${wiz.s4.dispRestante.toFixed(2)}€`; rt.style.color = "var(--text-main)"; }
+            else { rt.textContent = `Has asignado ${Math.abs(wiz.s4.dispRestante).toFixed(2)}€ de más.`; rt.style.color = "var(--color-retenidos)"; }
+        };
+
+        function validarS4() { if(Math.abs(wiz.s4.dispRestante) > 0.01) { alert("Debes cuadrar la asignación a 0.00€ para continuar."); return false; } return true; }
+
+        // --- PASO 5: CONFIRMACIÓN GLOBAL ---
+        let finalFdis = 0; let finalFret = 0; let finalFtot = 0;
+        function renderS5() {
+            finalFdis = wiz.s4.asigDisp; finalFret = 0;
+            wiz.s3.draftHuchas.forEach(h => { finalFret += (Number(h.guardado)||0) + (wiz.s4.asigHuc[h.id]||0); });
+            wiz.s3.draftFondos.forEach(f => { finalFret += (Number(f.guardado)||0) + (wiz.s4.asigFon[h.id]||0); });
+            finalFtot = finalFdis + finalFret;
+
+            document.getElementById('s5-txt-huchas').textContent = `${wiz.s3.draftHuchas.length} huchas activas.`;
+            document.getElementById('s5-txt-fondos').textContent = `${wiz.s3.draftFondos.length} fondos activos.`;
+            document.getElementById('s5-ftot').textContent = finalFtot.toFixed(2)+"€";
+            document.getElementById('s5-fdis').textContent = finalFdis.toFixed(2)+"€";
+            document.getElementById('s5-fret').textContent = finalFret.toFixed(2)+"€";
+        }
+
+        // --- EJECUCIÓN DEL CIERRE EN FIREBASE ---
+        async function ejecutarCierre() {
+            document.getElementById('global-loader').style.display = 'flex';
+            try {
+                const batch = writeBatch(db);
+                
+                const mesCierre = new Date().getMonth(); // 0 es Enero, 11 es Diciembre
+                const anioCierre = new Date().getFullYear();
+                
+                // 1. Crear el resumen del mes actual
+                const idMesActual = `mes_${anioCierre}_${mesCierre}`;
+                const histRef = doc(db, "usuarios", uidActual, "historial_mensual", idMesActual);
+                
+                const datosMes = { 
+                    mes: mesCierre, 
+                    anio: anioCierre, 
+                    ingresoNetoTotal: wiz.s1.ingTot, 
+                    ingresoNominaNeto: wiz.s1.ingNom, 
+                    ingresoNominaBruto: wiz.s1.ingBru, 
+                    retencionIRPF: wiz.s1.irpf, 
+                    retencionSS: wiz.s1.ss, 
+                    otrasRetenciones: wiz.s1.otr, 
+                    gastoTotal: wiz.s1.gasTot 
+                };
+                
+                // Guardamos el mes (Por defecto)
+                batch.set(histRef, datosMes);
+
+                // --- MAGIA: COMPRESIÓN ANUAL SI ES DICIEMBRE (Mes 11) ---
+                if (mesCierre === 11) {
+                    const mesesSnapshot = await getDocs(collection(db, "usuarios", uidActual, "historial_mensual"));
+                    let sumaAnual = { ...datosMes }; // Empezamos sumando diciembre
+                    
+                    mesesSnapshot.forEach(docSnap => {
+                        let d = docSnap.data();
+                        // Si el mes es de este año y no es el diciembre actual...
+                        if (d.anio === anioCierre && docSnap.id !== idMesActual) {
+                            // Sumamos todos los valores de los meses anteriores
+                            sumaAnual.ingresoNetoTotal += (d.ingresoNetoTotal || 0);
+                            sumaAnual.ingresoNominaNeto += (d.ingresoNominaNeto || 0);
+                            sumaAnual.ingresoNominaBruto += (d.ingresoNominaBruto || 0);
+                            sumaAnual.retencionIRPF += (d.retencionIRPF || 0);
+                            sumaAnual.retencionSS += (d.retencionSS || 0);
+                            sumaAnual.otrasRetenciones += (d.otrasRetenciones || 0);
+                            sumaAnual.gastoTotal += (d.gastoTotal || 0);
+                            
+                            // Borramos ese mes antiguo para limpiar la base de datos
+                            batch.delete(docSnap.ref); 
+                        }
+                    });
+                    
+                    // Borramos también el registro de diciembre mensual (para que no quede suelto)
+                    batch.delete(histRef); 
+                    
+                    // Guardamos el "Super Bloque" anual
+                    const anualRef = doc(db, "usuarios", uidActual, "historial_anual", `anio_${anioCierre}`);
+                    batch.set(anualRef, {
+                        anio: anioCierre,
+                        ingresoNetoTotal: sumaAnual.ingresoNetoTotal,
+                        ingresoNominaNeto: sumaAnual.ingresoNominaNeto,
+                        ingresoNominaBruto: sumaAnual.ingresoNominaBruto,
+                        retencionIRPF: sumaAnual.retencionIRPF,
+                        retencionSS: sumaAnual.retencionSS,
+                        otrasRetenciones: sumaAnual.otrasRetenciones,
+                        gastoTotal: sumaAnual.gastoTotal
+                    });
+                }
+                // --------------------------------------------------------
+
+                // 2. Borrar movimientos del mes para reiniciar el dashboard
+                movimientos.filter(m => new Date(m.fecha).getMonth() === mesCierre && new Date(m.fecha).getFullYear() === anioCierre).forEach(m => { batch.delete(doc(db, "usuarios", uidActual, "movimientos", m.id)); });
+
+                // 3. Reset categorías (Gastado = 0)
+                wiz.orig.cats.forEach(c => { batch.update(doc(db, "usuarios", uidActual, "categorias", c.id), { gastado: 0 }); });
+
+                // 4. Gestión CRUD Huchas (Guardar decisiones del asistente)
+                wiz.orig.huchas.forEach(hOrig => {
+                    let d = wiz.s3.draftHuchas.find(x => x.id === hOrig.id);
+                    if(!d) batch.delete(doc(db, "usuarios", uidActual, "huchas", hOrig.id)); // Eliminada
+                    else { let gNuevo = (Number(d.guardado)||0) + (wiz.s4.asigHuc[d.id]||0); batch.update(doc(db, "usuarios", uidActual, "huchas", hOrig.id), { guardado: gNuevo }); } // Actualizada
+                });
+                wiz.s3.draftHuchas.filter(x => x.isNew).forEach(n => {
+                    let gNuevo = (Number(n.guardado)||0) + (wiz.s4.asigHuc[n.id]||0);
+                    batch.set(doc(collection(db, "usuarios", uidActual, "huchas")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: null });
+                });
+
+                // 5. Gestión CRUD Fondos
+                wiz.orig.fondos.forEach(fOrig => {
+                    let d = wiz.s3.draftFondos.find(x => x.id === fOrig.id);
+                    if(!d) batch.delete(doc(db, "usuarios", uidActual, "fondos_reservados", fOrig.id));
+                    else { let gNuevo = (Number(d.guardado)||0) + (wiz.s4.asigFon[d.id]||0); batch.update(doc(db, "usuarios", uidActual, "fondos_reservados", fOrig.id), { guardado: gNuevo }); }
+                });
+                wiz.s3.draftFondos.filter(x => x.isNew).forEach(n => {
+                    let gNuevo = (Number(n.guardado)||0) + (wiz.s4.asigFon[n.id]||0);
+                    batch.set(doc(collection(db, "usuarios", uidActual, "fondos_reservados")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: null });
+                });
+
+                // 6. Actualizar Totales Globales (El dinero real)
+                batch.update(doc(db, "usuarios", uidActual), { fondosTotales: finalFtot, fondosDisponibles: finalFdis, fondosRetenidos: finalFret });
+
+                await batch.commit();
+                document.getElementById('global-loader').style.display = 'none';
+                document.getElementById('welcome-screen').style.display = 'flex'; // ¡Bienvenida al nuevo mes!
+
+            } catch(e) { 
+                alert("Error al cerrar el mes: "+e.message); 
+                document.getElementById('global-loader').style.display = 'none'; 
+            }
+        }
+
+        // --- PRIMER INGRESO ---
+        window.mostrarModalPrimerIngreso = () => { document.getElementById('welcome-screen').style.display = 'none'; abrirModal('modal-primer-ingreso'); };
+        
+        window.guardarPrimerIngreso = async () => {
+            const btn = document.getElementById('btn-g-ing'); const err = document.getElementById('err-ing');
+            const imp = parseFloat(document.getElementById('ing-importe').value); const t = document.getElementById('ing-tipo').value; const c = document.getElementById('ing-concepto').value.trim();
+            const bru = parseFloat(document.getElementById('ing-bruto').value)||null; const ck = document.getElementById('check-nomina').checked;
+            const p = ck?(parseFloat(document.getElementById('ing-irpf-pct').value)||0):0; const ir = ck?(parseFloat(document.getElementById('ing-irpf-eur').value)||0):0; const ss = ck?(parseFloat(document.getElementById('ing-ss').value)||0):0; const otr = ck?(parseFloat(document.getElementById('ing-otras').value)||0):0;
+
+            if(isNaN(imp)||imp<=0||!t||!c) { err.textContent="Rellena los campos obligatorios."; err.style.display='block'; return; }
+            btn.disabled=true; err.style.display='none';
+
+            try {
+                await addDoc(collection(db, "usuarios", uidActual, "movimientos"), { tipo: "ingreso", subtipo: t, concepto: c, importe: imp, importeBruto: bru, conceptosNomina: ck ? { irpfPorcentaje: p||null, irpfRetenido: ir||null, seguridadSocial: ss||null, otrasRetenciones: otr||null } : null, fecha: new Date().toISOString() });
+                
+                let monGan = Math.floor(imp / 10) * 5; let nMon = (datosUsuario.monedas||0) + monGan;
+                
+                // Actualizar nuevo disponible sobre el calculado en el cierre (finalFdis + imp)
+                await updateDoc(doc(db, "usuarios", uidActual), { fondosTotales: finalFtot + imp, fondosDisponibles: finalFdis + imp, monedas: nMon });
+                
+                cerrarModal('modal-primer-ingreso');
+                if(monGan > 0) {
+                    document.getElementById('f-mon').textContent = monGan; document.getElementById('f-imp').textContent = imp.toFixed(2); document.getElementById('f-tot').textContent = nMon;
+                    abrirModal('modal-feli-monedas');
+                } else { window.location.href = 'dashboard.html'; }
+            } catch(e) { err.textContent="Error al guardar."; err.style.display='block'; btn.disabled=false; }
+        };
+    </script>
+</body>
+</html>
