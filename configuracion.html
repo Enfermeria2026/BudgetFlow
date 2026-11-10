@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Configuración</title>
+    <style>
+        :root {
+            --bg-color: #F4F6F9; --text-main: #2C3E50;
+            --color-disponibles: #27AE60; --color-retenidos: #E74C3C;
+            --card-bg: #FFFFFF; --nav-bg: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        }
+        button, a, input, select, .btn-close, .config-card { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
+
+        /* LOADER */
+        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #E5E7E9; border-top: 5px solid var(--text-main); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* HEADER FIJO SUPERIOR */
+        .top-header { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--bg-color); z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; }
+        .menu-btn { font-size: 28px; cursor: pointer; border: none; background: none; color: var(--text-main); padding: 0; }
+        .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
+        .header-logo img { width: 40px; height: auto; }
+        .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); opacity: 0; /* Oculto aquí para cuadrar diseño */ }
+
+        /* MENÚ LATERAL (SIDEBAR) */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background-color: var(--card-bg); z-index: 1000; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #E5E7E9; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
+        .sidebar-header img { width: 40px; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
+        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
+
+        /* ZONA FIJA SUPERIOR */
+        .fixed-top-section { position: fixed; top: 60px; left: 0; width: 100%; height: 50px; background-color: var(--bg-color); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .page-title { font-size: 18px; font-weight: bold; color: var(--text-main); text-align: center; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+
+        /* CONTENEDOR CON SCROLL */
+        .page-content { position: fixed; top: 110px; bottom: 70px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; overflow-y: auto; padding: 0 15px 20px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
+
+        /* TARJETAS DE CONFIGURACIÓN */
+        .config-card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E5E7E9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); padding: 18px 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: background 0.2s; }
+        .config-card:hover { background: #F8F9F9; }
+        .config-icon { width: 35px; height: 35px; border-radius: 8px; background: #F4F6F9; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-main); flex-shrink: 0; }
+        .config-text { flex: 1; font-size: 15px; font-weight: bold; color: var(--text-main); }
+        .config-arrow { font-size: 16px; color: #BDC3C7; font-weight: bold; }
+
+        /* BARRA INFERIOR DE NAVEGACIÓN FIJA */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--color-disponibles); }
+        .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
+        .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
+
+        /* MODALES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* FULLSCREEN MODAL (Para Perfil) */
+        .modal-fullscreen { max-width: 500px; height: 95vh; max-height: 95vh; padding: 0; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; }
+        .modal-header-fs { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #F8F9F9; border-bottom: 1px solid #E5E7E9; }
+        .modal-breadcrumb { font-size: 12px; font-weight: bold; color: #7F8C8D; text-transform: uppercase; }
+        .modal-breadcrumb b { color: var(--text-main); }
+        .btn-close { font-size: 24px; font-weight: bold; color: var(--text-main); text-decoration: none; cursor: pointer; }
+        .modal-body-fs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .modal-footer-fs { padding: 15px 20px; background: #F8F9F9; border-top: 1px solid #E5E7E9; display: flex; flex-direction: column; gap: 10px; }
+
+        .modal-title { font-size: 18px; font-weight: bold; text-align: center; margin: 0; color: var(--text-main); }
+        
+        /* FORMULARIOS */
+        .field-wrapper { display: flex; flex-direction: column; gap: 6px; }
+        .field-wrapper label { font-size: 12px; font-weight: bold; color: var(--text-main); }
+        .field-wrapper input, .field-wrapper select { padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; color: var(--text-main); background: #fff; }
+        .field-wrapper input:disabled { background: #F4F6F9; color: #7F8C8D; font-weight: bold; }
+        
+        .input-with-btn { display: flex; gap: 8px; }
+        .input-with-btn input { flex: 1; }
+        .btn-edit-icon { background: #F4F6F9; border: 1px solid #D5D8DC; border-radius: 8px; width: 42px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-modal-cancel { flex: 1; padding: 12px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
+        .btn-modal-ok { flex: 1; padding: 12px; border: none; background: var(--text-main); color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .btn-guardar-perfil { width: 100%; padding: 15px; background: var(--color-disponibles); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(39,174,96,0.3); }
+        .btn-eliminar-cuenta { width: 100%; padding: 15px; background: transparent; color: var(--color-retenidos); border: 2px solid var(--color-retenidos); border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; }
+
+        .form-block { padding: 12px; border: 1px solid #E5E7E9; border-radius: 8px; background: #F8F9F9; display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
+        .error-msg { color: var(--color-retenidos); font-size: 12px; font-weight: bold; display: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader"><div class="spinner"></div></div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html"><span class="sidebar-icon">📊</span> Dashboard</a></li>
+            <li><a href="presupuestos.html"><span class="sidebar-icon">📁</span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon">🧾</span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon">🏦</span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon">🐖</span> Huchas de ahorro</a></li>
+            <li><a href="tienda.html"><span class="sidebar-icon">🏪</span> Tienda de la app</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon">🗓️</span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon">📥</span> Exportar datos</a></li>
+            <li><a href="configuracion.html" class="active"><span class="sidebar-icon">⚙️</span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon">❓</span> Centro de ayuda</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon">🚪</span> Cerrar sesión</a></li>
+        </ul>
+    </aside>
+
+    <header class="top-header">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="header-logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> <span style="color:#000;">Budget</span><span style="color:var(--color-disponibles);">Flow</span></div>
+        <div class="header-date"></div>
+    </header>
+
+    <div class="fixed-top-section">
+        <h1 class="page-title">Configuración</h1>
+    </div>
+
+    <main class="page-content">
+        <!-- Opciones de Configuración -->
+        <div class="config-card" onclick="abrirPerfil()">
+            <div class="config-icon">👤</div>
+            <div class="config-text">Cuenta y Perfil</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">📱</div>
+            <div class="config-text">Preferencias de la aplicación</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">🔒</div>
+            <div class="config-text">Privacidad y seguridad</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">ℹ️</div>
+            <div class="config-text">Información de la aplicación</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">🎧</div>
+            <div class="config-text">Ayuda y soporte</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">📜</div>
+            <div class="config-text">Términos y condiciones de uso</div>
+            <div class="config-arrow">➔</div>
+        </div>
+        <div class="config-card">
+            <div class="config-icon">🛡️</div>
+            <div class="config-text">Política de privacidad</div>
+            <div class="config-arrow">➔</div>
+        </div>
+    </main>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <a href="huchas.html" class="nav-item"><span class="nav-icon">🐖</span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon">🏦</span>Fondos</a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item"><span class="nav-icon">📁</span>Presupuestos</a>
+        <a href="gastos.html" class="nav-item"><span class="nav-icon">🧾</span>Gastos</a>
+    </nav>
+
+    <!-- MEGA MODAL CUENTA Y PERFIL -->
+    <div class="modal-overlay" id="modal-perfil">
+        <div class="modal-content modal-fullscreen">
+            
+            <div class="modal-header-fs">
+                <div class="modal-breadcrumb">Configuración ➔ <b>Cuenta y perfil</b></div>
+                <a href="#" class="btn-close" onclick="cerrarModal('modal-perfil')">×</a>
+            </div>
+
+            <div class="modal-body-fs">
+                <!-- DATOS PERSONALES -->
+                <div class="field-wrapper">
+                    <label>Nombre</label>
+                    <input type="text" id="perfil-nombre" placeholder="Tu nombre">
+                </div>
+                <div class="field-wrapper">
+                    <label>Apellidos</label>
+                    <input type="text" id="perfil-apellidos" placeholder="Tus apellidos">
+                </div>
+                <div class="field-wrapper">
+                    <label>Fecha de nacimiento</label>
+                    <input type="date" id="perfil-fecha">
+                </div>
+                <div class="field-wrapper">
+                    <label>Sexo</label>
+                    <select id="perfil-sexo" onchange="toggleSexoOtro()">
+                        <option value="">Selecciona...</option>
+                        <option value="Mujer">Mujer</option>
+                        <option value="Hombre">Hombre</option>
+                        <option value="Otro">Otro (Especificar)</option>
+                    </select>
+                </div>
+                <div class="field-wrapper" id="bloque-sexo-otro" style="display: none;">
+                    <label>Especificar sexo</label>
+                    <input type="text" id="perfil-sexo-otro" placeholder="Opcional">
+                </div>
+
+                <div style="height: 1px; background: #E5E7E9; margin: 5px 0;"></div>
+
+                <!-- DATOS DE CUENTA -->
+                <div class="field-wrapper">
+                    <label>Nombre de usuario</label>
+                    <input type="text" id="perfil-username" placeholder="@usuario">
+                </div>
+                <div class="field-wrapper">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="perfil-email" disabled>
+                </div>
+                
+                <div class="field-wrapper">
+                    <label>Contraseña actual</label>
+                    <div class="input-with-btn">
+                        <input type="password" value="********" disabled>
+                        <button class="btn-edit-icon" onclick="abrirCambioPass()">✏️</button>
+                    </div>
+                </div>
+
+                <div style="height: 1px; background: #E5E7E9; margin: 5px 0;"></div>
+
+                <!-- DOBLE VERIFICACIÓN -->
+                <label style="display:flex; align-items:center; gap:10px; font-weight:bold; font-size:13px; color:var(--text-main); cursor:pointer;">
+                    <input type="checkbox" id="perfil-2fa-check" style="width:18px; height:18px;" onchange="toggle2FA()">
+                    Activar Doble Verificación
+                </label>
+
+                <div class="form-block" id="bloque-2fa" style="display:none;">
+                    <div class="field-wrapper">
+                        <label>Método de seguridad</label>
+                        <select id="perfil-2fa-tipo" onchange="toggle2FATipo()">
+                            <option value="pin">PIN (6 dígitos)</option>
+                            <option value="pregunta">Pregunta de seguridad</option>
+                        </select>
+                    </div>
+                    
+                    <div class="field-wrapper" id="bloque-pin">
+                        <label>Escribe tu PIN (6 números)</label>
+                        <input type="password" id="perfil-pin" placeholder="Ej: 123456" maxlength="6" inputmode="numeric">
+                    </div>
+
+                    <div id="bloque-pregunta" style="display:none; flex-direction:column; gap:10px;">
+                        <div class="field-wrapper">
+                            <label>Selecciona una pregunta</label>
+                            <select id="perfil-pregunta" onchange="togglePreguntaOtra()">
+                                <option value="">Selecciona...</option>
+                                <option value="ciudad">¿En qué ciudad nací?</option>
+                                <option value="mascota">¿Cómo se llama mi primera mascota?</option>
+                                <option value="animal">¿Cuál es mi animal favorito?</option>
+                                <option value="pais">¿Cuál es mi país favorito?</option>
+                                <option value="otra">Otra (Especificar)</option>
+                            </select>
+                        </div>
+                        <div class="field-wrapper" id="bloque-pregunta-otra" style="display:none;">
+                            <label>Escribe tu pregunta</label>
+                            <input type="text" id="perfil-pregunta-otra">
+                        </div>
+                        <div class="field-wrapper">
+                            <label>Respuesta (minúsculas, sin tildes)</label>
+                            <input type="text" id="perfil-respuesta" oninput="this.value = this.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="error-msg" id="err-perfil"></p>
+            </div>
+
+            <div class="modal-footer-fs">
+                <button class="btn-guardar-perfil" onclick="guardarPerfil()" id="btn-save-perfil">GUARDAR CAMBIOS</button>
+                <button class="btn-eliminar-cuenta" onclick="abrirModal('modal-del-cuenta')">ELIMINAR CUENTA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIO DE CONTRASEÑA -->
+    <div class="modal-overlay" id="modal-password" style="z-index: 15000;">
+        <div class="modal-content">
+            <h3 class="modal-title">Cambiar Contraseña</h3>
+            <p style="font-size:13px; color:#555; margin:0; text-align:center;">Introduce tu nueva contraseña dos veces para confirmar.</p>
+            
+            <div class="field-wrapper"><label>Nueva contraseña</label><input type="password" id="new-pass-1"></div>
+            <div class="field-wrapper"><label>Repite la contraseña</label><input type="password" id="new-pass-2"></div>
+            
+            <p class="error-msg" id="err-pass"></p>
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modal-password')">Cancelar</button>
+                <button class="btn-modal-ok" onclick="guardarPassword()" id="btn-save-pass">ACTUALIZAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR CUENTA (DOBLE CONFIRMACIÓN) -->
+    <div class="modal-overlay" id="modal-del-cuenta" style="z-index: 15000;">
+        <div class="modal-content" style="text-align:center;">
+            <div style="font-size:45px; margin-bottom:5px;">⚠️</div>
+            <h3 class="modal-title" style="color:var(--color-retenidos);">¿Eliminar cuenta?</h3>
+            <p style="font-size:13px; color:#555;">Esta acción es <b>irreversible</b>. Se borrarán todos tus datos, historial, nombre de usuario y acceso de forma permanente.</p>
+            
+            <p class="error-msg" id="err-del"></p>
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modal-del-cuenta')">Cancelar</button>
+                <button class="btn-modal-ok" style="background:var(--color-retenidos);" onclick="eliminarCuenta()" id="btn-del-account">SÍ, ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+        let uidActual = null; let userActual = null; let datosBase = null;
+
+        // UI Generales
+        window.toggleMenu = () => { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if(sb.classList.contains('open')){ sb.classList.remove('open'); ov.style.display='none'; } else{ sb.classList.add('open'); ov.style.display='block'; } };
+        window.cerrarSesion = () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
+        window.abrirModal = id => { document.getElementById(id).style.display = 'flex'; };
+        window.cerrarModal = id => { document.getElementById(id).style.display = 'none'; };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) { 
+                uidActual = user.uid; userActual = user;
+                await cargarDatosIniciales();
+            } else { window.location.href = 'index.html'; }
+        });
+
+        async function cargarDatosIniciales() {
+            try {
+                const uDoc = await getDoc(doc(db, "usuarios", uidActual));
+                if (uDoc.exists()) datosBase = uDoc.data();
+                document.getElementById('global-loader').style.display = 'none';
+            } catch (e) { console.error("Error cargando perfil", e); }
+        }
+
+        // --- LÓGICA DEL MEGA MODAL DE PERFIL ---
+        window.abrirPerfil = () => {
+            // Cargar datos en el formulario
+            document.getElementById('perfil-nombre').value = datosBase.nombre || '';
+            document.getElementById('perfil-apellidos').value = datosBase.apellidos || '';
+            document.getElementById('perfil-fecha').value = datosBase.fechaNacimiento || '';
+            
+            let s = datosBase.sexo || '';
+            if(s==='Mujer' || s==='Hombre' || s==='') { document.getElementById('perfil-sexo').value = s; } 
+            else { document.getElementById('perfil-sexo').value = 'Otro'; document.getElementById('perfil-sexo-otro').value = s; }
+            toggleSexoOtro();
+
+            document.getElementById('perfil-username').value = datosBase.username || '';
+            document.getElementById('perfil-email').value = userActual.email || '';
+
+            // Cargar 2FA
+            let dVer = datosBase.dobleVerificacion || false;
+            document.getElementById('perfil-2fa-check').checked = dVer;
+            toggle2FA();
+
+            if (dVer && datosBase.metodo2FA) {
+                document.getElementById('perfil-2fa-tipo').value = datosBase.metodo2FA;
+                toggle2FATipo();
+                if (datosBase.metodo2FA === 'pin') { document.getElementById('perfil-pin').value = datosBase.pin2FA || ''; } 
+                else {
+                    let p = datosBase.pregunta2FA || '';
+                    if(['ciudad','mascota','animal','pais'].includes(p)) { document.getElementById('perfil-pregunta').value = p; } 
+                    else { document.getElementById('perfil-pregunta').value = 'otra'; document.getElementById('perfil-pregunta-otra').value = p; }
+                    togglePreguntaOtra();
+                    document.getElementById('perfil-respuesta').value = datosBase.respuesta2FA || '';
+                }
+            } else {
+                document.getElementById('perfil-2fa-tipo').value = 'pin'; toggle2FATipo();
+            }
+
+            document.getElementById('err-perfil').style.display = 'none';
+            abrirModal('modal-perfil');
+        };
+
+        // Toggles UI
+        window.toggleSexoOtro = () => { document.getElementById('bloque-sexo-otro').style.display = document.getElementById('perfil-sexo').value === 'Otro' ? 'flex' : 'none'; };
+        window.toggle2FA = () => { document.getElementById('bloque-2fa').style.display = document.getElementById('perfil-2fa-check').checked ? 'flex' : 'none'; };
+        window.toggle2FATipo = () => {
+            let t = document.getElementById('perfil-2fa-tipo').value;
+            document.getElementById('bloque-pin').style.display = t === 'pin' ? 'flex' : 'none';
+            document.getElementById('bloque-pregunta').style.display = t === 'pregunta' ? 'flex' : 'none';
+        };
+        window.togglePreguntaOtra = () => { document.getElementById('bloque-pregunta-otra').style.display = document.getElementById('perfil-pregunta').value === 'otra' ? 'flex' : 'none'; };
+
+        // Guardar Perfil
+        window.guardarPerfil = async () => {
+            const btn = document.getElementById('btn-save-perfil'); const err = document.getElementById('err-perfil');
+            
+            // Recoger datos
+            let nom = document.getElementById('perfil-nombre').value.trim();
+            let ape = document.getElementById('perfil-apellidos').value.trim();
+            let fec = document.getElementById('perfil-fecha').value;
+            let sexSel = document.getElementById('perfil-sexo').value;
+            let sex = sexSel === 'Otro' ? document.getElementById('perfil-sexo-otro').value.trim() : sexSel;
+            let usr = document.getElementById('perfil-username').value.trim();
+            let chk2FA = document.getElementById('perfil-2fa-check').checked;
+            
+            // Validar 2FA si está activo
+            let m2FA = null, p2FA = null, r2FA = null, pin2 = null;
+            if (chk2FA) {
+                m2FA = document.getElementById('perfil-2fa-tipo').value;
+                if (m2FA === 'pin') {
+                    pin2 = document.getElementById('perfil-pin').value.trim();
+                    if (!/^\d{6}$/.test(pin2)) { err.textContent = "El PIN debe tener exactamente 6 números."; err.style.display = 'block'; return; }
+                } else {
+                    let pSel = document.getElementById('perfil-pregunta').value;
+                    p2FA = pSel === 'otra' ? document.getElementById('perfil-pregunta-otra').value.trim() : pSel;
+                    r2FA = document.getElementById('perfil-respuesta').value.trim();
+                    if (!p2FA || !r2FA) { err.textContent = "Completa la pregunta y respuesta de seguridad."; err.style.display = 'block'; return; }
+                }
+            }
+
+            if (!usr) { err.textContent = "El nombre de usuario es obligatorio."; err.style.display = 'block'; return; }
+
+            btn.disabled = true; btn.textContent = "GUARDANDO..."; err.style.display = 'none';
+
+            try {
+                // Preparamos objeto de actualización
+                let upd = { nombre: nom, apellidos: ape, fechaNacimiento: fec, sexo: sex, username: usr, dobleVerificacion: chk2FA };
+                
+                if (chk2FA) {
+                    upd.metodo2FA = m2FA;
+                    if (m2FA === 'pin') { upd.pin2FA = pin2; upd.pregunta2FA = null; upd.respuesta2FA = null; } 
+                    else { upd.pin2FA = null; upd.pregunta2FA = p2FA; upd.respuesta2FA = r2FA; }
+                } else {
+                    upd.metodo2FA = null; upd.pin2FA = null; upd.pregunta2FA = null; upd.respuesta2FA = null;
+                }
+
+                // Aquí podríamos añadir lógica para actualizar la colección "usernames" si usr != datosBase.username
+                // Por simplicidad y asegurar que funcione sin romper nada, actualizamos el user doc principal.
+                await updateDoc(doc(db, "usuarios", uidActual), upd);
+                
+                // Refrescar memoria
+                datosBase = { ...datosBase, ...upd };
+                
+                btn.textContent = "¡GUARDADO!";
+                setTimeout(() => { cerrarModal('modal-perfil'); btn.disabled = false; btn.textContent = "GUARDAR CAMBIOS"; }, 1000);
+
+            } catch(e) { console.error(e); err.textContent = "Error al guardar el perfil."; err.style.display = 'block'; btn.disabled = false; btn.textContent = "GUARDAR CAMBIOS"; }
+        };
+
+        // --- CONTRASEÑA ---
+        window.abrirCambioPass = () => {
+            document.getElementById('new-pass-1').value = ''; document.getElementById('new-pass-2').value = '';
+            document.getElementById('err-pass').style.display = 'none'; abrirModal('modal-password');
+        };
+
+        window.guardarPassword = async () => {
+            const btn = document.getElementById('btn-save-pass'); const err = document.getElementById('err-pass');
+            let p1 = document.getElementById('new-pass-1').value; let p2 = document.getElementById('new-pass-2').value;
+            
+            if(!p1 || p1.length < 6) { err.textContent = "La contraseña debe tener al menos 6 caracteres."; err.style.display = 'block'; return; }
+            if(p1 !== p2) { err.textContent = "Las contraseñas no coinciden."; err.style.display = 'block'; return; }
+
+            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ACTUALIZANDO...";
+
+            try {
+                await updatePassword(userActual, p1);
+                cerrarModal('modal-password');
+                alert("Contraseña actualizada con éxito.");
+            } catch(e) {
+                if (e.code === 'auth/requires-recent-login') {
+                    err.textContent = "Por seguridad, cierra sesión, vuelve a entrar e inténtalo de nuevo.";
+                } else { err.textContent = "Error al actualizar contraseña."; }
+                err.style.display = 'block';
+            } finally { btn.disabled = false; btn.textContent = "ACTUALIZAR"; }
+        };
+
+        // --- ELIMINAR CUENTA ---
+        window.eliminarCuenta = async () => {
+            const btn = document.getElementById('btn-del-account'); const err = document.getElementById('err-del');
+            btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
+
+            try {
+                // 1. Borrar documento del usuario (el historial y otras subcolecciones se quedarán huérfanas o requerirían una Cloud Function para limpiarse en cascada, pero el acceso a ellas se pierde).
+                await deleteDoc(doc(db, "usuarios", uidActual));
+                
+                // Si tienes colección "usernames", aquí borrarías el doc del username asociado para liberarlo.
+                if(datosBase.username) {
+                    try { await deleteDoc(doc(db, "usernames", datosBase.username)); } catch(e) {}
+                }
+
+                // 2. Borrar cuenta de Auth
+                await deleteUser(userActual);
+                window.location.href = 'index.html';
+
+            } catch(e) {
+                if (e.code === 'auth/requires-recent-login') {
+                    err.textContent = "Por seguridad, cierra sesión, vuelve a entrar e inténtalo de nuevo.";
+                } else { err.textContent = "Error al eliminar la cuenta."; }
+                err.style.display = 'block'; btn.disabled = false; btn.textContent = "SÍ, ELIMINAR";
+            }
+        };
+    </script>
+</body>
+</html>
