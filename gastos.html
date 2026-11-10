@@ -454,7 +454,7 @@
             }
 
             // Validar que la fecha no sea posterior a hoy
-            const fechaSeleccionada = new Date(fec);
+            const fechaSeleccionada = new Date(fec + "T00:00:00"); // <-- AÑADIENDO ESTO FORZAMOS LA HORA LOCAL
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0); // Ignorar horas para comparar solo el día
 
