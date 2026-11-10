@@ -27,9 +27,9 @@
         .menu-btn { font-size: 28px; cursor: pointer; border: none; background: none; color: var(--text-main); padding: 0; }
         .header-logo { display: flex; align-items: center; gap: 5px; font-size: 22px; font-weight: bold; }
         .header-logo img { width: 40px; height: auto; }
-        .header-date { font-size: 15px; font-weight: bold; color: var(--text-main); opacity: 0; /* Oculto aquí para cuadrar diseño */ }
+        .header-date { font-size: 15px; font-weight: bold; opacity: 0; }
 
-        /* MENÚ LATERAL (SIDEBAR) */
+        /* MENÚ LATERAL */
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background-color: var(--card-bg); z-index: 1000; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column; }
         .sidebar.open { left: 0; }
@@ -38,8 +38,6 @@
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; text-decoration: none; color: var(--text-main); font-size: 15px; font-weight: 500; border-bottom: 1px solid #F4F6F9; }
         .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #F8F9F9; color: var(--color-disponibles); font-weight: bold; border-left: 4px solid var(--color-disponibles); padding-left: 16px; }
-        .sidebar-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
-        .sidebar-menu a:hover .sidebar-icon, .sidebar-menu a.active .sidebar-icon { color: var(--color-disponibles); }
 
         /* ZONA FIJA SUPERIOR */
         .fixed-top-section { position: fixed; top: 60px; left: 0; width: 100%; height: 50px; background-color: var(--bg-color); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -51,23 +49,29 @@
         /* TARJETAS DE CONFIGURACIÓN */
         .config-card { background: var(--card-bg); border-radius: 12px; border: 1px solid #E5E7E9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); padding: 18px 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: background 0.2s; }
         .config-card:hover { background: #F8F9F9; }
-        .config-icon { width: 35px; height: 35px; border-radius: 8px; background: #F4F6F9; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-main); flex-shrink: 0; }
+        .config-icon { width: 35px; height: 35px; border-radius: 8px; background: #F4F6F9; display: flex; align-items: center; justify-content: center; color: var(--text-main); flex-shrink: 0; }
         .config-text { flex: 1; font-size: 15px; font-weight: bold; color: var(--text-main); }
         .config-arrow { font-size: 16px; color: #BDC3C7; font-weight: bold; }
 
-        /* BARRA INFERIOR DE NAVEGACIÓN FIJA */
+        /* BARRA INFERIOR */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background-color: var(--nav-bg); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7F8C8D; font-size: 11px; font-weight: bold; }
         .nav-item.active { color: var(--color-disponibles); }
         .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: 0.2s; }
         .nav-item.active .nav-icon { color: var(--color-disponibles); transform: scale(1.1); }
 
-        /* MODALES */
+        /* MODALES GENERALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 15px; box-sizing: border-box; }
         .modal-content { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         
-        /* FULLSCREEN MODAL (Para Perfil) */
-        .modal-fullscreen { max-width: 500px; height: 95vh; max-height: 95vh; padding: 0; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; }
+        /* MODAL FLOTANTE (Para Perfil) - Ajustado con márgenes */
+        .modal-fullscreen { 
+            width: 95%; max-width: 500px; 
+            height: 85vh; max-height: 800px; 
+            margin: auto; /* Esto permite que flote en el centro con espacio arriba y abajo */
+            padding: 0; display: flex; flex-direction: column; 
+            border-radius: 16px; overflow: hidden; 
+        }
         .modal-header-fs { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #F8F9F9; border-bottom: 1px solid #E5E7E9; }
         .modal-breadcrumb { font-size: 12px; font-weight: bold; color: #7F8C8D; text-transform: uppercase; }
         .modal-breadcrumb b { color: var(--text-main); }
@@ -81,11 +85,11 @@
         .field-wrapper { display: flex; flex-direction: column; gap: 6px; }
         .field-wrapper label { font-size: 12px; font-weight: bold; color: var(--text-main); }
         .field-wrapper input, .field-wrapper select { padding: 12px; border: 1px solid #D5D8DC; border-radius: 8px; font-size: 14px; color: var(--text-main); background: #fff; }
-        .field-wrapper input:disabled { background: #F4F6F9; color: #7F8C8D; font-weight: bold; }
+        .field-wrapper input:disabled { background: #F4F6F9; color: #7F8C8D; font-weight: bold; border-color:#E5E7E9; }
         
         .input-with-btn { display: flex; gap: 8px; }
         .input-with-btn input { flex: 1; }
-        .btn-edit-icon { background: #F4F6F9; border: 1px solid #D5D8DC; border-radius: 8px; width: 42px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+        .btn-edit-icon { background: #F4F6F9; border: 1px solid #D5D8DC; border-radius: 8px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; color:var(--text-main); }
 
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
         .btn-modal-cancel { flex: 1; padding: 12px; border: 2px solid var(--text-main); background: transparent; border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--text-main); }
@@ -106,17 +110,17 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"> BudgetFlow</div>
         <ul class="sidebar-menu">
-            <li><a href="dashboard.html"><span class="sidebar-icon">📊</span> Dashboard</a></li>
-            <li><a href="presupuestos.html"><span class="sidebar-icon">📁</span> Presupuestos</a></li>
-            <li><a href="gastos.html"><span class="sidebar-icon">🧾</span> Gastos imprevistos</a></li>
-            <li><a href="fondos.html"><span class="sidebar-icon">🏦</span> Fondos reservados</a></li>
-            <li><a href="huchas.html"><span class="sidebar-icon">🐖</span> Huchas de ahorro</a></li>
-            <li><a href="tienda.html"><span class="sidebar-icon">🏪</span> Tienda de la app</a></li>
-            <li><a href="historial.html"><span class="sidebar-icon">🗓️</span> Historial mensual</a></li>
-            <li><a href="exportar.html"><span class="sidebar-icon">📥</span> Exportar datos</a></li>
-            <li><a href="configuracion.html" class="active"><span class="sidebar-icon">⚙️</span> Configuración</a></li>
-            <li><a href="ayuda.html"><span class="sidebar-icon">❓</span> Centro de ayuda</a></li>
-            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon">🚪</span> Cerrar sesión</a></li>
+            <li><a href="dashboard.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a></li>
+            <li><a href="presupuestos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> Presupuestos</a></li>
+            <li><a href="gastos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span> Gastos imprevistos</a></li>
+            <li><a href="fondos.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path><path d="M6 9v8"></path><path d="M10 9v8"></path><path d="M14 9v8"></path><path d="M18 9v8"></path></svg></span> Fondos reservados</a></li>
+            <li><a href="huchas.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span> Huchas de ahorro</a></li>
+            <li><a href="tienda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></span> Tienda de la app</a></li>
+            <li><a href="historial.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Historial mensual</a></li>
+            <li><a href="exportar.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> Exportar datos</a></li>
+            <li><a href="configuracion.html" class="active"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> Configuración</a></li>
+            <li><a href="ayuda.html"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span> Centro de ayuda</a></li>
+            <li><a href="#" onclick="cerrarSesion()"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Cerrar sesión</a></li>
         </ul>
     </aside>
 
@@ -133,37 +137,37 @@
     <main class="page-content">
         <!-- Opciones de Configuración -->
         <div class="config-card" onclick="abrirPerfil()">
-            <div class="config-icon">👤</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
             <div class="config-text">Cuenta y Perfil</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">📱</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg></div>
             <div class="config-text">Preferencias de la aplicación</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">🔒</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
             <div class="config-text">Privacidad y seguridad</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">ℹ️</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
             <div class="config-text">Información de la aplicación</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">🎧</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
             <div class="config-text">Ayuda y soporte</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">📜</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
             <div class="config-text">Términos y condiciones de uso</div>
             <div class="config-arrow">➔</div>
         </div>
         <div class="config-card">
-            <div class="config-icon">🛡️</div>
+            <div class="config-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
             <div class="config-text">Política de privacidad</div>
             <div class="config-arrow">➔</div>
         </div>
@@ -171,11 +175,11 @@
 
     <!-- NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
-        <a href="huchas.html" class="nav-item"><span class="nav-icon">🐖</span>Huchas</a>
-        <a href="fondos.html" class="nav-item"><span class="nav-icon">🏦</span>Fondos</a>
-        <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span>Dashboard</a>
-        <a href="presupuestos.html" class="nav-item"><span class="nav-icon">📁</span>Presupuestos</a>
-        <a href="gastos.html" class="nav-item"><span class="nav-icon">🧾</span>Gastos</a>
+        <a href="huchas.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></span>Huchas</a>
+        <a href="fondos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="21" width="18" height="2"></rect><path d="M3 7l9-5 9 5v2H3V7z"></path></svg></span>Fondos</a>
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>Dashboard</a>
+        <a href="presupuestos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span>Presupuestos</a>
+        <a href="gastos.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"></path><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="12" x2="8" y2="12"></line><line x1="10" y1="16" x2="8" y2="16"></line></svg></span>Gastos</a>
     </nav>
 
     <!-- MEGA MODAL CUENTA Y PERFIL -->
@@ -231,7 +235,7 @@
                     <label>Contraseña actual</label>
                     <div class="input-with-btn">
                         <input type="password" value="********" disabled>
-                        <button class="btn-edit-icon" onclick="abrirCambioPass()">✏️</button>
+                        <button class="btn-edit-icon" onclick="abrirCambioPass()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
                     </div>
                 </div>
 
@@ -326,7 +330,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyB-mVOFawjgVqHaiLO7TjY5JMaaWDjEof0", authDomain: "budgetflow-a1f80.firebaseapp.com", projectId: "budgetflow-a1f80", storageBucket: "budgetflow-a1f80.firebasestorage.app", messagingSenderId: "29395070663", appId: "1:29395070663:web:16e9db163af21b44e718e2", measurementId: "G-L7TQ65BLBH" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
@@ -349,7 +353,21 @@
         async function cargarDatosIniciales() {
             try {
                 const uDoc = await getDoc(doc(db, "usuarios", uidActual));
-                if (uDoc.exists()) datosBase = uDoc.data();
+                if (uDoc.exists()) {
+                    datosBase = uDoc.data();
+                } else {
+                    datosBase = {}; // Por si la cuenta está muy vacía
+                }
+                
+                // Si el username no estaba guardado en el perfil principal, lo buscamos en la colección
+                if (!datosBase.username) {
+                    const q = query(collection(db, "nombres_usuario"), where("uid", "==", uidActual));
+                    const qs = await getDocs(q);
+                    if (!qs.empty) {
+                        datosBase.username = qs.docs[0].id;
+                    }
+                }
+
                 document.getElementById('global-loader').style.display = 'none';
             } catch (e) { console.error("Error cargando perfil", e); }
         }
@@ -369,8 +387,8 @@
             document.getElementById('perfil-username').value = datosBase.username || '';
             document.getElementById('perfil-email').value = userActual.email || '';
 
-            // Cargar 2FA
-            let dVer = datosBase.dobleVerificacion || false;
+            // Cargar 2FA (asegurando que si no existe, sea estrictamente false para desmarcar)
+            let dVer = datosBase.dobleVerificacion === true;
             document.getElementById('perfil-2fa-check').checked = dVer;
             toggle2FA();
 
@@ -436,7 +454,6 @@
             btn.disabled = true; btn.textContent = "GUARDANDO..."; err.style.display = 'none';
 
             try {
-                // Preparamos objeto de actualización
                 let upd = { nombre: nom, apellidos: ape, fechaNacimiento: fec, sexo: sex, username: usr, dobleVerificacion: chk2FA };
                 
                 if (chk2FA) {
@@ -447,11 +464,28 @@
                     upd.metodo2FA = null; upd.pin2FA = null; upd.pregunta2FA = null; upd.respuesta2FA = null;
                 }
 
-                // Aquí podríamos añadir lógica para actualizar la colección "usernames" si usr != datosBase.username
-                // Por simplicidad y asegurar que funcione sin romper nada, actualizamos el user doc principal.
-                await updateDoc(doc(db, "usuarios", uidActual), upd);
+                // Lógica de cambio de nombre de usuario
+                if (usr !== datosBase.username) {
+                    const uRef = doc(db, "nombres_usuario", usr);
+                    const uSnap = await getDoc(uRef);
+                    if (uSnap.exists()) {
+                        err.textContent = "Este nombre de usuario ya está cogido por otra persona.";
+                        err.style.display = 'block';
+                        btn.disabled = false; btn.textContent = "GUARDAR CAMBIOS";
+                        return;
+                    }
+                    // Guardamos el nuevo usuario para bloquearlo
+                    await setDoc(uRef, { uid: uidActual });
+                    // Eliminamos el antiguo para liberarlo
+                    if (datosBase.username) {
+                        await deleteDoc(doc(db, "nombres_usuario", datosBase.username));
+                    }
+                }
+
+                // Actualizamos el perfil completo (usamos merge:true por seguridad)
+                await setDoc(doc(db, "usuarios", uidActual), upd, { merge: true });
                 
-                // Refrescar memoria
+                // Refrescar memoria local
                 datosBase = { ...datosBase, ...upd };
                 
                 btn.textContent = "¡GUARDADO!";
@@ -493,15 +527,15 @@
             btn.disabled = true; err.style.display = 'none'; btn.textContent = "ELIMINANDO...";
 
             try {
-                // 1. Borrar documento del usuario (el historial y otras subcolecciones se quedarán huérfanas o requerirían una Cloud Function para limpiarse en cascada, pero el acceso a ellas se pierde).
+                // Borrar documento del usuario
                 await deleteDoc(doc(db, "usuarios", uidActual));
                 
-                // Si tienes colección "usernames", aquí borrarías el doc del username asociado para liberarlo.
+                // Borrar nombre de usuario reservado
                 if(datosBase.username) {
-                    try { await deleteDoc(doc(db, "usernames", datosBase.username)); } catch(e) {}
+                    try { await deleteDoc(doc(db, "nombres_usuario", datosBase.username)); } catch(e) {}
                 }
 
-                // 2. Borrar cuenta de Auth
+                // Borrar cuenta de Google Auth
                 await deleteUser(userActual);
                 window.location.href = 'index.html';
 
