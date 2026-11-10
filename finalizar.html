@@ -15,7 +15,7 @@
             background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main);
             height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
-        button, input, select, .inline-opt-btn, .modal-opt-item, .acordeon-header { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
+        button, a, input, select, .btn-close-wizard, .inline-opt-btn, .modal-opt-item, .acordeon-header { -webkit-tap-highlight-color: transparent; outline: none; font-family: inherit; }
 
         /* LOADER */
         #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -109,7 +109,7 @@
     <!-- WIZARD HEADER -->
     <header class="wizard-header">
         <div class="wizard-topbar">
-            <a href="dashboard.html" class="btn-close-wizard">×</a>
+            <a href="#" class="btn-close-wizard" onclick="abrirModal('modal-cancel-wizard')">×</a>
             <div class="wizard-title">Asistente de Cierre</div>
         </div>
         <div class="progress-container"><div class="progress-fill" id="prog-fill" style="width: 20%;"></div></div>
@@ -270,6 +270,7 @@
             </div>
             <div class="field-wrapper"><label>Aporte Inicial (Opcional)</label><input type="number" id="mc-aporte" placeholder="0.00" min="0" step="0.01"></div>
             <div class="field-wrapper"><label>Objetivo (Opcional)</label><input type="number" id="mc-obj" placeholder="0.00" min="0" step="0.01"></div>
+            <div class="field-wrapper"><label>Fecha prevista (Opcional)</label><input type="date" id="mc-fecha"></div>
             
             <p id="mc-err" style="color:var(--color-retenidos); font-size:12px; font-weight:bold; display:none; text-align:center; margin:0;"></p>
             <div class="btn-row">
@@ -318,6 +319,19 @@
         </div>
     </div>
 
+<!-- MODAL CANCELAR ASISTENTE -->
+    <div class="modal-overlay" id="modal-cancel-wizard" style="z-index: 15000;">
+        <div class="modal-content" style="text-align:center;">
+            <div style="font-size:45px; margin-bottom:5px;">⚠️</div>
+            <h3 class="modal-title" style="color:var(--color-retenidos);">¿Cancelar cierre de mes?</h3>
+            <p style="font-size:13px; color:#555;">Si sales ahora, perderás las configuraciones, creaciones y repartos de dinero que hayas hecho en este asistente.</p>
+            <div class="btn-row">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modal-cancel-wizard')">Volver</button>
+                <button class="btn-modal-ok" style="background:var(--color-retenidos);" onclick="window.location.href='dashboard.html'">SÍ, SALIR</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- PANTALLA BIENVENIDA Y PRIMER INGRESO -->
     <div id="welcome-screen">
         <div class="welcome-icon">✨</div>
@@ -633,22 +647,46 @@
 
         window.abrirCrearModal = t => {
             document.getElementById('mc-title').textContent = t==='hucha' ? 'Nueva Hucha' : 'Nuevo Fondo';
-            document.getElementById('mc-type').value = t; document.getElementById('mc-nombre').value = '';
-            document.getElementById('mc-aporte').value = ''; document.getElementById('mc-obj').value = ''; document.getElementById('mc-err').style.display='none';
+            document.getElementById('mc-type').value = t; 
+            document.getElementById('mc-nombre').value = '';
+            document.getElementById('mc-aporte').value = ''; 
+            document.getElementById('mc-obj').value = ''; 
+            document.getElementById('mc-fecha').value = ''; // Vaciamos la fecha al abrir
+            document.getElementById('mc-err').style.display='none';
             selIc = "🏠"; selCo = "#58D68D";
             renderizarSelectoresInline();
             abrirModal('modal-crear-item');
         };
         
         window.guardarDraftItem = () => {
-            let n = document.getElementById('mc-nombre').value.trim(); let ap = parseFloat(document.getElementById('mc-aporte').value)||0; let ob = parseFloat(document.getElementById('mc-obj').value)||null;
-            let t = document.getElementById('mc-type').value; let er = document.getElementById('mc-err');
+            let n = document.getElementById('mc-nombre').value.trim(); 
+            let ap = parseFloat(document.getElementById('mc-aporte').value)||0; 
+            let ob = parseFloat(document.getElementById('mc-obj').value)||null;
+            let fec = document.getElementById('mc-fecha').value; // Leemos la fecha
+            let t = document.getElementById('mc-type').value; 
+            let er = document.getElementById('mc-err');
+            
             if(!n) { er.textContent="Rellena el título."; er.style.display='block'; return; }
             if(ap > currentS3Dis) { er.textContent="El aporte supera tus Fondos Disponibles proyectados."; er.style.display='block'; return; }
             
-            let obj = { id: 'temp_'+Date.now(), nombre: n, icono: selIc, color: selCo, guardado: ap, objetivo: ob, isNew: true };
+            // Validación de fecha (no puede ser hoy ni pasada)
+            if(fec) { 
+                let d = new Date(fec); 
+                let hoy = new Date(); 
+                hoy.setHours(0,0,0,0); 
+                if(d <= hoy){ 
+                    er.textContent="La fecha no puede ser igual o anterior a hoy."; 
+                    er.style.display='block'; 
+                    return; 
+                } 
+            }
+            
+            // Guardamos todo (incluyendo la fecha) en la memoria temporal del asistente
+            let obj = { id: 'temp_'+Date.now(), nombre: n, icono: selIc, color: selCo, guardado: ap, objetivo: ob, fechaPrevista: fec || null, isNew: true };
             if(t==='hucha') wiz.s3.draftHuchas.push(obj); else wiz.s3.draftFondos.push(obj);
-            cerrarModal('modal-crear-item'); renderS3();
+            
+            cerrarModal('modal-crear-item'); 
+            renderS3();
         };
 
         window.preDelItem = (id, t) => { document.getElementById('md-id').value = id; document.getElementById('md-type').value = t; abrirModal('modal-del-item'); };
@@ -799,7 +837,7 @@
                 });
                 wiz.s3.draftHuchas.filter(x => x.isNew).forEach(n => {
                     let gNuevo = (Number(n.guardado)||0) + (wiz.s4.asigHuc[n.id]||0);
-                    batch.set(doc(collection(db, "usuarios", uidActual, "huchas")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: null });
+                    batch.set(doc(collection(db, "usuarios", uidActual, "huchas")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: n.fechaPrevista||null });
                 });
 
                 // 5. Gestión CRUD Fondos
@@ -810,7 +848,7 @@
                 });
                 wiz.s3.draftFondos.filter(x => x.isNew).forEach(n => {
                     let gNuevo = (Number(n.guardado)||0) + (wiz.s4.asigFon[n.id]||0);
-                    batch.set(doc(collection(db, "usuarios", uidActual, "fondos_reservados")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: null });
+                    batch.set(doc(collection(db, "usuarios", uidActual, "fondos_reservados")), { nombre: n.nombre, icono: n.icono, color: n.color, guardado: gNuevo, objetivo: n.objetivo||null, fechaPrevista: n.fechaPrevista||null });
                 });
 
                 // 6. Actualizar Totales Globales
